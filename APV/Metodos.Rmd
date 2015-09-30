@@ -52,7 +52,10 @@ load("~/Documents/Dropbox/Data Science/R/proyectos/data/enigh/enigh_tidy.RData")
 ## Gráfica consumo seguros por décil
 ```{r, message=FALSE, warning=FALSE}
 ggplot(eem::order_axis(
-  subset(enigh_tidy, !DECIL == "TOTAL" & TIPO == "HOGARES" & RUBRO == "SEGURO MEDICO " & Y == "2014"),
+  subset(enigh_tidy, !DECIL == "TOTAL" & 
+           TIPO == "HOGARES" & 
+           RUBRO == "SEGURO MEDICO " & 
+           Y == "2014"),
   DECIL, 
   VALOR), 
        aes(x = DECIL_o, 
@@ -161,5 +164,11 @@ ggplot(cambios_mercados_g,
 cambios_mercados_t %<>%
   select(-c(Hogares2012, P_Mercado2012, Hogares2014, P_Mercado2014))
   
+
+```
+
+## Gráfica de KPMG
+```{}
+
 
 ```
