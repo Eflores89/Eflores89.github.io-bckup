@@ -7,6 +7,16 @@ library(dplyr)
 library(magrittr)
 ```
 
+```{r, echo=FALSE}
+# QUITAR CON CARGA DE EEM
+eem_colors<-c("#A84A44", "#E47D04", "#D8A19E", "#ae8b38", "#4d7c28", 
+              "#38b6a6", "#2080c7", "#94127a", "#155685", "#157d85", 
+              "#731585", "#848515", "#d06347", "#d0ca47", "#d04785", 
+              "#a19c9b", "#b5bcbf", "#62686b", "#021118", "#daf3ff")
+
+```
+
+
 
 ## Gráfica de Crecimiento en riesgo
 ```{r}
@@ -167,8 +177,103 @@ cambios_mercados_t %<>%
 
 ```
 
-## Gráfica de KPMG
-```{}
+## Gráfica de EY (Porque dejan poliza)
+```{r}
+df_ey <- data.frame("Razon" = c("Costo","Cobertura","Recomendación otra", 
+                                "Comunicación", "Servicio", "Poliza no alineada", 
+                                "Descubrí otra opción", "Cambio de circunstancias", 
+                                "Reputación de marca", "Mala experiencia", 
+                                "Beneficios de lealtad"), 
+                    "Porcentaje" = c(58, 49, 40, 33, 28, 33, 22, 28, 25, 26, 22))
 
+ggplot(eem::order_axis(df_ey, Razon, Porcentaje), 
+       aes(x = Razon_o, 
+           y = Porcentaje)) + 
+  geom_bar(stat="identity", fill = eem_colors[1]) +
+  theme_eem_white()+
+  labs(title = "Razones para cancelar/cambiar de póliza", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
+```
+
+
+## Gráfica de EY (Interacción con clientes)
+```{r}
+df_ey2<-data.frame("Region" = c("LatAm", "LatAm", 
+                                "NorteAmerica", "NorteAmerica", 
+                                "DesGlobal" ,"DesGlobal"),
+                   "Tipo" = c("Ninguna", "Al menos 1 vez en 18 meses",
+                              "Ninguna", "Al menos 1 vez en 18 meses",
+                              "Ninguna", "Al menos 1 vez en 18 meses"),
+                   "Porcentaje" = c(35, 65, 54, 46, 30, 70))
+
+ggplot(eem::order_axis(df_ey2, Tipo, Porcentaje), 
+       aes(x = Region, 
+           y = Porcentaje)) + 
+  geom_bar(stat="identity", 
+           aes(fill = Tipo_o))+
+  theme_eem_white()+
+  scale_fill_eem(10) +
+  labs(title = "Interacción con Clientes", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
 
 ```
+
+
+## Gráfica de EY (Preferencia interacción)
+```{r}
+df_ey3<-data.frame("Tipo" = c("Información General", "Información General",
+                              "Información General", "Información General",
+                              "Promociones", "Promociones",
+                              "Promociones", "Promociones", 
+                              "Cambios en Polizas", "Cambios en Polizas",
+                              "Cambios en Polizas", "Cambios en Polizas"),
+                   "Fecha" = c("Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido"),
+                   "Frecuencia" = c("Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año", "Una vez por año",
+                                    "Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año", "Una vez por año",
+                                    "Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año","Una vez por año"), 
+                   "Porcentaje" = c(50, 70, 22, 22, 
+                                    48, 71, 25, 21, 
+                                    38, 63, 44, 31),
+                   "X" = c(1,2,3,4,5,6,7,8,9,10,11,12))
+
+ggplot(df_ey3, 
+       aes(x = Fecha, 
+           y = Porcentaje, 
+           group = Tipo)) + 
+  geom_line(aes(colour = Tipo)) + 
+  facet_grid(.~Frecuencia)+
+  theme_eem_white()+
+  scale_colour_eem(10) +
+  labs(title = "Preferencias de Comunicación", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
+
+```
+
+
+
+## Raman  y Gayatri  (2004) - Respuesta a conocimiento
+```{r}
+df_rg<-data.frame("Grupo" = c("20-30 años", "31 a 40 años", "41 a 50 años", "Más de 50 años"), 
+                  "Porcentaje" = c(53, 24, 20, 3))
+
+ggplot(eem::order_axis(df_rg, Grupo, Porcentaje),
+       aes(x = Grupo_o, 
+           y = Porcentaje)) + 
+  geom_bar(stat = "identity", fill = eem_colors[1]) +
+  theme_eem_white()+
+  labs(title = "Top of Mind \n Nuevos competidores", 
+       x = "Grupo Edad", 
+       y = "Porcentaje del total de sí")
+```
+
