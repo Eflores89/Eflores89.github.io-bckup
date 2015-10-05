@@ -66,8 +66,8 @@ ggplot(eem::order_axis(
            TIPO == "HOGARES" & 
            RUBRO == "SEGURO MEDICO " & 
            Y == "2014"),
-  DECIL, 
-  VALOR), 
+                      DECIL, 
+                      VALOR), 
        aes(x = DECIL_o, 
            y = VALOR))+
   geom_bar(stat = "identity", fill = "#A84A44") + 
@@ -277,3 +277,20 @@ ggplot(eem::order_axis(df_rg, Grupo, Porcentaje),
        y = "Porcentaje del total de sí")
 ```
 
+## Crecimientos mercado 
+```{r}
+bmi_est<-data.frame("GROSS INSURANCE PREMIUMS (USDbn)" = c(9.52,10.89,11.17,10.17,11.31,12.4,13.3,14.34),
+                    "YoY" = c(8.1, 14.4, 2.6, -8.9, 11.3, 9.6, 7.2, 7.8),
+                    "Y" = c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+ 
+ggplot(bmi_est,
+       aes(x = Y,
+           y = YoY))+
+  geom_line(colour = eem_colors[1])+
+  theme_eem_white()+
+  scale_fill_eem(20)+
+  labs(title = "Crecimiento Estimado Mercado",
+       x = "Año",
+       y = "Tasa (%)")
+
+```
