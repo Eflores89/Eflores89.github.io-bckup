@@ -10,6 +10,7 @@ html,
 body {
   height: 100%;
   text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
 }
 
 body {
