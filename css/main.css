@@ -92,6 +92,8 @@ article {
 .container {
   padding: 100px 50px;
   width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 @media (max-width: 960px) {
@@ -117,6 +119,8 @@ header {
   <!-- -webkit-filter: grayscale(1); -->
   <!-- filter: grayscale(1); -->
   overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 @media (max-width: 960px) {
