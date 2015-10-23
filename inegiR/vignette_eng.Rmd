@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>inegiR | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/science.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <h1>inegiR</h1>
+        </div>
+      </div>
+      
+</header>
+
+<article>
+  <div class="container">
+    # Overview
+
+
+inegiR is a package designed to interact with the oficial API of INEGI (Oficial statistics agency of Mexico). Because the API works with JSON or XML formating, this package is essentially a wrapper package for jsonlite, XML and some tidy plyr transformations. 
+
+The package uses two main functions: 
+
+ - `serie_inegi()` - Used to query a data series from INEGI. 
+ - denue_inegi() - Used to query the information in the DENUE database.
+ 
+The remaining functions serve as elegant wrappers to perform common tasks. For example inflacion_general() to download monthly inflation data. Other functions make transformations easier on-the-fly, for example YoY() to calculate a percentage change from a year ago (year-over-year). 
+
+
+
+
+# Example 1: downloading a data series 
+
+
+---
+
+## Install
+
+To get the CRAN version (as of Nov-2015):
+
+```{r, eval=FALSE}
+
+install.packages(inegiR)
+
+library(inegiR)
+
+```
+
+To download dev version on github, using devtools:
+
+```{r, eval=FALSE}
+#install.packages("devtools")
+library(devtools)
+
+install_github("Eflores89/inegiR")
+  #dependiencies: zoo, XML, plyr, jsonlite
+  
+library(inegiR)
+```
+
+
+## Download data
+
+There are roughly two ways to download data series: the "general" and the "short" way (provided there is a wrapper function available). 
+
+In the first case, the function parses a URL provided by the user. All the URL's for each data series can be found in the INEGI [development site](http://www.inegi.org.mx/desarrolladores/indicadores/apiindicadores.aspx). You must also sign up for an API token in that same site with your email. 
+
+
+Let us save the imaginary token:
+```{r, eval=FALSE}
+token<-"abc123"
+```
+
+Now, I wish to find the rate of inflation (which in the case of INEGI is a percent change of the INPC data series).
+
+This is the corresponding URL for INPC data.series:
+```{r, eval=FALSE}
+urlINPC<-"http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/"
+```
+
+JSON format is also accepted and is interchangeable (do not use the "?callback?" sign provided by INEGI's documentation): 
+```{r, eval=FALSE}
+urlINPC2 <- "http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/"
+````
+
+Now, we are going to download this data series as a data.frame.
+
+```{r, eval=FALSE}
+
+INPC<-serie_inegi(urlINPC, token)
+
+# take a look
+tail(INPC)
+# Fechas         Valores
+# 2014-12-01   116.05900000
+# 2015-01-01   115.95400000
+# 2015-02-01   116.17400000
+# 2015-03-01   116.64700000
+# 2015-04-01   116.34500000
+# 2015-05-01   115.76400000
+
+```
+
+The optional "metadata" parameter in serie_inegi allows us to also download the metadata information from the data series, which includes date of update, units, frequency, etc. 
+
+If "metadata" is set to TRUE, the information is parsed as a list of two elements: the metadata and the data frame. 
+
+```{r, eval=FALSE}
+
+INPC_Metadata<-serie_inegi(urlINPC, token, metadata = TRUE)
+
+class(INPC_Metadata)
+# [1] "list"
+```
+
+To access any of these elements, simply use as a list:
+
+```{r, eval=FALSE}
+
+# date of last update
+INPC_Metadata$MetaData$UltimaActualizacion
+[1] "2015/06/09"
+
+```
+
+
+Now that we have the INPC data series, we must apply a year-over-year change. For this we use the handy YoY() function, which let's us choose the amount of periods to compare over (12 if you want year over year for a monthly series): 
+
+
+```{r, eval=FALSE}
+
+Inflation <- YoY(INPC$Valores, lapso = 12, decimal=FALSE)
+
+# if we want a dataframe, we simply build like this
+
+Inflation_df <- cbind.data.frame(Fechas = INPC$Fechas, Inflation = Inflation)
+
+
+tail(Inflation_df)
+# Fechas        Inflation
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643
+```
+
+This method works for any URL obtained from the INEGI documentation, but for the most used indicators, the package has built-in shortcut wrappers. 
+
+
+Let us obtain the same data series (inflation) via one of these specified shortcut functions:
+
+
+```{r, eval=FALSE}
+Inflation_fast <- inflacion_general(token)
+
+tail(Inflation_fast)
+# Fechas        Inflacion
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643
+```
+
+  </div>
+</article>
+</body>
+</html>

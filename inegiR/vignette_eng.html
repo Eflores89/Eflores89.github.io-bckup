@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>inegiR | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+          <span>
+            Publicado:
+          </span>
+          22 Oct 2015
+        </li>
+        <li>
+          <span>
+            Archivar en:
+          </span>
+          
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>inegiR</h1>
+          <br></br>
+    <h1 id="overview">Overview</h1>
+
+<p>inegiR is a package designed to interact with the oficial API of INEGI (Oficial statistics agency of Mexico). Because the API works with JSON or XML formating, this package is essentially a wrapper package for jsonlite, XML and some tidy plyr transformations.</p>
+
+<p>The package uses two main functions:</p>
+
+<ul>
+  <li><code>serie_inegi()</code> - Used to query a data series from INEGI.</li>
+  <li>denue_inegi() - Used to query the information in the DENUE database.</li>
+</ul>
+
+<p>The remaining functions serve as elegant wrappers to perform common tasks. For example inflacion_general() to download monthly inflation data. Other functions make transformations easier on-the-fly, for example YoY() to calculate a percentage change from a year ago (year-over-year).</p>
+
+<h1 id="example-1-downloading-a-data-series">Example 1: downloading a data series</h1>
+
+<hr />
+
+<h2 id="install">Install</h2>
+
+<p>To get the CRAN version (as of Nov-2015):</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">install</span><span class="o">.</span><span class="n">packages</span><span class="p">(</span><span class="n">inegiR</span><span class="p">)</span>
+
+<span class="n">library</span><span class="p">(</span><span class="n">inegiR</span><span class="p">)</span></code></pre></div>
+
+<p>To download dev version on github, using devtools:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#install.packages(&quot;devtools&quot;)</span>
+<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
+
+install_github<span class="p">(</span><span class="s">&quot;Eflores89/inegiR&quot;</span><span class="p">)</span>
+  <span class="c1">#dependiencies: zoo, XML, plyr, jsonlite</span>
+  
+<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span></code></pre></div>
+
+<h2 id="download-data">Download data</h2>
+
+<p>There are roughly two ways to download data series: the “general” and the “short” way (provided there is a wrapper function available).</p>
+
+<p>In the first case, the function parses a URL provided by the user. All the URL’s for each data series can be found in the INEGI <a href="http://www.inegi.org.mx/desarrolladores/indicadores/apiindicadores.aspx">development site</a>. You must also sign up for an API token in that same site with your email.</p>
+
+<p>Let us save the imaginary token:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">token<span class="o">&lt;-</span><span class="s">&quot;abc123&quot;</span></code></pre></div>
+
+<p>Now, I wish to find the rate of inflation (which in the case of INEGI is a percent change of the INPC data series).</p>
+
+<p>This is the corresponding URL for INPC data.series:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC<span class="o">&lt;-</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/&quot;</span></code></pre></div>
+
+<p>JSON format is also accepted and is interchangeable (do not use the “?callback?” sign provided by INEGI’s documentation):</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC2 <span class="o">&lt;-</span> <span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/&quot;</span></code></pre></div>
+
+<p>Now, we are going to download this data series as a data.frame.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">INPC<span class="o">&lt;-</span>serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">)</span>
+
+<span class="c1"># take a look</span>
+<span class="kp">tail</span><span class="p">(</span>INPC<span class="p">)</span>
+<span class="c1"># Fechas         Valores</span>
+<span class="c1"># 2014-12-01   116.05900000</span>
+<span class="c1"># 2015-01-01   115.95400000</span>
+<span class="c1"># 2015-02-01   116.17400000</span>
+<span class="c1"># 2015-03-01   116.64700000</span>
+<span class="c1"># 2015-04-01   116.34500000</span>
+<span class="c1"># 2015-05-01   115.76400000</span></code></pre></div>
+
+<p>The optional “metadata” parameter in serie_inegi allows us to also download the metadata information from the data series, which includes date of update, units, frequency, etc.</p>
+
+<p>If “metadata” is set to TRUE, the information is parsed as a list of two elements: the metadata and the data frame.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">INPC_Metadata<span class="o">&lt;-</span>serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">,</span> metadata <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+
+<span class="kp">class</span><span class="p">(</span>INPC_Metadata<span class="p">)</span>
+<span class="c1"># [1] &quot;list&quot;</span></code></pre></div>
+
+<p>To access any of these elements, simply use as a list:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># date of last update</span>
+INPC_Metadata<span class="o">$</span>MetaData<span class="o">$</span>UltimaActualizacion
+<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="s">&quot;2015/06/09&quot;</span></code></pre></div>
+
+<p>Now that we have the INPC data series, we must apply a year-over-year change. For this we use the handy YoY() function, which let’s us choose the amount of periods to compare over (12 if you want year over year for a monthly series):</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">Inflation <span class="o">&lt;-</span> YoY<span class="p">(</span>INPC<span class="o">$</span>Valores<span class="p">,</span> lapso <span class="o">=</span> <span class="m">12</span><span class="p">,</span> decimal<span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
+
+<span class="c1"># if we want a dataframe, we simply build like this</span>
+
+Inflation_df <span class="o">&lt;-</span> <span class="kp">cbind.data.frame</span><span class="p">(</span>Fechas <span class="o">=</span> INPC<span class="o">$</span>Fechas<span class="p">,</span> Inflation <span class="o">=</span> Inflation<span class="p">)</span>
+
+
+<span class="kp">tail</span><span class="p">(</span>Inflation_df<span class="p">)</span>
+<span class="c1"># Fechas        Inflation</span>
+<span class="c1"># 2014-12-01    4.081322</span>
+<span class="c1"># 2015-01-01    3.065642</span>
+<span class="c1"># 2015-02-01    3.000266</span>
+<span class="c1"># 2015-03-01    3.137075</span>
+<span class="c1"># 2015-04-01    3.062327</span>
+<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+
+<p>This method works for any URL obtained from the INEGI documentation, but for the most used indicators, the package has built-in shortcut wrappers.</p>
+
+<p>Let us obtain the same data series (inflation) via one of these specified shortcut functions:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">Inflation_fast <span class="o">&lt;-</span> inflacion_general<span class="p">(</span>token<span class="p">)</span>
+
+<span class="kp">tail</span><span class="p">(</span>Inflation_fast<span class="p">)</span>
+<span class="c1"># Fechas        Inflacion</span>
+<span class="c1"># 2014-12-01    4.081322</span>
+<span class="c1"># 2015-01-01    3.065642</span>
+<span class="c1"># 2015-02-01    3.000266</span>
+<span class="c1"># 2015-03-01    3.137075</span>
+<span class="c1"># 2015-04-01    3.062327</span>
+<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+
+
+  </div>
+</article>
+
+</body>
+</html>
