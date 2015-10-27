@@ -1,0 +1,296 @@
+# Estudio Preliminar
+## Paquetes
+```{r, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(eem)
+library(dplyr)
+library(magrittr)
+```
+
+```{r, echo=FALSE}
+# QUITAR CON CARGA DE EEM
+eem_colors<-c("#A84A44", "#E47D04", "#D8A19E", "#ae8b38", "#4d7c28", 
+              "#38b6a6", "#2080c7", "#94127a", "#155685", "#157d85", 
+              "#731585", "#848515", "#d06347", "#d0ca47", "#d04785", 
+              "#a19c9b", "#b5bcbf", "#62686b", "#021118", "#daf3ff")
+
+```
+
+
+
+## Gráfica de Crecimiento en riesgo
+```{r}
+df<-data.frame("Tipo"=c("Bajo_riesgo", "Bajo_riesgo", "Bajo_riesgo", 
+                        "Alto_riesgo", "Alto_riesgo", "Alto_riesgo"), 
+               "p.Est"=c(0.10, 0.15, 0.35, 0.12, 0.23, 0.5), 
+               "prima_max"=c(.05, 0.07, 0.09, 0.05, 0.09, 0.12), 
+               "Etapa" = c("Joven", "Med", "Adulto_mayor", "Joven", "Med", "Adulto_mayor"))
+
+ggplot(eem::order_axis(df,Etapa, 
+                       prima_max), 
+       aes(x=Etapa_o, 
+           y=p.Est))+
+  geom_path(aes(group=Tipo))+
+  theme_eem_white()+
+  scale_fill_eem(2)+
+  labs(title = "Curva Teórica \n Valoración Individual por Etapas",
+       x = "Etapa de Vida",
+       y = "Riesgo Estimado Individual")
+```
+
+
+## Estimaciones Básicas de Población.
+
+```{r, eval = FALSE}
+library(xlsx)
+totidy<-read.xlsx("cuadros_inegi.xlsx", sheetIndex = 1)
+enigh_tidy<-gather(totidy, tipo, rubro)
+
+#guardar
+xlsx::write.xlsx2(enigh_tidy, 
+                  "inegi_enigh_tidy.xlsx", 
+                  row.names = FALSE, 
+                  sheetName = "ExportR")
+```
+
+
+```{r}
+#if new session; /
+load("~/Documents/Dropbox/Data Science/R/proyectos/data/enigh/enigh_tidy.RData")
+```
+
+## Gráfica consumo seguros por décil
+```{r, message=FALSE, warning=FALSE}
+ggplot(eem::order_axis(
+  subset(enigh_tidy, !DECIL == "TOTAL" & 
+           TIPO == "HOGARES" & 
+           RUBRO == "SEGURO MEDICO " & 
+           Y == "2014"),
+                      DECIL, 
+                      VALOR), 
+       aes(x = DECIL_o, 
+           y = VALOR))+
+  geom_bar(stat = "identity", fill = "#A84A44") + 
+  theme_eem_white() +
+  scale_colour_eem(10) +
+  labs(title = "Hogares con Gasto en Seguro Médico",
+       x = "Decil",
+       y = "Hogares")
+```
+
+
+## Tablas déciles
+```{r, message=FALSE, warning=FALSE}
+library(knitr)
+
+# 2014
+mercado_2014 <- sum(subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "SEGURO MEDICO " & 
+                              Y == "2014")$VALOR)
+ 
+solo_hogares_seguro_2014<-subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "SEGURO MEDICO " & 
+                              Y == "2014") %>%
+  left_join(., subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "TOTAL" & 
+                              Y == "2014") %>% 
+              select(DECIL, VALOR),
+            by = "DECIL") %>%
+  mutate("Porcentaje_Hogares" = VALOR.x/VALOR.y*100, 
+         "Porcentaje_Mercado" = VALOR.x/mercado_2014*100) %>%
+  select(DECIL, VALOR.x, Porcentaje_Hogares, Porcentaje_Mercado)
+
+
+# 2012
+mercado_2012 <- sum(subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "SEGURO MEDICO " & 
+                              Y == "2012")$VALOR)
+ 
+solo_hogares_seguro_2012<-subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "SEGURO MEDICO " & 
+                              Y == "2012") %>%
+  left_join(., subset(enigh_tidy, 
+                            !DECIL == "TOTAL" & 
+                              TIPO == "HOGARES" & 
+                              RUBRO == "TOTAL" & 
+                              Y == "2012") %>% 
+              select(DECIL, VALOR),
+            by = "DECIL") %>%
+  mutate("Porcentaje_Hogares" = VALOR.x/VALOR.y*100, 
+         "Porcentaje_Mercado" = VALOR.x/mercado_2012*100) %>%
+  select(DECIL, VALOR.x, Porcentaje_Hogares, Porcentaje_Mercado)
+
+# --- 
+# kable 2014
+names(solo_hogares_seguro_2014)<-c("Decil", "Hogares_con_Gasto", "Porcentaje_Hogares", "Porcentaje_Mercado")
+names(solo_hogares_seguro_2012)<-c("Decil", "Hogares_con_Gasto", "Porcentaje_Hogares", "Porcentaje_Mercado")
+
+kable(solo_hogares_seguro_2014, digits = 2)
+kable(solo_hogares_seguro_2012, digits = 2)
+
+```
+
+
+## Gráfica y tablas de porcentaje de hogares (Cambio 2012 a 2014)
+```{r, warning=FALSE, error=FALSE, eval = FALSE}
+
+cambios_mercados_g <- solo_hogares_seguro_2012 %>% 
+  mutate("Y" = "2012") %>% 
+  rbind(., 
+        solo_hogares_seguro_2014 %>% mutate("Y" = "2014"))
+
+# ordenar deciles
+cambios_mercados_g$DECIL <- factor(cambios_mercados_g$DECIL, 
+                                   levels = c("D1","D2","D3","D4","D5","D6","D7","D8","D9","D10"))
+
+cambios_mercados_t <- solo_hogares_seguro_2012 %>%
+  left_join(., solo_hogares_seguro_2014, by = "Decil")
+
+names(cambios_mercados_t) <- c("Decil", "Hogares2012", "P_Hogares2012",
+                             "P_Mercado2012", "Hogares2014", "P_Hogares2014",
+                             "P_Mercado2014")
+# grafica
+ggplot(cambios_mercados_g, 
+       aes(x = DECIL, y = Porcentaje_Hogares, group = Y))+
+  geom_line(aes(colour = Y)) + 
+  theme_eem_white() +
+  scale_colour_eem(20)+
+  scale_fill_manual(values = c("#A84A44","#E47D04")) + 
+  labs(title = "Porcentaje de Hogares \n Gasto en Seguro Médico (2012-2014)",
+       x = "Décil",
+       y = "Porcentaje")
+
+# tabla
+cambios_mercados_t %<>%
+  select(-c(Hogares2012, P_Mercado2012, Hogares2014, P_Mercado2014))
+  
+
+```
+
+## Gráfica de EY (Porque dejan poliza)
+```{r}
+df_ey <- data.frame("Razon" = c("Costo","Cobertura","Recomendación otra", 
+                                "Comunicación", "Servicio", "Poliza no alineada", 
+                                "Descubrí otra opción", "Cambio de circunstancias", 
+                                "Reputación de marca", "Mala experiencia", 
+                                "Beneficios de lealtad"), 
+                    "Porcentaje" = c(58, 49, 40, 33, 28, 33, 22, 28, 25, 26, 22))
+
+ggplot(eem::order_axis(df_ey, Razon, Porcentaje), 
+       aes(x = Razon_o, 
+           y = Porcentaje)) + 
+  geom_bar(stat="identity", fill = eem_colors[1]) +
+  theme_eem_white()+
+  labs(title = "Razones para cancelar/cambiar de póliza", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
+```
+
+
+## Gráfica de EY (Interacción con clientes)
+```{r}
+df_ey2<-data.frame("Region" = c("LatAm", "LatAm", 
+                                "NorteAmerica", "NorteAmerica", 
+                                "DesGlobal" ,"DesGlobal"),
+                   "Tipo" = c("Ninguna", "Al menos 1 vez en 18 meses",
+                              "Ninguna", "Al menos 1 vez en 18 meses",
+                              "Ninguna", "Al menos 1 vez en 18 meses"),
+                   "Porcentaje" = c(35, 65, 54, 46, 30, 70))
+
+ggplot(eem::order_axis(df_ey2, Tipo, Porcentaje), 
+       aes(x = Region, 
+           y = Porcentaje)) + 
+  geom_bar(stat="identity", 
+           aes(fill = Tipo_o))+
+  theme_eem_white()+
+  scale_fill_eem(10) +
+  labs(title = "Interacción con Clientes", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
+
+```
+
+
+## Gráfica de EY (Preferencia interacción)
+```{r}
+df_ey3<-data.frame("Tipo" = c("Información General", "Información General",
+                              "Información General", "Información General",
+                              "Promociones", "Promociones",
+                              "Promociones", "Promociones", 
+                              "Cambios en Polizas", "Cambios en Polizas",
+                              "Cambios en Polizas", "Cambios en Polizas"),
+                   "Fecha" = c("Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido",
+                               "Actual", "Preferido"),
+                   "Frecuencia" = c("Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año", "Una vez por año",
+                                    "Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año", "Una vez por año",
+                                    "Más de Una Vez x año", "Más de Una Vez x año",
+                                    "Una vez por año","Una vez por año"), 
+                   "Porcentaje" = c(50, 70, 22, 22, 
+                                    48, 71, 25, 21, 
+                                    38, 63, 44, 31),
+                   "X" = c(1,2,3,4,5,6,7,8,9,10,11,12))
+
+ggplot(df_ey3, 
+       aes(x = Fecha, 
+           y = Porcentaje, 
+           group = Tipo)) + 
+  geom_line(aes(colour = Tipo)) + 
+  facet_grid(.~Frecuencia)+
+  theme_eem_white()+
+  scale_colour_eem(10) +
+  labs(title = "Preferencias de Comunicación", 
+       x = "Razón", 
+       y = "Porcentaje respondientes")
+
+```
+
+
+
+## Raman  y Gayatri  (2004) - Respuesta a conocimiento
+```{r}
+df_rg<-data.frame("Grupo" = c("20-30 años", "31 a 40 años", "41 a 50 años", "Más de 50 años"), 
+                  "Porcentaje" = c(53, 24, 20, 3))
+
+ggplot(eem::order_axis(df_rg, Grupo, Porcentaje),
+       aes(x = Grupo_o, 
+           y = Porcentaje)) + 
+  geom_bar(stat = "identity", fill = eem_colors[1]) +
+  theme_eem_white()+
+  labs(title = "Top of Mind \n Nuevos competidores", 
+       x = "Grupo Edad", 
+       y = "Porcentaje del total de sí")
+```
+
+## Crecimientos mercado 
+```{r}
+bmi_est<-data.frame("GROSS INSURANCE PREMIUMS (USDbn)" = c(9.52,10.89,11.17,10.17,11.31,12.4,13.3,14.34),
+                    "YoY" = c(8.1, 14.4, 2.6, -8.9, 11.3, 9.6, 7.2, 7.8),
+                    "Y" = c(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+ 
+ggplot(bmi_est,
+       aes(x = Y,
+           y = YoY))+
+  geom_line(colour = eem_colors[1])+
+  theme_eem_white()+
+  scale_fill_eem(20)+
+  labs(title = "Crecimiento Estimado Mercado",
+       x = "Año",
+       y = "Tasa (%)")
+
+```

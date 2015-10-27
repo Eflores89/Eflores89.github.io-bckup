@@ -1,11 +1,61 @@
-.highlight  { background: #ffffff; }
-.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight  { 
+background: #eae2c4;
+-webkit-font-smoothing: antialiased;
+background-attachment: scroll;
+background-clip: border-box;
+background-color: rgb(248, 248, 248);
+background-image: none;
+background-origin: padding-box;
+background-size: auto;
+border-bottom-color: rgb(234, 234, 234);
+border-bottom-left-radius: 3px;
+border-bottom-right-radius: 3px;
+border-bottom-style: solid;
+border-bottom-width: 1px;
+border-image-outset: 0px;
+border-image-repeat: stretch;
+border-image-slice: 100%;
+border-image-source: none;
+border-image-width: 1;
+border-left-color: rgb(234, 234, 234);
+border-left-style: solid;
+border-left-width: 1px;
+border-right-color: rgb(234, 234, 234);
+border-right-style: solid;
+border-right-width: 1px;
+border-top-color: rgb(234, 234, 234);
+border-top-left-radius: 3px;
+border-top-right-radius: 3px;
+border-top-style: solid;
+border-top-width: 1px;
+box-sizing: border-box;
+
+display: block;
+font-family: Monaco, Consolas, Menlo, monospace;
+font-size: 14px;
+font-style: normal;
+font-variant: normal;
+font-weight: normal;
+margin-bottom: 18px;
+margin-left: 0px;
+margin-right: 0px;
+margin-top: 14px;
+max-width: 100%;
+overflow-x: auto;
+padding-bottom: 12px;
+padding-left: 12px;
+padding-right: 12px;
+padding-top: 1;
+color: rgb(49, 49, 49);
+
+}
+.highlight .c { color: #567e5b; font-style: italic } /* Comment */
 .highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
 .highlight .k { font-weight: bold } /* Keyword */
 .highlight .o { font-weight: bold } /* Operator */
 .highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
 .highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
-.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .c1 { color: #567e5b; font-style: italic } /* Comment.Single  - comment en R*/
 .highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
 .highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
 .highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
@@ -21,11 +71,11 @@
 .highlight .gt { color: #aa0000 } /* Generic.Traceback */
 .highlight .kc { font-weight: bold } /* Keyword.Constant */
 .highlight .kd { font-weight: bold } /* Keyword.Declaration */
-.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+/* descomentarizar... algunas funciones en R las tomas asi! --- .highlight .kp { font-weight: bold } /* Keyword.Pseudo */
 .highlight .kr { font-weight: bold } /* Keyword.Reserved */
 .highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
-.highlight .m { color: #009999 } /* Literal.Number */
-.highlight .s { color: #d14 } /* Literal.String */
+.highlight .m { color: #009999 } /* Literal.Number  -  numeros en R */ 
+.highlight .s { color: #a1511c } /* Literal.String - strings en Rs*/
 .highlight .na { color: #008080 } /* Name.Attribute */
 .highlight .nb { color: #0086B3 } /* Name.Builtin */
 .highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
