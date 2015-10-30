@@ -1,0 +1,144 @@
+Para calcular las liquidaciones por escenario, utilizamos datos de la LFT, artículo 50 y generamos una función reactiva en **R**.
+
+```{r}
+library(ggplot2)
+library(eem)
+
+indemnizacion_mx <- function(tipo, 
+                             ingreso = "2013-01-01", 
+                             salida = "2014-01-02", 
+                             sueldo_mes, 
+                             dias_vacacion = 6,
+                             porcent_prima = 0.25, 
+                             dias_aguinaldo = 15,
+                             salario_min){
+  
+  salida <- as.Date(salida)
+  ingreso <- as.Date(ingreso)
+  # calcular variables
+  v.sueldo_diario <- sueldo_mes/30
+  v.prima_diario <- dias_vacacion*v.sueldo_diario*porcent_prima/365
+  v.aguinaldo_diario <- dias_aguinaldo*v.sueldo_diario/365
+  
+  v.sal_diario_int <- v.sueldo_diario + v.prima_diario + v.aguinaldo_diario
+  v.sal_mes_int <- v.sal_diario_int*30
+
+  if(tipo == 1){  
+    # indeterminado  
+    constitucional <- 3*v.sal_mes_int
+    
+    if((salida-ingreso)>365)
+      {
+      a <- floor(as.numeric(salida-ingreso)/365)
+      if(a==0){a<-1}else{}
+      }else{ a <- 0}
+    dias_servicio <- (20*a)*v.sal_diario_int
+    proporcional <- 20*v.sal_diario_int/360*300
+    
+    # para prima antiguedad
+    v.prima_salariomax <- salario_min*2*(12*a)
+    v.prima_salariomin <- salario_min*(12*a)
+    v.prima_doble <- if(v.sal_diario_int > (salario_min*2)){TRUE}else{FALSE}
+    v.prima_calculo <- v.sal_diario_int*12*a
+    
+    antiguedad <- if(v.prima_doble){v.prima_salariomax}else{
+      if(v.prima_calculo<v.prima_salariomin){v.prima_salariomin}else{
+        v.prima_calculo
+      }
+    }
+      indemnizacion <- data.frame("Concepto" = c("Constitucional", 
+                                                 "Servicio",
+                                                 "Prima Antiguedad"),
+                                  "Valor" = c(constitucional, 
+                                              dias_servicio + proporcional,
+                                              antiguedad)
+                                  )
+  }else{
+    if(tipo == 2){
+      #determinado
+      if((salida-ingreso)<365){
+        meses_lab <- floor((salida-ingreso)/30)
+        contrato <- meses_lab*sueldo_mes*0.5
+        constitucional <- 0
+      }else{
+        contrato <- v.sal_mes_int*6
+        constitucional <- 3*v.sal_mes_int
+      }
+      indemnizacion <- data.fram("Concepto" = c("Contrato", 
+                                                  "Constitucional"),
+                                   "Valor" = c(contrato, 
+                                               constitucional))
+    }else{}
+    
+  }
+  return(indemnizacion)
+}
+
+```
+
+
+
+```{r}
+# con mismo tiempo, variando sueldos.
+pagos <- NULL
+for(i in 6000:80000){
+ind <- indemnizacion_mx(tipo = 1,
+                       ingreso = "2014-12-27", salida = "2016-01-30",
+                       sueldo_mes = i,
+                       dias_vacacion = 10, 
+                       porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
+pagos[i-5999] <- sum(ind$Valor)
+}
+
+ggplot(data.frame("i" = 6000:80000,
+                  "pagos" = pagos), 
+       aes(x = i, 
+           y = pagos))+
+  geom_point()+
+  theme_eem_white()
+```
+
+
+```{r}
+# con mismo sueldo, variando tiempo.
+pagos2 <- NULL
+for(i in 1:10000){
+ind <- indemnizacion_mx(tipo = 1,
+                       ingreso = "2014-12-27", salida = as.Date("2016-01-30")+i,
+                       sueldo_mes = 15000,
+                       dias_vacacion = 10, 
+                       porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
+pagos2[i] <- sum(ind$Valor)
+}
+
+ggplot(data.frame("i" = 1:10000,
+                  "pagos" = pagos2), 
+       aes(x = i, 
+           y = pagos))+
+  geom_point()+
+  theme_eem_white()
+```
+
+
+
+```{r}
+# con varianza proporcional
+inflacion <- 0.04
+tasa_natural <- 0.025
+pagos3 <- NULL
+for(i in 1:10000){
+ind <- indemnizacion_mx(tipo = 1,
+                       ingreso = "2014-12-27", salida = as.Date("2016-01-30")+i,
+                       sueldo_mes = 15000*((1+inflacion)^((365+i)/365))*((1+tasa_natural)^((365+i)/365)),
+                       dias_vacacion = 10, 
+                       porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
+pagos3[i] <- sum(ind$Valor)
+}
+
+ggplot(data.frame("i" = 1:10000,
+                  "pagos" = pagos3), 
+       aes(x = i, 
+           y = pagos))+
+  geom_point()+
+  theme_eem_white()
+```
