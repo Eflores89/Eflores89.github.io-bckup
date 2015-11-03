@@ -81,34 +81,45 @@ indemnizacion_mx <- function(tipo,
 ```{r}
 # con mismo tiempo, variando sueldos.
 pagos <- NULL
+porcentajes <- NULL
 for(i in 6000:80000){
 ind <- indemnizacion_mx(tipo = 1,
-                       ingreso = "2014-12-27", salida = "2016-01-30",
+                       ingreso = "2014-12-27", 
+                       salida = "2016-01-30",
                        sueldo_mes = i,
                        dias_vacacion = 10, 
-                       porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
+                       porcent_prima = 0.25, 
+                       dias_aguinaldo = 15, 
+                       salario_min = 66)
 pagos[i-5999] <- sum(ind$Valor)
+porcentajes[i-5999] <- (sum(ind$Valor)/i-1)*100
 }
 
 ggplot(data.frame("i" = 6000:80000,
-                  "pagos" = pagos), 
+                  "pagos" = porcentajes), 
        aes(x = i, 
            y = pagos))+
   geom_point()+
-  theme_eem_white()
+  theme_eem_white()+
+  labs(title = "Indemnización esperada como porcentaje del sueldo", 
+       x = "Sueldo base mensual (no integrado)",
+       y = "Porcentaje")
+
 ```
 
 
 ```{r}
 # con mismo sueldo, variando tiempo.
 pagos2 <- NULL
+porcentajes2 <- NULL
 for(i in 1:10000){
 ind <- indemnizacion_mx(tipo = 1,
                        ingreso = "2014-12-27", salida = as.Date("2016-01-30")+i,
-                       sueldo_mes = 15000,
+                       sueldo_mes = 10000,
                        dias_vacacion = 10, 
                        porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
-pagos2[i] <- sum(ind$Valor)
+pagos2[i] <- sum(ind$Valor)/1000
+porcentajes2[i] <- sum(ind$Valor)/10000*100
 }
 
 ggplot(data.frame("i" = 1:10000,
@@ -116,7 +127,21 @@ ggplot(data.frame("i" = 1:10000,
        aes(x = i, 
            y = pagos))+
   geom_point()+
-  theme_eem_white()
+  theme_eem_white()+
+  labs(title = "Indemnización esperada nominal", 
+       x = "Días en trabajo", 
+       y = "Miles de Pesos")
+
+
+ggplot(data.frame("i" = 1:10000,
+                  "porcentajes" = porcentajes2), 
+       aes(x = i, 
+           y = porcentajes))+
+  geom_point()+
+  theme_eem_white()+
+  labs(title = "Indemnización esperada como porcentaje de sueldo", 
+       x = "Días en trabajo", 
+       y = "Porcentaje")
 ```
 
 
@@ -126,13 +151,20 @@ ggplot(data.frame("i" = 1:10000,
 inflacion <- 0.04
 tasa_natural <- 0.025
 pagos3 <- NULL
+porcentajes3 <- NULL
 for(i in 1:10000){
+sueldo <- 6000*((1+inflacion)^((365+i)/365))*((1+tasa_natural)^((365+i)/365))
+
 ind <- indemnizacion_mx(tipo = 1,
                        ingreso = "2014-12-27", salida = as.Date("2016-01-30")+i,
-                       sueldo_mes = 15000*((1+inflacion)^((365+i)/365))*((1+tasa_natural)^((365+i)/365)),
-                       dias_vacacion = 10, 
-                       porcent_prima = 0.25, dias_aguinaldo = 15, salario_min = 66)
-pagos3[i] <- sum(ind$Valor)
+                       sueldo_mes = sueldo,
+                       dias_vacacion = 10 + (2*floor(-1*as.numeric(as.Date("2014-12-27")-as.Date("2016-01-30")+i)/365)), 
+                       porcent_prima = 0.25, 
+                       dias_aguinaldo = 15, 
+                       salario_min = 66)
+
+pagos3[i] <- sum(ind$Valor)/1000
+porcentajes3[i] <- sum(ind$Valor)/sueldo*100
 }
 
 ggplot(data.frame("i" = 1:10000,
@@ -140,5 +172,19 @@ ggplot(data.frame("i" = 1:10000,
        aes(x = i, 
            y = pagos))+
   geom_point()+
-  theme_eem_white()
+  theme_eem_white()+
+  labs(title = "Indemnización esperada nominal",
+       x = "Días en trabajo", 
+       y = "Miles de pesos")
+
+
+ggplot(data.frame("i" = 1:10000,
+                  "porcentajes" = porcentajes3), 
+       aes(x = i, 
+           y = porcentajes))+
+  geom_point()+
+  theme_eem_white()+
+  labs(title = "Indemnización esperada como porcentaje de sueldo",
+       x = "Días en trabajo", 
+       y = "Porcentaje")
 ```
