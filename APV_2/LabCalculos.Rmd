@@ -188,3 +188,17 @@ ggplot(data.frame("i" = 1:10000,
        x = "Días en trabajo", 
        y = "Porcentaje")
 ```
+
+# Estadísticas INEGI
+
+## Personal ocupado
+```{r}
+
+library(inegiR)
+token <- "61c36253-47f6-c616-034e-7bf43b1aaba4"
+url_1 <- "http://www3.inegi.org.mx//sistemas/api/indicadores/v1//Indicador/5000000002/00/es/false/json/"
+url_2 <- "http://www3.inegi.org.mx//sistemas/api/indicadores/v1//Indicador/5000000001/00/es/false/json/"
+personal <- serie_inegi(url_1, token)
+unidades <- serie_inegi(url_2, token)
+
+```
