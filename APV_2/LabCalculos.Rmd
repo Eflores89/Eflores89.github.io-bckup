@@ -3,6 +3,7 @@ Para calcular las liquidaciones por escenario, utilizamos datos de la LFT, artí
 ```{r}
 library(ggplot2)
 library(eem)
+library(reshape2)
 
 indemnizacion_mx <- function(tipo, 
                              ingreso = "2013-01-01", 
@@ -200,5 +201,84 @@ url_1 <- "http://www3.inegi.org.mx//sistemas/api/indicadores/v1//Indicador/50000
 url_2 <- "http://www3.inegi.org.mx//sistemas/api/indicadores/v1//Indicador/5000000001/00/es/false/json/"
 personal <- serie_inegi(url_1, token)
 unidades <- serie_inegi(url_2, token)
+
+```
+
+
+# Función de seguro simple
+
+```{r}
+seguro_despido <- function(sueldo,
+                           suma_liquidacion, 
+                           porcentaje_prima,
+                           meses_esperados,
+                           ganancias_empresa_antes, 
+                           tasa_impositiva){
+  fondo_individual <- meses_esperados*porcentaje_prima*sueldo
+  pago <- fondo_individual-suma_liquidacion
+  empresa <- (ganancias_empresa_antes*tasa_impositiva)-((ganancias_empresa_antes - (porcentaje_prima*sueldo))*tasa_impositiva)
+  df <- data.frame(fondo_individual, 
+                   pago,
+                   empresa)
+  return(df)
+                           }
+```
+
+# Corridas por albercas de riesgo
+
+```{r}
+
+# variando costo de mensualidad
+individuos <- NULL
+empresa <- NULL
+
+ganancias_apv <- NULL
+ganancias_empresa <- NULL
+
+for(c in 1:10){
+p_prima <- c/100  
+  # 500 empleados, media 12 mil pesos, desv. 2
+sueldos <- rnorm(500, mean = 12, sd = 2)
+  # 30 meses en promedio de antiguedad
+meses <- rnorm(500, mean = 30, sd = 4)
+
+    for(i in 1:500){
+      
+      individuos[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = p_prima,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 1000,
+        tasa_impositiva = 0.3
+        )$pago
+      
+      empresa[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = 0.07,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 1000,
+        tasa_impositiva = 0.3
+        )$empresa
+    }
+
+ganancias_apv[c] <- sum(individuos)
+ganancias_empresa[c] <- sum(empresa)
+}
+
+df_difprimas <- melt(data.frame("apv" = ganancias_apv/1000, 
+                           "empresa" = ganancias_empresa/1000,
+                           "prima" = 1:10/100), 
+                     id.vars = "prima")
+
+ggplot(df_difprimas, 
+       aes(x = prima, 
+           y = value, 
+           group = variable)) +
+  geom_line()+
+  labs(title = "Prima y ganancia esperada \n empresa con 5 mil empleados", 
+       x = "Prima", y = "Ganancias (miles de pesos)") +
+  theme_eem_white()
 
 ```
