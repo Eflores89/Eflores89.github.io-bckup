@@ -204,6 +204,59 @@ unidades <- serie_inegi(url_2, token)
 
 ```
 
+# Mercado (Empresas)
+```{r}
+
+load("empresas_tidy.RData")
+
+# grafica 
+ggplot(order_axis(subset(empresas_tidy,
+                         GEOGRAFIA == "00 Nal" &
+                             variable == "EMPRESAS" &
+                             SECTOR == "TODOS" &
+                             SIZE != "TODOS"),
+                  DESC_RUBRO, value),
+       aes(y = value/1000,
+           x = DESC_RUBRO_o)) +
+    geom_bar(stat = "identity", fill = eem_colors[1]) +
+    theme_eem_white() +
+    labs(title = "Empresas por número de empleados",
+         x = "Número empleados",
+         y = "Miles de Empresas")
+
+# ultimo decil
+set_nacional <- subset(empresas_tidy, 
+                       GEOGRAFIA == "00 Nal" & 
+                         variable == "EMPRESAS" & 
+                         SECTOR == "TODOS" & SIZE != "TODOS")
+
+set_nacional$TAM <- c(1,4,8,13,18,25,40,75,175,350,750,2000)
+vector_empleados <- set_nacional$TAM * set_nacional$value
+suma_empleados <- sum(set_nacional$TAM * set_nacional$value)
+set_nacional$P <- vector_empleados/suma_empleados
+
+trabajadores_totales <- subset(empresas_tidy, 
+                               GEOGRAFIA == "00 Nal"  & 
+                                 variable == "TOTAL_TRAB" &
+                                 SECTOR == "TODOS" & SIZE != "TODOS")
+
+ggplot(order_axis(trabajadores_totales,
+                  DESC_RUBRO, value),
+       aes(y = value/1000,
+           x = DESC_RUBRO_o)) +
+    geom_bar(stat = "identity", fill = eem_colors[1]) +
+    theme_eem_white() +
+    labs(title = "Trabajadores por empresa de trabajo",
+         x = "Número empleados (tamaño)",
+         y = "Miles de Trabajadores")
+
+# share trabajadores
+
+share_top2 <- sum(subset(trabajadores_totales, 
+                         SIZE == "Mas de mil" | 
+                           SIZE == "500 a mil")$value)/sum(trabajadores_totales$value)
+```
+
 
 # Función de seguro simple
 
@@ -249,7 +302,7 @@ meses <- rnorm(500, mean = 30, sd = 4)
         suma_liquidacion = sueldos[i]*2,
         porcentaje_prima = p_prima,
         meses_esperados = meses[i],
-        ganancias_empresa_antes = 1000,
+        ganancias_empresa_antes = 100,
         tasa_impositiva = 0.3
         )$pago
       
@@ -258,7 +311,7 @@ meses <- rnorm(500, mean = 30, sd = 4)
         suma_liquidacion = sueldos[i]*2,
         porcentaje_prima = 0.07,
         meses_esperados = meses[i],
-        ganancias_empresa_antes = 1000,
+        ganancias_empresa_antes = 100,
         tasa_impositiva = 0.3
         )$empresa
     }
@@ -277,8 +330,129 @@ ggplot(df_difprimas,
            y = value, 
            group = variable)) +
   geom_line()+
-  labs(title = "Prima y ganancia esperada \n empresa con 5 mil empleados", 
+  labs(title = "Prima y ganancia esperada \n empresa con 500 empleados", 
        x = "Prima", y = "Ganancias (miles de pesos)") +
   theme_eem_white()
 
 ```
+
+```{r}
+
+# variando tamaño de empresa
+individuos <- NULL
+empresa <- NULL
+
+ganancias_apv <- NULL
+ganancias_empresa <- NULL
+n_empleados <- NULL
+
+for(c in 1:10){
+p_prima <- 8/100  
+  # 500 empleados, media 12 mil pesos, desv. 2
+sueldos <- rnorm(c*100, mean = 12, sd = 2)
+  # 30 meses en promedio de antiguedad
+meses <- rnorm(c*100, mean = 30, sd = 4)
+
+    for(i in 1:(c*100)){
+      
+      individuos[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = p_prima,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 100,
+        tasa_impositiva = 0.3
+        )$pago
+      
+      empresa[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = 0.07,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 100,
+        tasa_impositiva = 0.3
+        )$empresa
+    }
+
+ganancias_apv[c] <- sum(individuos)
+ganancias_empresa[c] <- sum(empresa)
+n_empleados[c]<-c*100
+}
+
+df_difprimas <- melt(data.frame("apv" = ganancias_apv/1000, 
+                           "empresa" = ganancias_empresa/1000,
+                           "empleados" = n_empleados), 
+                     id.vars = "empleados")
+
+ggplot(df_difprimas, 
+       aes(x = empleados, 
+           y = value, 
+           group = variable)) +
+  geom_line()+
+  labs(title = "Prima y ganancia esperada \n empresa con n empleados", 
+       x = "Empleados", y = "Ganancias (miles de pesos)") +
+  theme_eem_white()
+
+```
+
+
+```{r}
+
+# variando meses que duran en empleo los trabajadores
+individuos <- NULL
+empresa <- NULL
+
+ganancias_apv <- NULL
+ganancias_empresa <- NULL
+meses_empleados <- NULL
+
+for(c in 1:8){
+p_prima <- 8/100  
+  # 500 empleados, media 12 mil pesos, desv. 2
+sueldos <- rnorm(500, mean = 12, sd = 2)
+  # meses en promedio de antiguedad
+meses <- rnorm(500, mean = (6*c), sd = 5)
+
+    for(i in 1:8){
+      
+      individuos[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = p_prima,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 100,
+        tasa_impositiva = 0.3
+        )$pago
+      
+      empresa[i]<-seguro_despido(
+        sueldo = sueldos[i],
+        suma_liquidacion = sueldos[i]*2,
+        porcentaje_prima = 0.07,
+        meses_esperados = meses[i],
+        ganancias_empresa_antes = 100,
+        tasa_impositiva = 0.3
+        )$empresa
+    }
+
+ganancias_apv[c] <- sum(individuos)
+ganancias_empresa[c] <- sum(empresa)
+meses_empleados[c]<-(6*c)
+}
+
+df_difprimas <- melt(data.frame("apv" = ganancias_apv/1000, 
+                           "empresa" = ganancias_empresa/1000,
+                           "meses" = meses_empleados), 
+                     id.vars = "meses")
+
+ggplot(df_difprimas, 
+       aes(x = meses, 
+           y = value, 
+           group = variable)) +
+  geom_line()+
+  labs(title = "Prima y ganancia esperada \n empresa con 500 empleados", 
+       x = "Meses promedio en trabajo", y = "Ganancias (miles de pesos)") +
+  theme_eem_white()
+```
+
+
+
