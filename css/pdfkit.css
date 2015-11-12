@@ -11,7 +11,6 @@ body {
   height: 80%;
   text-rendering: geometricPrecision;
   text-rendering: optimizeLegibility;
-  width: 80%;
 }
 
 body {
@@ -22,6 +21,10 @@ body {
   color: #222;
   font-weight: 400;
   white-space: nowrap;
+}
+.center {
+    margin: auto;
+    width: 70%;
 }
 
 /* Type */
