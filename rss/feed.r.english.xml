@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>En El Margen - R-English</title>
+		<description>Posts categorized as 'R-English'</description>
+		<link>http://www.enelmargen.org</link>
+		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>What the candidates say, analyzing republican debates using R</title>
+					<description>&lt;p&gt;As most people realize, this is probably one of the most data-rich primary campaigns in history, with hundreds of professional pollsters poring over every data-point trying to understand voter’s intention.&lt;/p&gt;
+
+&lt;p&gt;So here is another data-rich post to that end.&lt;/p&gt;
+
+&lt;p&gt;I was glad to discover the University of California at Santa Barbara’s &lt;a href=&quot;http://www.presidency.ucsb.edu/&quot;&gt;webpage&lt;/a&gt; with tons of high-quality data related to the elections.&lt;/p&gt;
+
+&lt;p&gt;Amongst these are the transcripts of presidential debates going back to 1960, which I will pore over a bit further.&lt;/p&gt;
+
+&lt;p&gt;Because the Republican race is arguably more fun to watch, i’ll be concentrating on these debates.&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-and-cleaning-the-data&quot;&gt;Getting and cleaning the data&lt;/h2&gt;
+
+&lt;p&gt;A few things to set-up before downloading the data:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# some packages for scraping and cleaning the data&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rvest&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;plyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stringi&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;magrittr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;c1&quot;&gt;# Function to fill data frame with previous name &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# (a run-on speech in the debate is recorded as a set of paragraphs)&lt;/span&gt;
+FillEmptyDF &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  vector.of.nas &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;is.na&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+  vector.of.names &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; df&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;#dataframe&lt;/span&gt;
+  vector.df &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;change &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; vector.of.nas&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                          names &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; vector.of.names&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  vector.of.rows &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;rownames&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vector.df&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;vector.of.nas&lt;span class=&quot;p&quot;&gt;,]))&lt;/span&gt;
+  vector.of.realnames &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; vector.of.rows&lt;span class=&quot;m&quot;&gt;-1&lt;/span&gt; 
+  &lt;span class=&quot;c1&quot;&gt;# clean if has smaller than 1 &lt;/span&gt;
+  vector.of.realnames&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;vector.of.realnames &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+  vector.df&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;vector.of.rows&lt;span class=&quot;p&quot;&gt;,]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; vector.df&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;vector.of.realnames&lt;span class=&quot;p&quot;&gt;,]&lt;/span&gt;
+  
+  df&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; vector.df&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;names&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# function to see if there are still NA&amp;#39;s in data.frame &lt;/span&gt;
+CheckDF &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; errors &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  row.has.na &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kp&quot;&gt;any&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;is.na&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;row.has.na&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    r &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    r &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;errors&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;row.has.na&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;r&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;r&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# function to partially separate and clean into a data.frame a debate from the presidency project&lt;/span&gt;
+MakeDebateDF&lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  newdf &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    person &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                   MARGIN &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                   &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+                     stri_extract_first_regex&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                                              &lt;span class=&quot;s&quot;&gt;&amp;quot;[A-Z ]+(?=(:\\s))&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                   &lt;span class=&quot;p&quot;&gt;}),&lt;/span&gt;
+    message &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                    MARGIN &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                    &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+                      stri_replace_first_regex&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                               &lt;span class=&quot;s&quot;&gt;&amp;quot;[A-Z ]+:\\s+&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                                               &lt;span class=&quot;s&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;}),&lt;/span&gt;
+    stringsAsFactors&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  
+  &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;newdf&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, to download the last 4 debates (i’m only going to analyze the “big-boy” debates between top contenders and omit New Hampshire because it is not in the database). I’ll use the main webpage for the presidency project:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Importing debates --- &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# url for all debates&lt;/span&gt;
+url &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;http://www.presidency.ucsb.edu/ws/index.php?pid=&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And download and fix each debate:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;### -------- debate in Wisconsin (fourth debate)&lt;/span&gt;
+wisconsin &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;110908&amp;quot;&lt;/span&gt;
+
+debate_w &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; read_html&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; wisconsin&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  html_nodes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  html_text&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+debate_w &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ldply&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+debate_w &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; MakeDebateDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;### -------- debate in Boulder, Col. (third debate)&lt;/span&gt;
+boulder &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;110906&amp;quot;&lt;/span&gt;
+
+debate_b &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; read_html&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; boulder&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  html_nodes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  html_text&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+debate_b &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ldply&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+debate_b &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; MakeDebateDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;### -------- debate in Simi Valley, California (second debate)&lt;/span&gt;
+california &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;110756&amp;quot;&lt;/span&gt;
+
+debate_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; read_html&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; california&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  html_nodes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  html_text&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+debate_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ldply&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+debate_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; MakeDebateDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;### -------- debate in Cleveland, Ohio (first debate)&lt;/span&gt;
+ohio &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;110489&amp;quot;&lt;/span&gt;
+
+debate_h &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; read_html&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; ohio&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  html_nodes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  html_text&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+debate_h &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ldply&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+debate_h &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; MakeDebateDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The way the webpage is structured means that there are paragraph breaks even if it’s the same candidate speaking. Using one of the previous functions, i’ll fix this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# loop until clean is finished... &lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# wisconsin&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CheckDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),])){&lt;/span&gt;
+  debate_w &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; FillEmptyDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# boulder&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CheckDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),])){&lt;/span&gt;
+  debate_b &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; FillEmptyDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# california&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CheckDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),])){&lt;/span&gt;
+  debate_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; FillEmptyDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# ohio&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CheckDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),])){&lt;/span&gt;
+  debate_h &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; FillEmptyDF&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;analyzing&quot;&gt;Analyzing&lt;/h2&gt;
+
+&lt;p&gt;Now, for the fun part. First, let’s start with some simply word-clouds (using &lt;a href=&quot;http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need&quot;&gt;this excellent example&lt;/a&gt; as a starting point)&lt;/p&gt;
+
+&lt;p&gt;I’m going to use the &lt;code&gt;rquery.wordcloud&lt;/code&gt; the function, taken shamelessly from sthda.com in the previous link to see what contenders like to talk about the most…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Join into large d.f.&lt;/span&gt;
+all_debates &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                     debate_b&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                     debate_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                     debate_h&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# these are necesary for plots &lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ggplot2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# this is for order_axis and theme_eem&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# it can be downloaded using &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# devtools::install_github(&amp;quot;eflores/eem&amp;quot;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;eem&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+trump_words &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;all_debates&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                    &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# cloud&lt;/span&gt;
+trump_cloud &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; rquery.wordcloud&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;trump_words&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+    &lt;span class=&quot;s&quot;&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+    max.words &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;300&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    excludeWords &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;going&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;and&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;s&quot;&gt;&amp;quot;applause&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;s&quot;&gt;&amp;quot;got&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;let&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+trump_freq &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; trump_cloud&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;freqTable
+
+&lt;span class=&quot;c1&quot;&gt;# top 10&lt;/span&gt;
+trump_top &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;order_axis&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      trump_freq&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,],&lt;/span&gt;
+        word&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; freq&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+      aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; word_o&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+          y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; freq&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+    geom_bar&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stat&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;identity&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              fill &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+    theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Top 10 words in Debates \n Donald Trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+          x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Word&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Frequency&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Donald really likes “great” more than the other candidates…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_wordcloud.png&quot; alt=&quot;trump_wordcloud&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_top10.png&quot; alt=&quot;trump_top10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Using the same process… What about Jeb Bush? He prefers to mention Hillary…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/bush_wordcloud.png&quot; alt=&quot;bush_wordcloud&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/bush_top10.png&quot; alt=&quot;bush_top10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Marco Rubio likes to present his tax plan…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/rubio_wordcloud.png&quot; alt=&quot;rubio_wordcloud&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/rubio_top10.png&quot; alt=&quot;rubio_top10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And the notoriously outspoken Cruz omits “people”, talks tax and prefers to confront “washington” more than his colleagues:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/cruz_wordcloud.png&quot; alt=&quot;cruz_wordcloud&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/cruz_top10.png&quot; alt=&quot;cruz_top10&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;more-stats&quot;&gt;More stats!&lt;/h2&gt;
+
+&lt;p&gt;The former stats are all about the total participation in debates, but more interesting is probably the way these candidates have (if they have), shifted views over the course of these debates.&lt;/p&gt;
+
+&lt;p&gt;It would be interesting to do some simple arithmetic on the corpus of words…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;UnlistAndExtractInfo &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;candidate&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# this function is not general - it only applies to these particular debates...&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# all the debates must be named the same in the parent env.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# for example: debate_h ...&lt;/span&gt;
+
+allwords_1 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;tolower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unlist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              stri_extract_all_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                    &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+allwords_2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;tolower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unlist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              stri_extract_all_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                    &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+allwords_3 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;tolower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unlist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              stri_extract_all_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                    &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+allwords_4 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;tolower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unlist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              stri_extract_all_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+              &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                    &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+df_insights &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+debate &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Ohio&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;California&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Colorado&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Wisconsin&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+average_intervention &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stri_count_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                          &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_h&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                                  &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))),&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stri_count_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                          &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                                  &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))),&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stri_count_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                          &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_b&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                                  &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))),&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stri_count_words&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                          &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate_w&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; person &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; candidate&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                                  &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+                        &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+words_total &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_1&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_2&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+words_unique &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_1&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+                 &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_2&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+                 &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+                 &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4&lt;span class=&quot;p&quot;&gt;))),&lt;/span&gt;
+words_repeated_fromfirst &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_2 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                            &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+unique_words_repeated_fromfirst &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_2&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_2 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;])),&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_3 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;])),&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_1&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+                            &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+words_repeated_fromsecond &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                            &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_2&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_2&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+unique_words_repeated_fromsecond &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_3&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_3 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_2&lt;span class=&quot;p&quot;&gt;])),&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_2&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+                            &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+words_repeated_fromthird &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_3&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+unique_words_repeated_fromthird &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;allwords_4&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;allwords_4 &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; allwords_3&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+                            &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;   
+&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; stringsAsFactors &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;df_insights&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# going to create a data frame with all the counts from the top candidates...&lt;/span&gt;
+candidates &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CARSON&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;RUBIO&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&amp;quot;KASICH&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CRUZ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;BUSH&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&amp;quot;FIORINA&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;PAUL&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CHRISTIE&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+info &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NULL&lt;/span&gt;
+info_all &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NULL&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;i &lt;span class=&quot;kr&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+info &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; UnlistAndExtractInfo&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;candidates&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+info&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;CANDIDATE &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; candidates&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+info_all &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; info&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# i&amp;#39;m going to add a few more columns...&lt;/span&gt;
+info_all &lt;span class=&quot;o&quot;&gt;%&amp;lt;&amp;gt;%&lt;/span&gt; mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;carry_over_p1 &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; unique_words_repeated_fromfirst&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;words_unique&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                     word_repeat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; words_total&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;words_unique&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s make some nice graphs with this information…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# graph of most words spoken by debate&lt;/span&gt;
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;order_axis&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  &lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; debate &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Ohio&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; CANDIDATE &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;CHRISTIE&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# christie didn&amp;#39;t go to wisconsin&lt;/span&gt;
+    CANDIDATE&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; carry_over_p1&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CANDIDATE_o&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; carry_over_p1&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  geom_bar&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;identity&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;fill &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CANDIDATE_o&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  facet_grid&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;debate &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  scale_fill_eem&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Repetition of words by candidate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Candidate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;% of unique words repeated from first debate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we take the full amount of unique words from the first debate, it’s clear the candidates haven’t been saying very different things. For example in California (the second debate), 41% of the words Trump said were the same he said in Ohio. The Donald is arguably the most repetitive, increasing this to 49% and 48% in Colorado and Wisconsin.&lt;/p&gt;
+
+&lt;p&gt;On the other hand, Fiorina always seems to have a surprise for viewers…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/repetitions.png&quot; alt=&quot;repetitions&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Although this could simply be due to the fact that she got very few words in the first debate (the outlier at the bottom is Fiorina) …&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;subset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;CANDIDATE &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;CHRISTIE&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; words_total&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; words_unique&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    geom_point&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CANDIDATE&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; size &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; shape &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+    theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# uses &amp;quot;eflores/eem&amp;quot;&lt;/span&gt;
+    scale_colour_eem&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# uses &amp;quot;eflores/eem&amp;quot;&lt;/span&gt;
+    labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Words per Debate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+         x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Total Words&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Unique Words&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/words_v_unique.png&quot; alt=&quot;repetitions&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# average length of interventions&lt;/span&gt;
+
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;factor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CANDIDATE&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; average_intervention&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                fill &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# the eem colors are from &amp;quot;eflores/eem&amp;quot;&lt;/span&gt;
+  geom_boxplot&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Average words per intervention&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Candidate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Words&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; theme&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;legend.position &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;none&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;When it comes to the average length of “interventions” (I define one as the slot a candidate is speaking in without being interrupted), Fiorina and Trump like to keep it short and simple while Rubio takes his time…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/candidate_words.png&quot; alt=&quot;words_int&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# average times unique word is repeated...&lt;/span&gt;
+
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;factor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;CANDIDATE&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; word_repeat&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; fill &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  geom_boxplot&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Average repetition of unique words&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Candidate&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Repetitions&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; theme&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;legend.position &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;none&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Another interesting tid-bit is the average repetitions of words. Again, Trump seems like an outlier, he repeated an average of 5 times every unique word in the California debate and has been repetitive since then.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/words_repeat.png&quot; alt=&quot;repetition_avg&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A trend seems to be emerging: Trump repeats the same thing every debate. But there should be much more proof after a few more debates…&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 26 Nov 2015 00:00:00 -0600</pubDate>
+				<link>http://www.enelmargen.org/r-english/datascience/2015/11/26/What-the-candidates-say-analyzing-republican-debates%20using-R2.html</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/r-english/datascience/2015/11/26/What-the-candidates-say-analyzing-republican-debates%20using-R2.html</guid>
+			</item>
+		
+	</channel>
+</rss>
