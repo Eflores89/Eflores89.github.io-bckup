@@ -112,6 +112,23 @@ article {
   overflow-y: hidden;
 }
 
+.title {
+  padding: 100px 50px;
+  width: 100%;
+  padding: 30px;
+  border: 5px red;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+
+hr { 
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.4));
+}
+
+
 @media (max-width: 960px) {
   article {
     display: block;
@@ -132,8 +149,9 @@ header {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  <!-- -webkit-filter: grayscale(1); -->
+  -webkit-filter: grayscale(0.2);
   <!-- filter: grayscale(1); -->
+  <!-- -webkit-filter: sepia(1); -->
   overflow: hidden;
   overflow-x: hidden;
   overflow-y: hidden;
