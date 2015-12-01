@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Producir pdf's de un sitio Jekyll | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="Artículo que explora manera de descargar un sitio HTML en PDF, en este caso un sitio Jekyll hosted en Github" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 11 Nov 2015</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: general, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/economia/que-pasa-baja-inflacion">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/negocios/sobrevivir-b-players">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>Producir pdf's de un sitio Jekyll</h1>
+          <br></br>
+    <p>En algunas ocasiones puede ser bastante interesante pasar un artículo o una investigación a formato pdf.</p>
+
+<p>Jekyll (el <strong>framework</strong> sobre cuál está recientemente este blog) nos permite rápidamente hacer sitios estáticos y hostearlos en Github.</p>
+
+<p>Pero en algunas ocasiones, me eh encontrado con la necesidad de mandar el artículo o investigación en formato print (o pdf, más bien).</p>
+
+<p>Por suerte encontré la herramienta <code>wkhtmltopdf</code> (el nombre pudo haber sido mejor) que nos permite pasar cualquier sitio html a un pdf.</p>
+
+<h2 id="setup-en-jekyll">Setup en Jekyll</h2>
+
+<p>Primero, recomiendo hacer lo siguiente: tener un CSS definido por cada “tipo de post”.</p>
+
+<p>Para los que no están muy familiarizados: el CSS es básicamente un código “madre” dónde se guardan los estilos de un sitio en html. Esto sirve por que en vez de tener que ir página por página cambiando como se ven los titulos, solamente cambiamos el CSS y tenemos un <strong>look</strong> totalmente diferente.</p>
+
+<p>Para definir un CSS personal, primero tenemos que decirle a nuestra plantilla html (<code>default.html</code>) que si encuentra un CSS personal, lo use (esto va hasta abajo de todos los CSS, para que se sobre-escriba cualquier <code>dependency</code>):</p>
+
+<div class="highlight"><pre><code class="language-liquid" data-lang="liquid"><span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nv">page</span><span class="p">.</span><span class="nv">custom_css</span><span class="w"> </span><span class="p">%}</span>
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;<span class="p">{{</span><span class="w"> </span><span class="nv">site</span><span class="p">.</span><span class="nv">baseurl</span><span class="w"> </span><span class="p">}}</span>/css/<span class="p">{{</span><span class="nv">page</span><span class="p">.</span><span class="nv">custom_css</span><span class="p">}}</span>.css&quot;&gt;
+<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span></code></pre></div>
+
+<p>Después guardamos nuestro CSS personal en la carpeta que dice la ruta (en mi caso <code>css/</code>). Aquí obviamente puedes poner cualquier estilo que quieras.</p>
+
+<p>Finalmente, en cada post o página estática que va generar el sitio, agregamos en el YAML el css personal así:</p>
+
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">title</span><span class="p-Indicator">:</span> <span class="s">&quot;Post</span><span class="nv"> </span><span class="s">1&quot;</span>
+<span class="l-Scalar-Plain">date</span><span class="p-Indicator">:</span> <span class="s">&#39;2015-11-10&#39;</span>
+<span class="l-Scalar-Plain">featured_image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/images/cover.jpg</span>
+<span class="l-Scalar-Plain">layout</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">post</span>
+<span class="l-Scalar-Plain">custom_css</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mycss</span>
+<span class="nn">---</span></code></pre></div>
+
+<p>Pequeño caveat, este plugin es un caso de:</p>
+
+<blockquote>
+  <p>GitHub Pages is powered by Jekyll. However, all Pages sites are generated using the <code>--safe</code> option to disable custom plugins for security reasons. Unfortunately, this means your plugins won’t work if you’re deploying to GitHub Pages.</p>
+
+  <p>You can still use GitHub Pages to publish your site, but you’ll need to convert the site locally and push the generated static files to your GitHub repository instead of the Jekyll source files.</p>
+</blockquote>
+
+<p>Entonces, tendrás que construir localmente el sitio y después subir a Github solo el folder <code>_site</code>.</p>
+
+<h2 id="all-about-the-css">All about the <strong>css</strong></h2>
+
+<p>Regresando al CSS, el principal problema que encontré al “imprimir” mis artículos es con este elemento.</p>
+
+<p>Obviamente el CSS está hecho para web, por lo que al pasar cualquier html con una especificación que <code>wkhtmltopdf</code> todavía no comprende, esto puede salir muy mal.</p>
+
+<p>La solución está en comentar los problemáticos webkits, por ejemplo:</p>
+
+<div class="highlight"><pre><code class="language-css" data-lang="css"><span class="nt">table</span> <span class="nt">td</span> <span class="p">{</span>
+  <span class="k">padding</span><span class="o">:</span><span class="m">5px</span><span class="p">;</span>
+	<span class="k">border-top</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#ffffff</span><span class="p">;</span>
+	<span class="k">border-bottom</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#e0e0e0</span><span class="p">;</span>
+	<span class="k">border-left</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#e0e0e0</span><span class="p">;</span>
+	<span class="k">background</span><span class="o">:</span> <span class="m">#ffffff</span><span class="p">;</span>
+<span class="c">/*</span>
+<span class="c">background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa)); </span>
+<span class="c">*/</span>
+
+<span class="c">/*</span>
+<span class="c">  background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);</span>
+<span class="c">*/</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Lo óptimo es guardar un formato que funcione mejor para un pdf en otro CSS. Aquí puedes jugar con el tamaño de la letra, el espaciado, el color y demás.</p>
+
+<p>Es decir, tendrías en tu carpeta dos posts iguales: uno generado con el CSS normal del sitio y otro con el CSS para imprimir. Para no confundir al sistema de archivo del sitio, puedes crear otra carpeta en dónde guardes el post directamente (sin la fecha “2015-11-10”, para que no tome la página como un post).</p>
+
+<p>Cuando hayas subido el sitio, deberías de tener dos sitios estáticos: <code>www.sitio.com/2015/11/10/post1.html</code> (contiene el CSS para web) y otro por ejemplo: <code>www.sitio.com/imprimir/post1.html</code>.</p>
+
+<p>Ahora si usamos la herramienta para convertir a pdf.</p>
+
+<h2 id="wkhtmltopdf">wkhtmltopdf</h2>
+
+<p>Las instrucciones para bajar e instalar, son bastante sencillas y se pueden encontrar <a href="http://wkhtmltopdf.org/index.html">aquí</a>.</p>
+
+<p>Ya que tengas todo instalado, simplemente abre una sessión en la terminal y escribe el comando del programa seguido por el sitio web a “transformar” y el nombre del archivo (debe tener el <code>.pdf</code>):</p>
+
+<div class="highlight"><pre><code class="language-console" data-lang="console"><span class="go">wkhtmltopdf www.sitio.com/imprimir/post1.html mipost.pdf</span></code></pre></div>
+
+<p>Recuerda verificar con <code>ls</code> antes o después en que parte de tu computadora estas, porque ahí se va guardar el pdf!</p>
+
+  </div>
+</article>
+
+</body>
+</html>

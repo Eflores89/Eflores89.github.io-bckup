@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Como revisar las descargas de paquetes de R | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="Este post explora una manera útil para descargar logs de descargas de paquetes del programa de estadística R. Contiene también código para hacerlo y una gráfica con un ejemplo." />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 02 Nov 2015</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: general, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/politica/tenencia-nl">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/economia/que-pasa-baja-inflacion">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>Como revisar las descargas de paquetes de R</h1>
+          <br></br>
+    <p>Siempre es bueno tratar de medir la popularidad de los paquetes en <strong>R</strong>, pero cuando tienes la perseverancia de subir uno a CRAN, te importa mucho más.</p>
+
+<p>Siguiendo algunos artículos en línea, decidí intentar hacer esto con <a href="/inegiR">inegiR</a>.</p>
+
+<p>El tema es complicado por que en <strong>R</strong> no hay un respositorio “madre” sino que todo se distribuye por medio de “espejos” de servidores que tienen diferentes lugares (por ejemplo en México el ITAM o UNAM). <a href="http://blog.rstudio.org/2013/06/10/rstudio-cran-mirror/">Este</a> artículo en el blog de Rstudio lo explica bastante bien.</p>
+
+<p>Por fortuna, Rstudio hizo un buen ejercicio de guardar registro de todas las descargas en su espejo y hacerlo público, lo que en este caso me ayudó para lo que quería medir.</p>
+
+<p>Les dejo la explicación por si alguna vez tienen la misma duda.</p>
+
+<h3 id="espejo-rstudio">Espejo RStudio</h3>
+
+<p>Los logs los guardan en este sitio: <a href="http://cran-logs.rstudio.com/">http://cran-logs.rstudio.com/</a> con un archivo por cada día.</p>
+
+<p>Por lo tanto, primero tenemos que decidir las fechas a descargar:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">start <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span><span class="s">&#39;2015-10-22&#39;</span><span class="p">)</span>
+today <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span><span class="s">&#39;2015-10-31&#39;</span><span class="p">)</span></code></pre></div>
+
+<p>Vamos a llenar un objeto con todos los días entre esos dos que defini previamente:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">all_days <span class="o">&lt;-</span> <span class="kp">seq</span><span class="p">(</span>start<span class="p">,</span> 
+                today<span class="p">,</span> by <span class="o">=</span> <span class="s">&#39;day&#39;</span><span class="p">)</span>
+year <span class="o">&lt;-</span> <span class="kp">as.POSIXlt</span><span class="p">(</span>all_days<span class="p">)</span><span class="o">$</span>year <span class="o">+</span> <span class="m">1900</span></code></pre></div>
+
+<p>Obtenemos un URL por cada día, siguiendo el mismo formato del sitio:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">urls <span class="o">&lt;-</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&#39;http://cran-logs.rstudio.com/&#39;</span><span class="p">,</span> year<span class="p">,</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> all_days<span class="p">,</span> <span class="s">&#39;.csv.gz&#39;</span><span class="p">)</span></code></pre></div>
+
+<h3 id="descarga-y-limpia">Descarga y limpia</h3>
+
+<p>Usamos <code>download.file</code> para descargar a un directorio que creamos o que ya existe..</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># si no existe... </span>
+<span class="kp">dir.create</span><span class="p">(</span><span class="s">&quot;CRANlogs&quot;</span><span class="p">)</span></code></pre></div>
+
+<p>Descarga de archivos</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Loop para bajar todos</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>all_days<span class="p">))</span> <span class="p">{</span>
+  download.file<span class="p">(</span>urls<span class="p">[</span>i<span class="p">],</span> 
+                <span class="kp">paste0</span><span class="p">(</span><span class="s">&#39;CRANlogs/&#39;</span><span class="p">,</span> 
+                        all_days<span class="p">[</span>i<span class="p">],</span> 
+                        <span class="s">&#39;.csv.gz&#39;</span><span class="p">))</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Una vez descargados, los vamos a importar a R, haciendo una <code>data.table</code> con <code>rbind</code> y agregando algunas modificaciones a las columnas y llaves únicas:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># lista de files...</span>
+file_list <span class="o">&lt;-</span> <span class="kp">list.files</span><span class="p">(</span><span class="s">&quot;CRANlogs&quot;</span><span class="p">,</span> full.names<span class="o">=</span><span class="kc">TRUE</span><span class="p">)</span>
+
+logs <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">()</span>
+
+<span class="c1"># loop para importar todos los archivos... </span>
+<span class="kr">for</span> <span class="p">(</span>file <span class="kr">in</span> file_list<span class="p">)</span> <span class="p">{</span>
+  <span class="kp">print</span><span class="p">(</span><span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Importando&quot;</span><span class="p">,</span> <span class="kp">file</span><span class="p">,</span> <span class="s">&quot;...&quot;</span><span class="p">))</span>
+  logs<span class="p">[[</span><span class="kp">file</span><span class="p">]]</span> <span class="o">&lt;-</span> read.table<span class="p">(</span><span class="kp">file</span><span class="p">,</span> 
+                             header <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> 
+                             sep <span class="o">=</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> 
+                             quote <span class="o">=</span> <span class="s">&quot;\&quot;&quot;</span><span class="p">,</span>
+                             dec <span class="o">=</span> <span class="s">&quot;.&quot;</span><span class="p">,</span> 
+                             fill <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> 
+                             comment.char <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> 
+                             as.is<span class="o">=</span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># rbind para juntar todas...</span>
+<span class="kn">library</span><span class="p">(</span>data.table<span class="p">)</span>
+dat <span class="o">&lt;-</span> rbindlist<span class="p">(</span>logs<span class="p">)</span>
+
+<span class="c1"># agregamos varias definiciones y limpiamos dataset</span>
+dat<span class="p">[,</span> <span class="kp">date</span><span class="o">:=</span><span class="kp">as.Date</span><span class="p">(</span><span class="kp">date</span><span class="p">)]</span>
+dat<span class="p">[,</span> package<span class="o">:=</span><span class="kp">factor</span><span class="p">(</span>package<span class="p">)]</span>
+dat<span class="p">[,</span> country<span class="o">:=</span><span class="kp">factor</span><span class="p">(</span>country<span class="p">)]</span>
+dat<span class="p">[,</span> weekday<span class="o">:=</span><span class="kp">weekdays</span><span class="p">(</span><span class="kp">date</span><span class="p">)]</span>
+dat<span class="p">[,</span> week<span class="o">:=</span><span class="kp">strftime</span><span class="p">(</span><span class="kp">as.POSIXlt</span><span class="p">(</span><span class="kp">date</span><span class="p">),</span>format<span class="o">=</span><span class="s">&quot;%Y-%W&quot;</span><span class="p">)]</span>
+
+<span class="c1"># indicador unico</span>
+dat<span class="p">[,</span> key<span class="o">:=</span><span class="kp">paste0</span><span class="p">(</span>package<span class="p">,</span><span class="s">&quot;_&quot;</span><span class="p">,</span><span class="kp">date</span><span class="p">,</span><span class="s">&quot;_&quot;</span><span class="p">,</span>week<span class="p">,</span><span class="s">&quot;_&quot;</span><span class="p">,</span>ip_id<span class="p">)]</span>
+
+<span class="c1"># a data frame</span>
+<span class="c1"># para manipular con dplyr</span>
+df <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>dat<span class="p">)</span></code></pre></div>
+
+<h3 id="analizar">Analizar</h3>
+
+<p>Ya que tenemos un data set limpio y listo para analizar, hice una simple gráfica…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># gráfica de downloads</span>
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+
+<span class="kr">if</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>df<span class="o">$</span>country<span class="p">))</span><span class="o">&gt;</span><span class="m">19</span><span class="p">){</span>
+<span class="c1"># gráfica sin división por país</span>
+p <span class="o">&lt;-</span> ggplot<span class="p">((</span>df <span class="o">%&gt;%</span> 
+          filter<span class="p">(</span>package <span class="o">==</span> <span class="s">&quot;inegiR&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+          group_by<span class="p">(</span><span class="kp">date</span><span class="p">)</span> <span class="o">%&gt;%</span>
+          summarise<span class="p">(</span><span class="s">&quot;Count&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+        <span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">date</span><span class="p">,</span> 
+           y <span class="o">=</span> Count<span class="p">))</span><span class="o">+</span>
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Descargas de inegiR en espejo de Rstudio&quot;</span><span class="p">,</span> 
+       x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Descargas únicas&quot;</span><span class="p">)</span>
+<span class="p">}</span><span class="kp">else</span><span class="p">{</span>
+<span class="c1"># gráfica con división por país</span>
+p <span class="o">&lt;-</span> ggplot<span class="p">((</span>df <span class="o">%&gt;%</span> 
+          filter<span class="p">(</span>package <span class="o">==</span> <span class="s">&quot;inegiR&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+          group_by<span class="p">(</span><span class="kp">date</span><span class="p">,</span> country<span class="p">)</span> <span class="o">%&gt;%</span>
+          summarise<span class="p">(</span><span class="s">&quot;Count&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+        <span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">date</span><span class="p">,</span> 
+           y <span class="o">=</span> Count<span class="p">,</span> 
+           fill <span class="o">=</span> country<span class="p">))</span><span class="o">+</span>
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+    <span class="c1"># ojo, solo hasta 20 diferentes países ... </span>
+  scale_fill_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Descargas de inegiR en espejo de Rstudio&quot;</span><span class="p">,</span> 
+       x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Descargas únicas&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># graficar objeto</span>
+plot<span class="p">(</span>p<span class="p">)</span></code></pre></div>
+
+<p>Si tenemos un horizonte más grande de tiempo, podemos agrupar la gráfica por semana:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># gráfica de downloads</span>
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+
+
+p <span class="o">&lt;-</span> ggplot<span class="p">((</span>df <span class="o">%&gt;%</span> 
+          filter<span class="p">(</span>package <span class="o">==</span> <span class="s">&quot;inegiR&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+          group_by<span class="p">(</span>week<span class="p">)</span> <span class="o">%&gt;%</span>
+          summarise<span class="p">(</span><span class="s">&quot;Count&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+        <span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> week<span class="p">,</span> 
+           y <span class="o">=</span> Count<span class="p">))</span><span class="o">+</span>
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Descargas de inegiR en espejo de Rstudio&quot;</span><span class="p">,</span> 
+       x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Descargas únicas&quot;</span><span class="p">)</span>
+
+plot<span class="p">(</span>p<span class="p">)</span></code></pre></div>
+
+<p>Como el paquete <strong>inegiR</strong> es nuevo, hice solamente una gráfica por día y el resultado es el siguiente:</p>
+
+<p><img src="/images/posts/inegiR_downloads.jpeg" alt="Grafica de descargas inegiR" /></p>
+
+  </div>
+</article>
+
+</body>
+</html>
