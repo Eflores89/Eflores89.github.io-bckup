@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Zonas Económicas Urgentes | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="El sur del país requiere de urgentes reformas para crecer, o mantendrá su crecimiento estancado" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 13 Dec 2015</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: economía, méxico</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/r-english/datascience/2015/11/26/What-the-candidates-say-analyzing-republican-debates-using-R2.html">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>Zonas Económicas Urgentes</h1>
+          <br></br>
+    <p>Recientemente se ha hablado de la creación de Zonas Económicas Especiales en el país. El formato y práctica de las mismas está por verse, pero es evidente que el sur del país requiere de urgentes reformas para crecer.</p>
+
+<p>Hace poco, la Presidencia dió a conocer un nuevo <a href="http://www.presidencia.gob.mx/zonaseconomicasespeciales/">programa</a> para hacer crecer al sur del país.</p>
+
+<p>Esto es urgente. De acuerdo con las estimaciones del PIB a nivel estatal: ¡El sur del país no ha crecido a más de 2% desde el segundo trimestre del 2012!</p>
+
+<p><img src="/images/posts/crecimientozonas_dic.png" alt="Crecimiento sur México" /></p>
+
+<p>La experiencia internacional tiende a estar a favor de este tipo de programas, pero como todo programa de gobierno, el exito del dependerá de su implementación y su interacción con otros factores (la inseguridad, por mencionar al más obvio).</p>
+
+<h2 id="cdigo">Código</h2>
+
+<p>Este post es un <em>update</em> a <a href="http://enelmargen.org/economia/otra-mala/">este</a> publicado en Agosto. El código para hacer la gráfica en <strong>R</strong> está a continuación:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>reshape2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+
+token <span class="o">&lt;-</span> <span class="s">&quot;[token]&quot;</span> <span class="c1"># poner tu token personal</span>
+crecimientos <span class="o">&lt;-</span> series_crecimiento_regiones<span class="p">(</span>token<span class="p">)</span>
+
+df <span class="o">&lt;-</span> ultimos<span class="p">(</span>
+    <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Fechas&quot;</span> <span class="o">=</span> crecimientos<span class="o">$</span>Fechas<span class="p">,</span> 
+               <span class="s">&quot;Norte&quot;</span> <span class="o">=</span> YoY<span class="p">(</span>crecimientos<span class="o">$</span>Norte<span class="p">,</span> <span class="m">4</span><span class="p">)</span><span class="o">*</span><span class="m">100</span><span class="p">,</span> 
+               <span class="s">&quot;Centro_nte&quot;</span> <span class="o">=</span> YoY<span class="p">(</span>crecimientos<span class="o">$</span>Centro_Norte<span class="p">,</span> <span class="m">4</span><span class="p">)</span><span class="o">*</span><span class="m">100</span><span class="p">,</span>
+               <span class="s">&quot;Centro&quot;</span> <span class="o">=</span> YoY<span class="p">(</span>crecimientos<span class="o">$</span>Centro<span class="p">,</span> <span class="m">4</span><span class="p">)</span><span class="o">*</span><span class="m">100</span><span class="p">,</span> 
+               <span class="s">&quot;Centro_sur&quot;</span> <span class="o">=</span> YoY<span class="p">(</span>crecimientos<span class="o">$</span>Centro_Sur<span class="p">,</span> <span class="m">4</span><span class="p">)</span><span class="o">*</span><span class="m">100</span><span class="p">,</span> 
+               <span class="s">&quot;Sur&quot;</span> <span class="o">=</span> YoY<span class="p">(</span>crecimientos<span class="o">$</span>Sur<span class="p">,</span> <span class="m">4</span><span class="p">)</span><span class="o">*</span><span class="m">100</span><span class="p">),</span> 
+      n <span class="o">=</span> <span class="m">12</span><span class="p">)</span>
+
+ggplot<span class="p">(</span>melt<span class="p">(</span>df<span class="p">,</span> id.vars <span class="o">=</span> <span class="s">&quot;Fechas&quot;</span><span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> Fechas<span class="p">,</span> y <span class="o">=</span> value<span class="p">,</span> group <span class="o">=</span> variable<span class="p">,</span> colour <span class="o">=</span> variable<span class="p">))</span><span class="o">+</span>
+  geom_path<span class="p">()</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Crecimiento Zonas México&quot;</span><span class="p">,</span> x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Tasa Anual&quot;</span><span class="p">)</span></code></pre></div>
+
+  </div>
+</article>
+
+</body>
+</html>
