@@ -81,10 +81,11 @@ blockquote {
     line-height: 40%;} 
 */
 
+/*
 p:first-of-type { 
     float: left;
       margin-bottom: 18px;
-}
+} */
 
 @media (max-width: 960px) {
   h1 {
@@ -379,7 +380,6 @@ ul.posts li {
 }
 
 ul.posts .meta {
-  display: block;
   margin-bottom: 12px;
   color: #8d8d8d;
 }
