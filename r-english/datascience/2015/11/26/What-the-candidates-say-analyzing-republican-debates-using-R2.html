@@ -13,7 +13,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="/css/reset.css">
   <link rel="stylesheet" href="/css/main.css">
-  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
 
 
   <!-- Fonts -->
@@ -47,6 +47,12 @@
         </li>
       
       
+      <li class="next">
+        <a href="/economia/Zonas-Econ-Urgentes">
+          Next
+        </a>
+      </li>
+      
     </ul>
   </div>
 </header>
@@ -69,52 +75,16 @@
 
 <p>A few things to set-up before downloading the data:</p>
 
+<blockquote>
+  <p>Update (1/4/2015) - Thanks to Alan Jordan who nicely corrected my regex with a more robust version and a more sucinct function for cleaning the data below..</p>
+</blockquote>
+
 <div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># some packages for scraping and cleaning the data</span>
 <span class="kn">library</span><span class="p">(</span>rvest<span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>plyr<span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>stringi<span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>magrittr<span class="p">)</span>
-
-
-<span class="c1"># Function to fill data frame with previous name </span>
-<span class="c1"># (a run-on speech in the debate is recorded as a set of paragraphs)</span>
-FillEmptyDF <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>df<span class="p">,</span> <span class="kp">col</span><span class="p">){</span>
-  vector.of.nas <span class="o">&lt;-</span> <span class="kp">is.na</span><span class="p">(</span>df<span class="p">[,</span><span class="kp">col</span><span class="p">])</span>
-  vector.of.names <span class="o">&lt;-</span> df<span class="p">[,</span><span class="kp">col</span><span class="p">]</span>
-  <span class="c1">#dataframe</span>
-  vector.df <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>change <span class="o">=</span> vector.of.nas<span class="p">,</span> 
-                          names <span class="o">=</span> vector.of.names<span class="p">)</span>
-  vector.of.rows <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">rownames</span><span class="p">(</span>vector.df<span class="p">[</span>vector.of.nas<span class="p">,]))</span>
-  vector.of.realnames <span class="o">&lt;-</span> vector.of.rows<span class="m">-1</span> 
-  <span class="c1"># clean if has smaller than 1 </span>
-  vector.of.realnames<span class="p">[</span>vector.of.realnames <span class="o">&lt;</span><span class="m">1</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="m">1</span>
-  vector.df<span class="p">[</span>vector.of.rows<span class="p">,]</span> <span class="o">&lt;-</span> vector.df<span class="p">[</span>vector.of.realnames<span class="p">,]</span>
-  
-  df<span class="p">[,</span> <span class="kp">col</span><span class="p">]</span> <span class="o">&lt;-</span> vector.df<span class="p">[</span><span class="s">&#39;names&#39;</span><span class="p">]</span>
-  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1"># function to see if there are still NA&#39;s in data.frame </span>
-CheckDF <span class="o">&lt;-</span> <span class="kr">function</span> <span class="p">(</span>df<span class="p">,</span> errors <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span> 
-<span class="p">{</span>
-  row.has.na <span class="o">&lt;-</span> <span class="kp">apply</span><span class="p">(</span>df<span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="p">{</span>
-    <span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>x<span class="p">))</span>
-  <span class="p">})</span>
-  <span class="kr">if</span> <span class="p">(</span><span class="kp">sum</span><span class="p">(</span>row.has.na<span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>
-    r <span class="o">&lt;-</span> <span class="kc">TRUE</span>
-  <span class="p">}</span>
-  <span class="kr">else</span> <span class="p">{</span>
-    r <span class="o">&lt;-</span> <span class="kc">FALSE</span>
-  <span class="p">}</span>
-  <span class="kr">if</span> <span class="p">(</span>errors<span class="p">)</span> <span class="p">{</span>
-    <span class="kr">return</span><span class="p">(</span>row.has.na<span class="p">)</span>
-    <span class="kr">return</span><span class="p">(</span>r<span class="p">)</span>
-  <span class="p">}</span>
-  <span class="kr">else</span> <span class="p">{</span>
-    <span class="kr">return</span><span class="p">(</span>r<span class="p">)</span>
-  <span class="p">}</span>
-<span class="p">}</span>
 
 <span class="c1"># function to partially separate and clean into a data.frame a debate from the presidency project</span>
 MakeDebateDF<span class="o">&lt;-</span><span class="kr">function</span><span class="p">(</span>df<span class="p">){</span>
@@ -123,18 +93,22 @@ MakeDebateDF<span class="o">&lt;-</span><span class="kr">function</span><span cl
                    MARGIN <span class="o">=</span> <span class="m">1</span><span class="p">,</span> 
                    <span class="kr">function</span><span class="p">(</span>x<span class="p">){</span>
                      stri_extract_first_regex<span class="p">(</span>x<span class="p">,</span> 
-                                              <span class="s">&quot;[A-Z ]+(?=(:\\s))&quot;</span><span class="p">)</span>
+                                              <span class="s">&quot;[A-Z&#39;-]+(?=(:\\s))&quot;</span><span class="p">)</span>
                    <span class="p">}),</span>
     message <span class="o">=</span> <span class="kp">apply</span><span class="p">(</span>df<span class="p">,</span> 
                     MARGIN <span class="o">=</span> <span class="m">1</span><span class="p">,</span> 
                     <span class="kr">function</span><span class="p">(</span>x<span class="p">){</span>
                       stri_replace_first_regex<span class="p">(</span>x<span class="p">,</span>
-                                               <span class="s">&quot;[A-Z ]+:\\s+&quot;</span><span class="p">,</span> 
+                                               <span class="s">&quot;[A-Z&#39;-]+:\\s+&quot;</span><span class="p">,</span> 
                                                <span class="s">&quot;&quot;</span><span class="p">)</span>
                     <span class="p">}),</span>
     stringsAsFactors<span class="o">=</span><span class="kc">FALSE</span>
   <span class="p">)</span>
-  
+  <span class="kr">for</span> <span class="p">(</span>j <span class="kr">in</span> <span class="m">2</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>newdf<span class="p">))</span> <span class="p">{</span> 
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newdf<span class="p">[</span>j<span class="p">,</span><span class="s">&#39;person&#39;</span><span class="p">]))</span> 
+		<span class="p">{</span>newdf<span class="p">[</span>j<span class="p">,</span><span class="s">&#39;person&#39;</span><span class="p">]</span> <span class="o">&lt;-</span>  newdf<span class="p">[(</span>j<span class="m">-1</span><span class="p">),</span><span class="s">&#39;person&#39;</span><span class="p">]</span> <span class="p">}</span>
+	<span class="p">}</span>
+
   <span class="kr">return</span><span class="p">(</span>newdf<span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 
