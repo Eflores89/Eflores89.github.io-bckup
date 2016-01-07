@@ -351,7 +351,7 @@ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot
 
 &lt;p&gt;&lt;img src=&quot;/images/posts/wordsxunique_2.png&quot; alt=&quot;words per unique word&quot; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;speed-of-intervention&quot;&gt;Speed of Intervention&lt;/h1&gt;
+&lt;h2 id=&quot;speed-of-intervention&quot;&gt;Speed of Intervention&lt;/h2&gt;
 
 &lt;p&gt;This last debate also had the effect of spreading the gap between Trump and his opponents in terms of speed in interventions. Every time he talks, he always says less words, but this was even more apparent in Las Vegas…&lt;/p&gt;
 
@@ -377,7 +377,7 @@ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot
 
 &lt;p&gt;This can also be an indication of how popular he is or how much “hits” he’s taking. When you need to counter an argument, sometimes only a few words is enough. If you do this constantly more than the others, the average is bound to go down.&lt;/p&gt;
 
-&lt;h1 id=&quot;the-data&quot;&gt;The Data&lt;/h1&gt;
+&lt;h2 id=&quot;the-data&quot;&gt;The Data&lt;/h2&gt;
 
 &lt;p&gt;As Alan Jordan suggested, i’ve left this data openly available via github, so anyone can play around with it and find a few more insights. &lt;a href=&quot;https://github.com/Eflores89/proyectos/tree/master/data/us_debates&quot;&gt;Here&lt;/a&gt; is the link.&lt;/p&gt;
 
