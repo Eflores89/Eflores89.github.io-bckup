@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>What the candidates say, analyzing republican debates using R | En El Margen</title>
+  <title>More debate analysis with R | En El Margen</title>
   <meta name="viewport" content="width=device-width">
 
 
@@ -31,7 +31,7 @@
     <div class="inner-container">
       <ul class="meta">
         <li>
-        <p style="color:white">Publicado: 26 Nov 2015</p>
+        <p style="color:white">Publicado: 06 Jan 2016</p>
         </li>
         <li>
             <p style="color:white">Archivado en: r-english, datascience</p>
@@ -41,17 +41,11 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/negocios/sobrevivir-b-players">
+          <a href="/economia/Conocer-Mexico">
             Previous
           </a>
         </li>
       
-      
-      <li class="next">
-        <a href="/economia/Zonas-Econ-Urgentes">
-          Next
-        </a>
-      </li>
       
     </ul>
   </div>
@@ -59,25 +53,15 @@
 
 <article>
   <div class="container">
-          <h1>What the candidates say, analyzing republican debates using R</h1>
+          <h1>More debate analysis with R</h1>
           <br></br>
-    <p>As most people realize, this is probably one of the most data-rich primary campaigns in history, with hundreds of professional pollsters poring over every data-point trying to understand voter’s intention.</p>
+    <p>A few weeks late, here is a follow-up analysis using <em>R</em>, of the transcript of the latest Republican primary debate held at Las Vegas, Nevada.</p>
 
-<p>So here is another data-rich post to that end.</p>
-
-<p>I was glad to discover the University of California at Santa Barbara’s <a href="http://www.presidency.ucsb.edu/">webpage</a> with tons of high-quality data related to the elections.</p>
-
-<p>Amongst these are the transcripts of presidential debates going back to 1960, which I will pore over a bit further.</p>
-
-<p>Because the Republican race is arguably more fun to watch, i’ll be concentrating on these debates.</p>
+<p>Like the previous post, it should be interesting to see some word-clouds and some trends from the front-runners (and <em>of course</em>, Donald Trump).</p>
 
 <h2 id="getting-and-cleaning-the-data">Getting and cleaning the data</h2>
 
-<p>A few things to set-up before downloading the data:</p>
-
-<blockquote>
-  <p>Update (1/4/2015) - Thanks to Alan Jordan who nicely corrected my regex with a more robust version and a more sucinct function for cleaning the data below..</p>
-</blockquote>
+<p>As in the last post, we’re going to import the data and clean with a function that was <a href="http://enelmargen.org/datascience/republican-debates/index.html">nicely improved by Alan Jordan</a>:</p>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># some packages for scraping and cleaning the data</span>
 <span class="kn">library</span><span class="p">(</span>rvest<span class="p">)</span>
@@ -112,97 +96,43 @@ MakeDebateDF<span class="o">&lt;-</span><span class="kr">function</span><span cl
   <span class="kr">return</span><span class="p">(</span>newdf<span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 
-<p>Now, to download the last 4 debates (i’m only going to analyze the “big-boy” debates between top contenders and omit New Hampshire because it is not in the database). I’ll use the main webpage for the presidency project:</p>
+<p>This time i’m only downloading one debate, and joining with the last four I had parsed…</p>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Importing debates --- </span>
 <span class="c1"># url for all debates</span>
-url <span class="o">&lt;-</span> <span class="s">&quot;http://www.presidency.ucsb.edu/ws/index.php?pid=&quot;</span></code></pre></div>
+url <span class="o">&lt;-</span> <span class="s">&quot;http://www.presidency.ucsb.edu/ws/index.php?pid=&quot;</span>
 
-<p>And download and fix each debate:</p>
+<span class="c1">### -------- debate in Las Vegas, Nevada (fifth debate)</span>
+lasvegas <span class="o">&lt;-</span> <span class="s">&quot;111177&quot;</span>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">### -------- debate in Wisconsin (fourth debate)</span>
-wisconsin <span class="o">&lt;-</span> <span class="s">&quot;110908&quot;</span>
-
-debate_w <span class="o">&lt;-</span> read_html<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="kp">url</span><span class="p">,</span> wisconsin<span class="p">))</span> <span class="o">%&gt;%</span> 
+debate_v <span class="o">&lt;-</span> read_html<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="kp">url</span><span class="p">,</span> lasvegas<span class="p">))</span> <span class="o">%&gt;%</span> 
   html_nodes<span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
   html_text<span class="p">()</span>
 
-debate_w <span class="o">&lt;-</span> ldply<span class="p">(</span>debate_w<span class="p">,</span> <span class="kp">rbind</span><span class="p">)</span>
-debate_w <span class="o">&lt;-</span> MakeDebateDF<span class="p">(</span>debate_w<span class="p">)</span>
-
-<span class="c1">### -------- debate in Boulder, Col. (third debate)</span>
-boulder <span class="o">&lt;-</span> <span class="s">&quot;110906&quot;</span>
-
-debate_b <span class="o">&lt;-</span> read_html<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="kp">url</span><span class="p">,</span> boulder<span class="p">))</span> <span class="o">%&gt;%</span> 
-  html_nodes<span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  html_text<span class="p">()</span>
-
-debate_b <span class="o">&lt;-</span> ldply<span class="p">(</span>debate_b<span class="p">,</span> <span class="kp">rbind</span><span class="p">)</span>
-debate_b <span class="o">&lt;-</span> MakeDebateDF<span class="p">(</span>debate_b<span class="p">)</span>
-
-<span class="c1">### -------- debate in Simi Valley, California (second debate)</span>
-california <span class="o">&lt;-</span> <span class="s">&quot;110756&quot;</span>
-
-debate_c <span class="o">&lt;-</span> read_html<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="kp">url</span><span class="p">,</span> california<span class="p">))</span> <span class="o">%&gt;%</span> 
-  html_nodes<span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  html_text<span class="p">()</span>
-
-debate_c <span class="o">&lt;-</span> ldply<span class="p">(</span>debate_c<span class="p">,</span> <span class="kp">rbind</span><span class="p">)</span>
-debate_c <span class="o">&lt;-</span> MakeDebateDF<span class="p">(</span>debate_c<span class="p">)</span>
-
-<span class="c1">### -------- debate in Cleveland, Ohio (first debate)</span>
-ohio <span class="o">&lt;-</span> <span class="s">&quot;110489&quot;</span>
-
-debate_h <span class="o">&lt;-</span> read_html<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="kp">url</span><span class="p">,</span> ohio<span class="p">))</span> <span class="o">%&gt;%</span> 
-  html_nodes<span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  html_text<span class="p">()</span>
-
-debate_h <span class="o">&lt;-</span> ldply<span class="p">(</span>debate_h<span class="p">,</span> <span class="kp">rbind</span><span class="p">)</span>
-debate_h <span class="o">&lt;-</span> MakeDebateDF<span class="p">(</span>debate_h<span class="p">)</span></code></pre></div>
-
-<p>The way the webpage is structured means that there are paragraph breaks even if it’s the same candidate speaking. Using one of the previous functions, i’ll fix this:</p>
-
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># loop until clean is finished... </span>
-  <span class="c1"># wisconsin</span>
-<span class="kr">while</span><span class="p">(</span>CheckDF<span class="p">(</span>debate_w<span class="p">[</span><span class="m">2</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>debate_w<span class="p">[,</span><span class="m">1</span><span class="p">]),])){</span>
-  debate_w <span class="o">&lt;-</span> FillEmptyDF<span class="p">(</span>debate_w<span class="p">,</span> <span class="m">1</span><span class="p">)</span>
-<span class="p">}</span>
-  <span class="c1"># boulder</span>
-<span class="kr">while</span><span class="p">(</span>CheckDF<span class="p">(</span>debate_b<span class="p">[</span><span class="m">2</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>debate_b<span class="p">[,</span><span class="m">1</span><span class="p">]),])){</span>
-  debate_b <span class="o">&lt;-</span> FillEmptyDF<span class="p">(</span>debate_b<span class="p">,</span> <span class="m">1</span><span class="p">)</span>
-<span class="p">}</span>
-  <span class="c1"># california</span>
-<span class="kr">while</span><span class="p">(</span>CheckDF<span class="p">(</span>debate_c<span class="p">[</span><span class="m">2</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>debate_c<span class="p">[,</span><span class="m">1</span><span class="p">]),])){</span>
-  debate_c <span class="o">&lt;-</span> FillEmptyDF<span class="p">(</span>debate_c<span class="p">,</span> <span class="m">1</span><span class="p">)</span>
-<span class="p">}</span>
-  <span class="c1"># ohio</span>
-<span class="kr">while</span><span class="p">(</span>CheckDF<span class="p">(</span>debate_h<span class="p">[</span><span class="m">2</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>debate_h<span class="p">[,</span><span class="m">1</span><span class="p">]),])){</span>
-  debate_h <span class="o">&lt;-</span> FillEmptyDF<span class="p">(</span>debate_h<span class="p">,</span> <span class="m">1</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+debate_v <span class="o">&lt;-</span> ldply<span class="p">(</span>debate_v<span class="p">,</span> <span class="kp">rbind</span><span class="p">)</span>
+debate_v <span class="o">&lt;-</span> MakeDebateDF<span class="p">(</span>debate_v<span class="p">)</span></code></pre></div>
 
 <h2 id="analyzing">Analyzing</h2>
+<p>Let’s join this data with the previous debates and see some stats and wordclouds…</p>
 
-<p>Now, for the fun part. First, let’s start with some simply word-clouds (using <a href="http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need">this excellent example</a> as a starting point)</p>
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># the last 4 debates were stored in &quot;all_debates&quot; object...</span>
+all_debates <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>all_debates<span class="p">,</span> 
+                     debate_v<span class="p">)</span></code></pre></div>
 
-<p>I’m going to use the <code>rquery.wordcloud</code> the function, taken shamelessly from sthda.com in the previous link to see what contenders like to talk about the most…</p>
+<p>Because he’s the most interesting to watch, let’s see what Trump says overall and in this debate…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Join into large d.f.</span>
-all_debates <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>debate_w<span class="p">,</span> 
-                     debate_b<span class="p">,</span>
-                     debate_c<span class="p">,</span>
-                     debate_h<span class="p">)</span>
-
-<span class="c1"># these are necesary for plots </span>
-<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
 <span class="c1"># this is for order_axis and theme_eem</span>
 <span class="c1"># it can be downloaded using </span>
-<span class="c1"># devtools::install_github(&quot;eflores/eem&quot;)</span>
+<span class="c1"># devtools::install_github(&quot;eflores89/eem&quot;)</span>
 <span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
-
+<span class="c1"># all debates</span>
 trump_words <span class="o">&lt;-</span> <span class="kp">apply</span><span class="p">(</span><span class="kp">subset</span><span class="p">(</span>all_debates<span class="p">,</span> person <span class="o">==</span> <span class="s">&quot;TRUMP&quot;</span><span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
                     <span class="m">1</span><span class="p">,</span>
                     <span class="kp">paste</span><span class="p">)</span>
 <span class="c1"># cloud</span>
+<span class="c1"># function taken from: </span>
+<span class="c1"># http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need</span>
 trump_cloud <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>trump_words<span class="p">,</span> 
     <span class="s">&quot;text&quot;</span><span class="p">,</span> 
     max.words <span class="o">=</span> <span class="m">300</span><span class="p">,</span>
@@ -212,48 +142,86 @@ trump_cloud <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span
 
 trump_freq <span class="o">&lt;-</span> trump_cloud<span class="o">$</span>freqTable
 
-<span class="c1"># top 10</span>
-trump_top <span class="o">&lt;-</span> ggplot<span class="p">(</span>order_axis<span class="p">(</span>
-      trump_freq<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">10</span><span class="p">,],</span>
-        word<span class="p">,</span> freq<span class="p">),</span> 
-      aes<span class="p">(</span>x <span class="o">=</span> word_o<span class="p">,</span> 
-          y <span class="o">=</span> freq<span class="p">))</span><span class="o">+</span>
-    geom_bar<span class="p">(</span>stat<span class="o">=</span><span class="s">&quot;identity&quot;</span><span class="p">,</span>
-              fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-    theme_eem<span class="p">()</span> <span class="o">+</span> 
-    labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Top 10 words in Debates \n Donald Trump&quot;</span><span class="p">,</span> 
-          x <span class="o">=</span> <span class="s">&quot;Word&quot;</span><span class="p">,</span>
-          y <span class="o">=</span> <span class="s">&quot;Frequency&quot;</span><span class="p">)</span></code></pre></div>
+<span class="c1"># debate in Las Vegas</span>
+trump_words_l <span class="o">&lt;-</span> <span class="kp">apply</span><span class="p">(</span><span class="kp">subset</span><span class="p">(</span>debate_v<span class="p">,</span> person <span class="o">==</span> <span class="s">&quot;TRUMP&quot;</span><span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
+                    <span class="m">1</span><span class="p">,</span>
+                    <span class="kp">paste</span><span class="p">)</span>
+trump_cloud_l <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>trump_words_l<span class="p">,</span> 
+    <span class="s">&quot;text&quot;</span><span class="p">,</span> 
+    max.words <span class="o">=</span> <span class="m">300</span><span class="p">,</span>
+    excludeWords <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;going&quot;</span><span class="p">,</span><span class="s">&quot;and&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;applause&quot;</span><span class="p">,</span><span class="s">&quot;get&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;got&quot;</span><span class="p">,</span><span class="s">&quot;let&quot;</span><span class="p">))</span>
 
-<p>Donald really likes “great” more than the other candidates…</p>
+trump_freq_l <span class="o">&lt;-</span> trump_cloud_l<span class="o">$</span>freqTable</code></pre></div>
 
-<p><img src="/images/posts/trump_wordcloud.png" alt="trump_wordcloud" /></p>
+<h2 id="overall-word-cloud">Overall word-cloud</h2>
 
-<p><img src="/images/posts/trump_top10.png" alt="trump_top10" /></p>
+<p><img src="/images/posts/trump_cloud2.png" alt="Donald Trump all debates wordcloud" /></p>
 
-<p>Using the same process… What about Jeb Bush? He prefers to mention Hillary…</p>
+<h2 id="las-vegas">Las Vegas</h2>
 
-<p><img src="/images/posts/bush_wordcloud.png" alt="bush_wordcloud" /></p>
+<p><img src="/images/posts/trump_cloud_lv.png" alt="Donald Trump las vegas debate word cloud" /></p>
 
-<p><img src="/images/posts/bush_top10.png" alt="bush_top10" /></p>
+<h2 id="shifts-in-speech">Shifts in speech</h2>
 
-<p>Marco Rubio likes to present his tax plan…</p>
+<p>Of course, over the same five debates, topics have shifted tremendously both among the contenders and Trump.</p>
 
-<p><img src="/images/posts/rubio_wordcloud.png" alt="rubio_wordcloud" /></p>
+<p>For example, let’s see what the most spoken words were by debate…</p>
 
-<p><img src="/images/posts/rubio_top10.png" alt="rubio_top10" /></p>
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># using previous data for each debate....</span>
+debate_words_h <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>x <span class="o">=</span> debate_h<span class="o">$</span><span class="kp">message</span><span class="p">)</span> <span class="c1">#ohio, 1st</span>
+  <span class="c1"># just the frequency table...</span>
+  <span class="c1"># a bit lazy to do myself!</span>
+  debate_words_h <span class="o">&lt;-</span> debate_words_h<span class="o">$</span>freq <span class="o">%&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;Debate&quot;</span> <span class="o">=</span> <span class="s">&quot;Ohio&quot;</span><span class="p">)</span>
+debate_words_c <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>x <span class="o">=</span> debate_c<span class="o">$</span><span class="kp">message</span><span class="p">)</span> <span class="c1">#cali, 2nd</span>
+  debate_words_c <span class="o">&lt;-</span> debate_words_c<span class="o">$</span>freq <span class="o">%&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;Debate&quot;</span> <span class="o">=</span> <span class="s">&quot;California&quot;</span><span class="p">)</span>
+debate_words_b <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>x <span class="o">=</span> debate_b<span class="o">$</span><span class="kp">message</span><span class="p">)</span> <span class="c1">#boulder, 3rd</span>
+  debate_words_b <span class="o">&lt;-</span> debate_words_b<span class="o">$</span>freq <span class="o">%&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;Debate&quot;</span> <span class="o">=</span> <span class="s">&quot;Boulder&quot;</span><span class="p">)</span>
+debate_words_w <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>x <span class="o">=</span> debate_w<span class="o">$</span><span class="kp">message</span><span class="p">)</span> <span class="c1">#wisc, 4th</span>
+  debate_words_w <span class="o">&lt;-</span> debate_words_w<span class="o">$</span>freq <span class="o">%&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;Debate&quot;</span> <span class="o">=</span> <span class="s">&quot;Wisconsin&quot;</span><span class="p">)</span>
+debate_words_v <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>x <span class="o">=</span> debate_v<span class="o">$</span><span class="kp">message</span><span class="p">)</span> <span class="c1">#vegas, 5th</span>
+  debate_words_v <span class="o">&lt;-</span> debate_words_v<span class="o">$</span>freq <span class="o">%&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;Debate&quot;</span> <span class="o">=</span> <span class="s">&quot;LasVegas&quot;</span><span class="p">)</span>
 
-<p>And the notoriously outspoken Cruz omits “people”, talks tax and prefers to confront “washington” more than his colleagues:</p>
+<span class="c1"># join all</span>
+all_debate_words <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>debate_words_h<span class="p">,</span> debate_words_c<span class="p">)</span> 
+all_debate_words <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>all_debate_words<span class="p">,</span> debate_words_b<span class="p">)</span> 
+all_debate_words <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>all_debate_words<span class="p">,</span> debate_words_w<span class="p">)</span> 
+all_debate_words <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>all_debate_words<span class="p">,</span> debate_words_v<span class="p">)</span> 
 
-<p><img src="/images/posts/cruz_wordcloud.png" alt="cruz_wordcloud" /></p>
+<span class="c1"># graph with some interesting words...</span>
+interesting_words <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>all_debate_words<span class="p">,</span> word <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;government&quot;</span><span class="p">,</span>
+                                              <span class="s">&quot;isis&quot;</span><span class="p">,</span><span class="s">&quot;president&quot;</span><span class="p">,</span><span class="s">&quot;senator&quot;</span><span class="p">,</span>
+                                              <span class="s">&quot;money&quot;</span><span class="p">,</span> <span class="s">&quot;jobs&quot;</span><span class="p">,</span> <span class="s">&quot;tax&quot;</span><span class="p">,</span> <span class="s">&quot;obama&quot;</span><span class="p">,</span>
+                                              <span class="s">&quot;clinton&quot;</span><span class="p">,</span> <span class="s">&quot;america&quot;</span><span class="p">))</span>
 
-<p><img src="/images/posts/cruz_top10.png" alt="cruz_top10" /></p>
+interesting_words<span class="o">$</span>Debate <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>interesting_words<span class="o">$</span>Debate<span class="p">,</span> 
+                          levels <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span><span class="s">&quot;California&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;Boulder&quot;</span><span class="p">,</span><span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;LasVegas&quot;</span><span class="p">))</span>
 
-<h2 id="more-stats">More stats!</h2>
+ggplot<span class="p">(</span>data <span class="o">=</span> interesting_words<span class="p">,</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> Debate<span class="p">,</span> 
+            y <span class="o">=</span> freq<span class="p">,</span> 
+            group <span class="o">=</span> word<span class="p">))</span> <span class="o">+</span> 
+        geom_line<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> word<span class="p">))</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> 
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Debate&quot;</span><span class="p">,</span> 
+             y <span class="o">=</span> <span class="s">&quot;Frequency&quot;</span><span class="p">,</span> 
+             title <span class="o">=</span> <span class="s">&quot;Shifts in speech&quot;</span><span class="p">)</span></code></pre></div>
 
-<p>The former stats are all about the total participation in debates, but more interesting is probably the way these candidates have (if they have), shifted views over the course of these debates.</p>
+<p>Apparently, “tax” is out: it wasn’t even mentioned this past debate, in contrast with the increasingly present “isis”. “Clinton” and “obama” are a constant:</p>
 
-<p>It would be interesting to do some simple arithmetic on the corpus of words…</p>
+<p><img src="/images/posts/shifts_p2.png" alt="shifts in speech republican debates" /></p>
+
+<h2 id="aggregate-stats">Aggregate stats</h2>
+
+<p>Now lets see some aggregate stats by contender.</p>
+
+<blockquote>
+  <p>This function is a bit confusing and/or unnecesary, I’ll probably find a better way to do this in the future…</p>
+</blockquote>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r">UnlistAndExtractInfo <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>candidate<span class="p">){</span>
 <span class="c1"># this function is not general - it only applies to these particular debates...</span>
@@ -284,8 +252,14 @@ allwords_4 <span class="o">&lt;-</span> <span class="kp">tolower</span><span cla
               <span class="kp">subset</span><span class="p">(</span>debate_w<span class="p">,</span> person <span class="o">==</span> candidate<span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
                     <span class="m">1</span><span class="p">,</span>
                     <span class="kp">paste</span><span class="p">))))</span>
+allwords_5 <span class="o">&lt;-</span> <span class="kp">tolower</span><span class="p">(</span><span class="kp">unlist</span><span class="p">(</span>
+              stri_extract_all_words<span class="p">(</span>
+              <span class="kp">apply</span><span class="p">(</span>
+              <span class="kp">subset</span><span class="p">(</span>debate_v<span class="p">,</span> person <span class="o">==</span> candidate<span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
+                    <span class="m">1</span><span class="p">,</span>
+                    <span class="kp">paste</span><span class="p">))))</span>
 df_insights <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>
-debate <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span> <span class="s">&quot;California&quot;</span><span class="p">,</span> <span class="s">&quot;Colorado&quot;</span><span class="p">,</span> <span class="s">&quot;Wisconsin&quot;</span><span class="p">),</span>
+debate <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span> <span class="s">&quot;California&quot;</span><span class="p">,</span> <span class="s">&quot;Colorado&quot;</span><span class="p">,</span> <span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span><span class="s">&quot;Vegas&quot;</span><span class="p">),</span>
 average_intervention <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="kp">mean</span><span class="p">(</span>stri_count_words<span class="p">(</span>
                         <span class="kp">apply</span><span class="p">(</span>
                           <span class="kp">subset</span><span class="p">(</span>debate_h<span class="p">,</span> person <span class="o">==</span> candidate<span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
@@ -305,33 +279,50 @@ average_intervention <span class="o">=</span> <span class="kt">c</span><span cla
                         <span class="kp">apply</span><span class="p">(</span>
                           <span class="kp">subset</span><span class="p">(</span>debate_w<span class="p">,</span> person <span class="o">==</span> candidate<span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
                                   <span class="m">1</span><span class="p">,</span>
+                        <span class="kp">paste</span><span class="p">))),</span>
+                        <span class="kp">mean</span><span class="p">(</span>stri_count_words<span class="p">(</span>
+                        <span class="kp">apply</span><span class="p">(</span>
+                          <span class="kp">subset</span><span class="p">(</span>debate_c<span class="p">,</span> person <span class="o">==</span> candidate<span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
+                                  <span class="m">1</span><span class="p">,</span>
                         <span class="kp">paste</span><span class="p">)))</span>
                         <span class="p">),</span>
-words_total <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>allwords_1<span class="p">),</span><span class="kp">length</span><span class="p">(</span>allwords_2<span class="p">),</span><span class="kp">length</span><span class="p">(</span>allwords_3<span class="p">),</span><span class="kp">length</span><span class="p">(</span>allwords_4<span class="p">)),</span>
+words_total <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>allwords_1<span class="p">),</span>
+                <span class="kp">length</span><span class="p">(</span>allwords_2<span class="p">),</span>
+                <span class="kp">length</span><span class="p">(</span>allwords_3<span class="p">),</span>
+                <span class="kp">length</span><span class="p">(</span>allwords_4<span class="p">),</span>
+                <span class="kp">length</span><span class="p">(</span>allwords_5<span class="p">)),</span>
 words_unique <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_1<span class="p">)),</span>
                  <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_2<span class="p">)),</span>
                  <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_3<span class="p">)),</span>
-                 <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">))),</span>
+                 <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">)),</span>
+                 <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_5<span class="p">))</span>
+                 <span class="p">),</span>
 words_repeated_fromfirst <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="kp">sum</span><span class="p">(</span>allwords_2 <span class="o">%in%</span> allwords_1<span class="p">),</span> 
                             <span class="kp">sum</span><span class="p">(</span>allwords_3 <span class="o">%in%</span> allwords_1<span class="p">),</span>
-                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_1<span class="p">)),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_1<span class="p">),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_5 <span class="o">%in%</span> allwords_1<span class="p">)),</span>
 unique_words_repeated_fromfirst <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span>
                             <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_2<span class="p">[</span>allwords_2 <span class="o">%in%</span> allwords_1<span class="p">])),</span>
                             <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_3<span class="p">[</span>allwords_3 <span class="o">%in%</span> allwords_1<span class="p">])),</span>
-                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_1<span class="p">]))</span>
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_1<span class="p">])),</span>
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_5<span class="p">[</span>allwords_5 <span class="o">%in%</span> allwords_1<span class="p">]))</span>
                             <span class="p">),</span>
 words_repeated_fromsecond <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> 
                             <span class="kp">sum</span><span class="p">(</span>allwords_3 <span class="o">%in%</span> allwords_2<span class="p">),</span>
-                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_2<span class="p">)),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_2<span class="p">),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_5 <span class="o">%in%</span> allwords_2<span class="p">)),</span>
 unique_words_repeated_fromsecond <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span>
                             <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_3<span class="p">[</span>allwords_3 <span class="o">%in%</span> allwords_2<span class="p">])),</span>
-                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_2<span class="p">]))</span>
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_2<span class="p">])),</span>
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_5<span class="p">[</span>allwords_5 <span class="o">%in%</span> allwords_2<span class="p">]))</span>
                             <span class="p">),</span>
 words_repeated_fromthird <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span>
-                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_3<span class="p">)),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_4 <span class="o">%in%</span> allwords_3<span class="p">),</span>
+                            <span class="kp">sum</span><span class="p">(</span>allwords_5 <span class="o">%in%</span> allwords_3<span class="p">)),</span>
 unique_words_repeated_fromthird <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span>
-                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_3<span class="p">]))</span>
-                            <span class="p">)</span>   
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_4<span class="p">[</span>allwords_4 <span class="o">%in%</span> allwords_3<span class="p">])),</span>
+                            <span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>allwords_5<span class="p">[</span>allwords_5 <span class="o">%in%</span> allwords_3<span class="p">]))</span>
+                            <span class="p">)</span>
 <span class="p">,</span> stringsAsFactors <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
 <span class="kr">return</span><span class="p">(</span>df_insights<span class="p">)</span>
 <span class="p">}</span>
@@ -352,7 +343,7 @@ info_all <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="
 info_all <span class="o">%&lt;&gt;%</span> mutate<span class="p">(</span>carry_over_p1 <span class="o">=</span> unique_words_repeated_fromfirst<span class="o">/</span>words_unique<span class="p">,</span>
                      word_repeat <span class="o">=</span> words_total<span class="o">/</span>words_unique<span class="p">)</span></code></pre></div>
 
-<p>Let’s make some nice graphs with this information…</p>
+<p>Using this information to graph…</p>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># graph of most words spoken by debate</span>
 ggplot<span class="p">(</span>order_axis<span class="p">(</span>
@@ -369,41 +360,30 @@ ggplot<span class="p">(</span>order_axis<span class="p">(</span>
        x <span class="o">=</span> <span class="s">&quot;Candidate&quot;</span><span class="p">,</span> 
        y <span class="o">=</span> <span class="s">&quot;% of unique words repeated from first debate&quot;</span><span class="p">)</span></code></pre></div>
 
-<p>If we take the full amount of unique words from the first debate, it’s clear the candidates haven’t been saying very different things. For example in California (the second debate), 41% of the words Trump said were the same he said in Ohio. The Donald is arguably the most repetitive, increasing this to 49% and 48% in Colorado and Wisconsin.</p>
+<p>As the graph shows, Trump continues to lead in repetitiveness. In the latest debate, the Donald repeated 44.8% of the words he said during the first debate, followed by 38% from Kasich and 36% from Bush.</p>
 
-<p>On the other hand, Fiorina always seems to have a surprise for viewers…</p>
+<p>This is a key metric Trump has been consistently winning…</p>
 
-<p><img src="/images/posts/repetitions.png" alt="repetitions" /></p>
+<p><img src="/images/posts/reps_part2.png" alt="repetitions_trump" /></p>
 
-<p>Although this could simply be due to the fact that she got very few words in the first debate (the outlier at the bottom is Fiorina) …</p>
+<p>Again, if we plot total words versus unique words, to find the repetition of each individual word, we find Mr. Trump consistently below the trend: he says each word much more than the average candidate.</p>
+
+<p>On the other hand, Carson and Fiorina tend to have a larger vocabulary of words.</p>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r">ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</span>info_all<span class="p">,</span>CANDIDATE <span class="o">!=</span> <span class="s">&quot;CHRISTIE&quot;</span><span class="p">),</span> 
        aes<span class="p">(</span>x <span class="o">=</span> words_total<span class="p">,</span> 
            y <span class="o">=</span> words_unique<span class="p">))</span> <span class="o">+</span> 
     geom_point<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">),</span> size <span class="o">=</span> <span class="m">3</span><span class="p">,</span> shape <span class="o">=</span> <span class="m">2</span><span class="p">)</span> <span class="o">+</span>
+    stat_smooth<span class="p">()</span><span class="o">+</span>
     theme_eem<span class="p">()</span><span class="o">+</span> <span class="c1"># uses &quot;eflores/eem&quot;</span>
     scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># uses &quot;eflores/eem&quot;</span>
     labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Words per Debate&quot;</span><span class="p">,</span>
          x <span class="o">=</span> <span class="s">&quot;Total Words&quot;</span><span class="p">,</span> 
          y <span class="o">=</span> <span class="s">&quot;Unique Words&quot;</span><span class="p">)</span></code></pre></div>
 
-<p><img src="/images/posts/words_v_unique.png" alt="repetitions" /></p>
+<p><img src="/images/posts/words_debate_2.png" alt="unique words vs words by debate" /></p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># average length of interventions</span>
-
-ggplot<span class="p">(</span>info_all<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">factor</span><span class="p">(</span>CANDIDATE<span class="p">),</span> 
-           y <span class="o">=</span> average_intervention<span class="p">,</span> 
-                fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">]))</span> <span class="o">+</span> <span class="c1"># the eem colors are from &quot;eflores/eem&quot;</span>
-  geom_boxplot<span class="p">()</span> <span class="o">+</span>
-  theme_eem<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Average words per intervention&quot;</span><span class="p">,</span>
-       x <span class="o">=</span> <span class="s">&quot;Candidate&quot;</span><span class="p">,</span> 
-       y <span class="o">=</span> <span class="s">&quot;Words&quot;</span><span class="p">)</span> <span class="o">+</span> theme<span class="p">(</span>legend.position <span class="o">=</span> <span class="s">&quot;none&quot;</span><span class="p">)</span></code></pre></div>
-
-<p>When it comes to the average length of “interventions” (I define one as the slot a candidate is speaking in without being interrupted), Fiorina and Trump like to keep it short and simple while Rubio takes his time…</p>
-
-<p><img src="/images/posts/candidate_words.png" alt="words_int" /></p>
+<p>Aggregating over the whole gives us a sense of this difference much more clearly:</p>
 
 <div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># average times unique word is repeated...</span>
 
@@ -416,12 +396,47 @@ ggplot<span class="p">(</span>info_all<span class="p">,</span>
        x <span class="o">=</span> <span class="s">&quot;Candidate&quot;</span><span class="p">,</span> 
        y <span class="o">=</span> <span class="s">&quot;Repetitions&quot;</span><span class="p">)</span> <span class="o">+</span> theme<span class="p">(</span>legend.position <span class="o">=</span> <span class="s">&quot;none&quot;</span><span class="p">)</span></code></pre></div>
 
-<p>Another interesting tid-bit is the average repetitions of words. Again, Trump seems like an outlier, he repeated an average of 5 times every unique word in the California debate and has been repetitive since then.</p>
+<p><img src="/images/posts/wordsxunique_2.png" alt="words per unique word" /></p>
 
-<p><img src="/images/posts/words_repeat.png" alt="repetition_avg" /></p>
+<h1 id="speed-of-intervention">Speed of Intervention</h1>
 
-<p>A trend seems to be emerging: Trump repeats the same thing every debate. But there should be much more proof after a few more debates…</p>
+<p>This last debate also had the effect of spreading the gap between Trump and his opponents in terms of speed in interventions. Every time he talks, he always says less words, but this was even more apparent in Las Vegas…</p>
 
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># order the debates...</span>
+info_all<span class="o">$</span>debate <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>info_all<span class="o">$</span>debate<span class="p">,</span> 
+                          levels <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span><span class="s">&quot;California&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;Colorado&quot;</span><span class="p">,</span><span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;Vegas&quot;</span><span class="p">))</span>
+
+<span class="c1"># average length of interventions</span>
+ggplot<span class="p">(</span>info_all<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> debate<span class="p">,</span> 
+           y <span class="o">=</span> average_intervention<span class="p">,</span> 
+           group <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
+  geom_path<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
+  theme_eem<span class="p">()</span> <span class="o">+</span> 
+  scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> 
+  labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Debate&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Words&quot;</span><span class="p">,</span> 
+       title <span class="o">=</span> <span class="s">&quot;Average words per intervention&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/intervention_debs.png" alt="words by intervention" /></p>
+
+<p>This can also be an indication of how popular he is or how much “hits” he’s taking. When you need to counter an argument, sometimes only a few words is enough. If you do this constantly more than the others, the average is bound to go down.</p>
+
+<h1 id="the-data">The Data</h1>
+
+<p>As Alan Jordan suggested, i’ve left this data openly available via github, so anyone can play around with it and find a few more insights. <a href="https://github.com/Eflores89/proyectos/tree/master/data/us_debates">Here</a> is the link.</p>
+
+<ul>
+  <li>The <code>all_debates</code> data.frame contains two columns: candidate and message. This is all of the debates.</li>
+  <li><code>debate_h</code> is the Ohio debate.</li>
+  <li><code>debate_c</code> is the California debate.</li>
+  <li><code>debate_b</code> is the Boulder debate.</li>
+  <li><code>debate_w</code> is the Wisconsin debate.</li>
+  <li><code>debate_v</code> is the Las Vegas debate.</li>
+  <li>The <code>info_all</code> data.frame is the aggregate stats of contenders by debate. It contains word counts, unique word counts, etc.</li>
+</ul>
 
   </div>
 </article>
