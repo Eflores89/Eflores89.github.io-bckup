@@ -7,7 +7,7 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>More debate analysis with R</title>
+				<title>More republican debate analysis with R</title>
 					<description>&lt;p&gt;A few weeks late, here is a follow-up analysis using &lt;em&gt;R&lt;/em&gt;, of the transcript of the latest Republican primary debate held at Las Vegas, Nevada.&lt;/p&gt;
 
 &lt;p&gt;Like the previous post, it should be interesting to see some word-clouds and some trends from the front-runners (and &lt;em&gt;of course&lt;/em&gt;, Donald Trump).&lt;/p&gt;
@@ -392,8 +392,8 @@ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot
 &lt;/ul&gt;
 </description>
 				<pubDate>Wed, 06 Jan 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/r-debates-part-ii</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debates-part-ii</guid>
+				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</guid>
 			</item>
 		
 			<item>
