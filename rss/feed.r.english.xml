@@ -391,7 +391,7 @@ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot
   &lt;li&gt;The &lt;code&gt;info_all&lt;/code&gt; data.frame is the aggregate stats of contenders by debate. It contains word counts, unique word counts, etc.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-				<pubDate>Wed, 06 Jan 2016 00:00:00 -0600</pubDate>
+				<pubDate>Thu, 07 Jan 2016 00:00:00 -0600</pubDate>
 				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</link>
 				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</guid>
 			</item>
