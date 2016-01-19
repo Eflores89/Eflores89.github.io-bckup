@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>South Carolina Republican Debate with R | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 19 Jan 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/r-debate-analysis-part-ii">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>South Carolina Republican Debate with R</h1>
+          <br></br>
+    <p>Continuing with the series analyzing republican debates, the latest in South Carolina confirms a few of the trends i’ve been observing, mainly that:</p>
+
+<ul>
+  <li>Trump likes to repeat himself (maybe he likes to stick with what has worked so far?).</li>
+  <li>Trump also likes to keep it short: everyone else says more things for longer at a time.</li>
+  <li>The most relevant person in republican debates is actually a democrat: Mr. Obama. Only “people” was mentioned more often in the South Carolina.</li>
+  <li>Cruz vs. Trump is happening.</li>
+</ul>
+
+<p>For those <a href="http://enelmargen.org/datascience/r-debate-analysis-part-ii/">following along</a>, this is the new url ending:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">south_carolina <span class="o">&lt;-</span> <span class="s">&quot;111395&quot;</span></code></pre></div>
+
+<p>To save some precious real estate, i’ve done the work previously explained in the last posts, and built the data.frame with the debate. (You can see the <em>rough</em> scripts <a href="https://github.com/Eflores89/proyectos/tree/master/scripts">here</a>)</p>
+
+<h2 id="some-word-clouds">Some word-clouds</h2>
+
+<p>I’ll start with the usual word-clouds. In this case, it’s actually interesting to see how the “war” between Cruz and Trump has been playing out.</p>
+
+<p>First we see an overall word-cloud (all the debates) for Mr. Cruz:
+<img src="/images/posts/cruz_wc_total.png" alt="Ted Cruz all debates wordcloud" /></p>
+
+<p>But this last debate, the Donald made it to Ted’s most frequent words:
+<img src="/images/posts/cruz_wc_scarolina.png" alt="Ted Cruz all debates wordcloud" /></p>
+
+<p>Trump, on the other hand, barely flinched. China was on his top agenda:</p>
+
+<p><img src="/images/posts/trump_sc_wc.png" alt="Donald Trump south carolina debate word cloud" /></p>
+
+<h2 id="debate-cloud">Debate-cloud</h2>
+
+<p>As for the entire debate, the most frequent words were “people” (intuitively makes sense) and “president”.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># all debates</span>
+scarolina <span class="o">&lt;-</span> <span class="kp">apply</span><span class="p">(</span><span class="kp">subset</span><span class="p">(</span>all_debates<span class="p">,</span> debate <span class="o">==</span> <span class="s">&quot;SouthCarolina&quot;</span><span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
+                    <span class="m">1</span><span class="p">,</span>
+                    <span class="kp">paste</span><span class="p">)</span>
+debate_cloud <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>scarolina<span class="p">,</span> 
+    <span class="s">&quot;text&quot;</span><span class="p">,</span> 
+    max.words <span class="o">=</span> <span class="m">300</span><span class="p">,</span>
+    excludeWords <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;going&quot;</span><span class="p">,</span><span class="s">&quot;and&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;applause&quot;</span><span class="p">,</span><span class="s">&quot;get&quot;</span><span class="p">,</span>
+                    <span class="s">&quot;got&quot;</span><span class="p">,</span><span class="s">&quot;let&quot;</span><span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/all_scarolina_wc.png" alt="Republican debate in South Carolina word cloud" /></p>
+
+<h2 id="individual-obsessions">Individual obsessions</h2>
+
+<p>It’s also pretty clear from a few minutes of watching the debate, that candidates have their own quirky obsessions and mostly resort to talking about them as much as they can.</p>
+
+<p>First, a small function to give me the counts of words…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">TopMentions <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">){</span>
+df <span class="o">&lt;-</span> all_debates
+  counts <span class="o">&lt;-</span> stri_count_regex<span class="p">(</span>df<span class="o">$</span><span class="kp">message</span><span class="p">,</span> 
+                            pattern <span class="o">=</span> x<span class="p">,</span>
+                            case_insensitive <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  df<span class="o">$</span>counts <span class="o">&lt;-</span> counts
+  df <span class="o">&lt;-</span> df <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>person<span class="p">)</span> <span class="o">%&gt;%</span>
+                 dplyr<span class="o">::</span>summarise<span class="p">(</span><span class="s">&quot;mentions&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>counts<span class="p">))</span>
+  df <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>df<span class="p">)</span>
+  df <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>df<span class="p">,</span> mentions<span class="o">&gt;</span><span class="m">0</span><span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Let’s see who likes to talk the most about guns…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># guns </span>
+w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;gun&quot;</span><span class="p">,</span><span class="s">&quot;guns&quot;</span><span class="p">)</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmention_guns.png" alt="Top contenders mentioning guns" /></p>
+
+<p>I think we know who is gonna win here…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># mexico</span>
+w <span class="o">&lt;-</span> <span class="s">&quot;mexico&quot;</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmention_mexico.png" alt="Top contenders mentioning mexico" /></p>
+
+<p>Republicans are also characteristically strong on military-speak, so let’s see who likes this subject the most…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># isis, military</span>
+w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;isis&quot;</span><span class="p">,</span><span class="s">&quot;military&quot;</span><span class="p">)</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmention_isis.png" alt="Top contenders mentioning isis" /></p>
+
+<p>On the economic front, a natural contender pops up…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># taxes</span>
+w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;taxes&quot;</span><span class="p">)</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmention_taxes.png" alt="Top contenders mentioning taxes" /></p>
+
+<p>And finally… this a surprise!</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># muslim</span>
+w <span class="o">&lt;-</span> <span class="s">&quot;muslim&quot;</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmention_muslim.png" alt="Top contenders mentioning muslim" /></p>
+
+<p>I guess it’s worth mentioning a caveat here: this has nothing to do with sentiment, Mr. Bush is arguably much nicer in tone that Trump…</p>
+
+<p>Also, some candidates prefer another term…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">w <span class="o">&lt;-</span> <span class="s">&quot;islamic&quot;</span>
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
+                  axis <span class="o">=</span> person<span class="p">,</span> 
+                  column <span class="o">=</span> mentions<span class="p">),</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
+            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
+        theme_eem<span class="p">()</span> <span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
+        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/topmentions_islamic.png" alt="Top contenders mentioning islamic" /></p>
+
+<h2 id="aggregate-stats">Aggregate stats</h2>
+
+<p>Let’s see what the aggregate stats have to say about this new debate…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">candidates <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;TRUMP&quot;</span><span class="p">,</span><span class="s">&quot;CARSON&quot;</span><span class="p">,</span><span class="s">&quot;RUBIO&quot;</span><span class="p">,</span>
+                <span class="s">&quot;KASICH&quot;</span><span class="p">,</span><span class="s">&quot;CRUZ&quot;</span><span class="p">,</span><span class="s">&quot;BUSH&quot;</span><span class="p">,</span>
+                <span class="s">&quot;FIORINA&quot;</span><span class="p">,</span><span class="s">&quot;PAUL&quot;</span><span class="p">,</span><span class="s">&quot;CHRISTIE&quot;</span><span class="p">)</span>
+info <span class="o">&lt;-</span> <span class="kc">NULL</span>
+info_all <span class="o">&lt;-</span> <span class="kc">NULL</span>
+<span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">9</span><span class="p">){</span>
+info <span class="o">&lt;-</span> UnlistAndExtractInfo<span class="p">(</span>candidates<span class="p">[</span>i<span class="p">])</span>
+info<span class="o">$</span>CANDIDATE <span class="o">&lt;-</span> candidates<span class="p">[</span>i<span class="p">]</span>
+info_all <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>info_all<span class="p">,</span> info<span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># i&#39;m going to add a few more columns...</span>
+info_all <span class="o">%&lt;&gt;%</span> mutate<span class="p">(</span>carry_over_p1 <span class="o">=</span> unique_words_repeated_fromfirst<span class="o">/</span>words_unique<span class="p">,</span>
+                     word_repeat <span class="o">=</span> words_total<span class="o">/</span>words_unique<span class="p">)</span></code></pre></div>
+
+<p>Using this information to graph…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</span>info_all<span class="p">,</span> CANDIDATE <span class="o">!=</span> <span class="s">&quot;CHRISTIE&quot;</span> <span class="o">&amp;</span> words_unique<span class="o">&gt;</span><span class="m">90</span><span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> words_total<span class="p">,</span> 
+           y <span class="o">=</span> words_unique<span class="p">))</span> <span class="o">+</span> 
+    geom_point<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">),</span> size <span class="o">=</span> <span class="m">3</span><span class="p">,</span> shape <span class="o">=</span> <span class="m">2</span><span class="p">)</span> <span class="o">+</span>
+    stat_smooth<span class="p">()</span><span class="o">+</span>
+    theme_eem<span class="p">()</span><span class="o">+</span> <span class="c1"># uses &quot;eflores89/eem&quot;</span>
+    scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># uses &quot;eflores89/eem&quot;</span>
+    labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Words per Debate&quot;</span><span class="p">,</span>
+         x <span class="o">=</span> <span class="s">&quot;Total Words&quot;</span><span class="p">,</span> 
+         y <span class="o">=</span> <span class="s">&quot;Unique Words&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/debate6_words.png" alt="unique words vs words by debate" /></p>
+
+<p>I’m not an expert, but I would argue that the longer the debate format, the worst off Trump will likely do. Why?</p>
+
+<p>There seems to be a declining curve once about 3,000 words are spoken. Whereas Ted Cruz can fluently speak about more things (he says more unique words), Trump seems to be struggling to find new words.</p>
+
+<p>Of course, I’m assuming saying the same thing over and over again is bad for your campaign. Perhaps the formula is the other way around.</p>
+
+<p>But again, let’s see this trend more clearly with another graph…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># average times unique word is repeated...</span>
+ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</span>info_all<span class="p">,</span> CANDIDATE <span class="o">!=</span> <span class="s">&quot;CHRISTIE&quot;</span> <span class="o">&amp;</span> words_unique<span class="o">&gt;</span><span class="m">90</span><span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">factor</span><span class="p">(</span>CANDIDATE<span class="p">),</span> 
+           y <span class="o">=</span> word_repeat<span class="p">,</span> 
+           fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">]))</span> <span class="o">+</span>
+  geom_boxplot<span class="p">()</span> <span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Average repetition of unique words&quot;</span><span class="p">,</span>
+       x <span class="o">=</span> <span class="s">&quot;Candidate&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Repetitions&quot;</span><span class="p">)</span> <span class="o">+</span> theme<span class="p">(</span>legend.position <span class="o">=</span> <span class="s">&quot;none&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_reps6.png" alt="words per unique word" /></p>
+
+<p>The trend continues. Trump says considerably more times each unique word than the other candidates.</p>
+
+<h2 id="speed-of-intervention">Speed of Intervention</h2>
+
+<p>Like the debate in Las Vegas, South Carolina was similar for Trump in terms of words spoken in each “intervention” (time he was continually speaking). As I said earlier, this can simply be due to the fact that he has to constantly play defense…</p>
+
+<p>Kasich, on the other hand, delivers his remarks and follows the rules: he does not speak when not spoken to (which is most of the debate).</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># order the debates...</span>
+info_all<span class="o">$</span>debate <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>info_all<span class="o">$</span>debate<span class="p">,</span> 
+                          levels <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span><span class="s">&quot;California&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;Colorado&quot;</span><span class="p">,</span><span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span>
+                                     <span class="s">&quot;Vegas&quot;</span><span class="p">,</span> <span class="s">&quot;SCarolina&quot;</span><span class="p">))</span>
+
+<span class="c1"># average length of interventions</span>
+ggplot<span class="p">(</span>info_all<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> debate<span class="p">,</span> 
+           y <span class="o">=</span> average_intervention<span class="p">,</span> 
+           group <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
+  geom_path<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
+  theme_eem<span class="p">()</span> <span class="o">+</span> 
+  scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> 
+  labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Debate&quot;</span><span class="p">,</span> 
+       y <span class="o">=</span> <span class="s">&quot;Words&quot;</span><span class="p">,</span> 
+       title <span class="o">=</span> <span class="s">&quot;Average words per intervention&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/words_trend6.png" alt="words by intervention" /></p>
+
+<h2 id="the-data">The Data</h2>
+<p>As usual, I’ve left this data openly available via github, so anyone can play around with it and find a few more insights. <a href="https://github.com/Eflores89/proyectos/tree/master/data/us_debates">Here</a> is the link.</p>
+
+<p>You can also contact me via twitter for any questions: @eflores89 or via an issue in github.</p>
+
+  </div>
+</article>
+
+</body>
+</html>
