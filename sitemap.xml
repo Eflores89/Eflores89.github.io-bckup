@@ -2,7 +2,7 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://www.enelmargen.org/r-english/datascience/2016/02/21/inegiR_v12.html</loc>
+    <loc>http://www.enelmargen.org/datascience/inegir-v1-2</loc>
     
     <lastmod>2016-02-21T00:00:00-06:00</lastmod>
     
@@ -455,6 +455,15 @@
     <loc>http://www.enelmargen.org/economia/macroeconomistas-optimismo</loc>
     
     <lastmod>2011-11-01T20:32:53Z</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.enelmargen.org/politica/mundo-violent</loc>
+    
+    <lastmod>2011-06-14T00:00:00-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
