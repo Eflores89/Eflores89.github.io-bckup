@@ -7,6 +7,274 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>inegiR version 1.2</title>
+					<description>&lt;p&gt;Version 1.2 of &lt;em&gt;inegiR&lt;/em&gt; is now on &lt;a href=&quot;https://cran.r-project.org/web/packages/inegiR/index.html&quot;&gt;CRAN&lt;/a&gt; so I thought I’d write a few words/vignette about what’s new or different, if at all. By the way, i’m writing in english because more people seem to read &lt;a href=&quot;http://www.r-bloggers.com&quot;&gt;r-bloggers&lt;/a&gt; than my blog (no surprise there), however the pdf manual and &lt;a href=&quot;http://enelmargen.org/inegiR/&quot;&gt;most documentation&lt;/a&gt; is still in spanish.&lt;/p&gt;
+
+&lt;h1 id=&quot;bug-fixes&quot;&gt;Bug fixes&lt;/h1&gt;
+
+&lt;p&gt;Thanks to Diego Valle who reported a &lt;a href=&quot;https://github.com/Eflores89/inegiR/issues/10&quot;&gt;slight bug&lt;/a&gt;, the more random dates (“bienal” and “decenal”) were not being parsed correctly.&lt;/p&gt;
+
+&lt;p&gt;Also added warnings and error handling when the data doesn’t exist for municipalities (issue is &lt;a href=&quot;https://github.com/Eflores89/inegiR/issues/11&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
+
+&lt;h1 id=&quot;new-functions&quot;&gt;New functions&lt;/h1&gt;
+
+&lt;h2 id=&quot;grids&quot;&gt;Grids&lt;/h2&gt;
+
+&lt;p&gt;Thanks to Arturo Cardenas who unwittingly built a new function for the DENUE part of the package that’s incorporated in this version.&lt;/p&gt;
+
+&lt;p&gt;As he &lt;a href=&quot;http://arturocm.github.io/blog/r/leaflet/inegir/rtodolist/a-mexican-standoff&quot;&gt;wrote&lt;/a&gt; in his blog, the denue API only allows us to download businesses in a radious of a maximum of 5 kilometers. However, we can get around this limitation by asking the API a series of coordinates that we know overlap each other to create a square of a larger size. This is a picture, taken from that post, detailing what I mean:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/inegiR/imgs/grid_example.png&quot; alt=&quot;example of a grid&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Each circle is, of course 5 kms in radius and so the API would give us everything inside.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;hacer_grid()&lt;/code&gt; function helps us in the process by creating a data.frame with a series of coordinates that create a grid like the one in the image if we supply it 2 corners in latitud and longitud.&lt;/p&gt;
+
+&lt;p&gt;But the more powerful &lt;code&gt;denue_grid()&lt;/code&gt; does the interesting part. Using the former function, it also downloads the denue data and returns a unique business data.frame in that grid (if you want duplicates as well, you can eliminate the unique part by setting the &lt;code&gt;unicos = FALSE&lt;/code&gt; parameter)&lt;/p&gt;
+
+&lt;h2 id=&quot;example-with-grids&quot;&gt;Example with Grids&lt;/h2&gt;
+
+&lt;p&gt;Here is an example with the city of Monterrey, let’s say I want all the businesses in San Pedro (a municipality that is part of the metropolitan area).&lt;/p&gt;
+
+&lt;p&gt;The total area is roughly about 45 kms, &lt;em&gt;give or take&lt;/em&gt; (I know this is not geographically accurate):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/inegiR/imgs/spgg_grid.png&quot; alt=&quot;rough estimate of san pedro&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I feed the upper right hand and lower left hand coordinates to the function, and voila:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;inegiR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+upper_lat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;25.686917&lt;/span&gt;
+upper_long &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;-100.429398&lt;/span&gt;
+lower_lat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;25.612030&lt;/span&gt;
+lower_long &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;-100.333032&lt;/span&gt;
+token_denue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;mytoken&amp;quot;&lt;/span&gt;
+
+sanpedro &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; denue_grid&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;upper_lat&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; lower_lat&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                       upper_long&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; lower_long&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                       token &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; token_denue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Simple as that!&lt;/p&gt;
+
+&lt;h2 id=&quot;factor-productivity&quot;&gt;Factor productivity&lt;/h2&gt;
+
+&lt;p&gt;By using two fairly consistent surveys that INEGI makes on a monthly bases, I added two functions to calculate productivity, by state in two important industries.&lt;/p&gt;
+
+&lt;p&gt;For both cases, productivity is defined as total value produced in state divided by number of total occupied people in the industry in the state. Bear in mind that value produced is in thousands of pesos, so 100 would be equal to 100 thousand pesos &lt;em&gt;“produced”&lt;/em&gt; by each person.&lt;/p&gt;
+
+&lt;p&gt;We can simply get a time series by the doing the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;eem&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ggplot2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# ts for Manufacturing in state of Nuevo León:&lt;/span&gt;
+token &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;mytoken&amp;quot;&lt;/span&gt;
+pm &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; series_productividad_man&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;token&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+nl &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Productivity&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; pm&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;NL&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Date&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pm&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Fechas&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;nl&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; Date&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; Productivity&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Productivity in Manufacturing \n State of Nuevo León&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Thousands of pesos x person&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/inegiR/imgs/manprod_nl.png&quot; alt=&quot;productividad manufacturera en nuevo león&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# ts for Construction in state of Nuevo León:&lt;/span&gt;
+pc &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; series_productividad_const&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;token&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+nl &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Productivity&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; pc&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;NL&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Date&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pc&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Fechas&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;nl&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; Date&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; Productivity&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Productivity in Construction \n State of Nuevo León&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Thousands of pesos x person&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/inegiR/imgs/prodcons_nl.png&quot; alt=&quot;productividad construcción en nuevo león&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;new-geography&quot;&gt;New geography&lt;/h1&gt;
+
+&lt;p&gt;These last two examples lead me to another point: the names in the functions with states have changed. In the first version, Nuevo León state was “NuevoLeon”, it has been changed to “NL”. This is more conscise, easier to read and consistent with the new constitutional name change for Mexico City (it is now “CDMX”, as opposed to “DF”).&lt;/p&gt;
+
+&lt;p&gt;The other advantage is that these names will be consistent with Diego Valle’s &lt;code&gt;mxmaps&lt;/code&gt; package to easily make chroloplethr maps (it’s available &lt;a href=&quot;https://github.com/diegovalle/mxmaps&quot;&gt;here&lt;/a&gt;). There is a nifty function to make these included in the package using &lt;em&gt;inegiR&lt;/em&gt;, but now you can do this both ways!&lt;/p&gt;
+
+&lt;p&gt;To switch between “old names” and the new ones, i’ve left the following catalog &lt;a href=&quot;https://github.com/Eflores89/proyectos/blob/master/data/inegiR_geo/df_oldnames.csv&quot;&gt;here&lt;/a&gt;:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;Name of State&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;Previous Name&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;New Name&lt;/strong&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Aguascalientes&lt;/td&gt;
+      &lt;td&gt;Aguascalientes&lt;/td&gt;
+      &lt;td&gt;AGS&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Baja California&lt;/td&gt;
+      &lt;td&gt;BajaCalifornia&lt;/td&gt;
+      &lt;td&gt;BC&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Baja California Sur&lt;/td&gt;
+      &lt;td&gt;BajaCaliforniaSur&lt;/td&gt;
+      &lt;td&gt;BCS&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Campeche&lt;/td&gt;
+      &lt;td&gt;Campeche&lt;/td&gt;
+      &lt;td&gt;CAMP&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Coahuila&lt;/td&gt;
+      &lt;td&gt;Coahuila&lt;/td&gt;
+      &lt;td&gt;COAH&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Colima&lt;/td&gt;
+      &lt;td&gt;Colima&lt;/td&gt;
+      &lt;td&gt;COL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Chiapas&lt;/td&gt;
+      &lt;td&gt;Chiapas&lt;/td&gt;
+      &lt;td&gt;CHPS&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Chihuahua&lt;/td&gt;
+      &lt;td&gt;Chihuahua&lt;/td&gt;
+      &lt;td&gt;CHIH&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Distrito Federal&lt;/td&gt;
+      &lt;td&gt;DF&lt;/td&gt;
+      &lt;td&gt;CDMX&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Durango&lt;/td&gt;
+      &lt;td&gt;Durango&lt;/td&gt;
+      &lt;td&gt;DGO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Guanajuato&lt;/td&gt;
+      &lt;td&gt;Guanajuato&lt;/td&gt;
+      &lt;td&gt;GTO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Guerrero&lt;/td&gt;
+      &lt;td&gt;Guerrero&lt;/td&gt;
+      &lt;td&gt;GRO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Hidalgo&lt;/td&gt;
+      &lt;td&gt;Hidalgo&lt;/td&gt;
+      &lt;td&gt;HGO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Jalisco&lt;/td&gt;
+      &lt;td&gt;Jalisco&lt;/td&gt;
+      &lt;td&gt;JAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Estado de México&lt;/td&gt;
+      &lt;td&gt;EdoMexico&lt;/td&gt;
+      &lt;td&gt;MEX&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Michoacán&lt;/td&gt;
+      &lt;td&gt;Michoacan&lt;/td&gt;
+      &lt;td&gt;MICH&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Morelos&lt;/td&gt;
+      &lt;td&gt;Morelos&lt;/td&gt;
+      &lt;td&gt;MOR&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Nayarit&lt;/td&gt;
+      &lt;td&gt;Nayarit&lt;/td&gt;
+      &lt;td&gt;NAY&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Nuevo León&lt;/td&gt;
+      &lt;td&gt;NuevoLeon&lt;/td&gt;
+      &lt;td&gt;NL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Oaxaca&lt;/td&gt;
+      &lt;td&gt;Oaxaca&lt;/td&gt;
+      &lt;td&gt;OAX&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Puebla&lt;/td&gt;
+      &lt;td&gt;Puebla&lt;/td&gt;
+      &lt;td&gt;PUE&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Querétaro&lt;/td&gt;
+      &lt;td&gt;Queretaro&lt;/td&gt;
+      &lt;td&gt;QRO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Quintana Roo&lt;/td&gt;
+      &lt;td&gt;QuintanaRoo&lt;/td&gt;
+      &lt;td&gt;QROO&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;San Luís Potosí&lt;/td&gt;
+      &lt;td&gt;SanLuisPotosi&lt;/td&gt;
+      &lt;td&gt;SLP&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Sinaloa&lt;/td&gt;
+      &lt;td&gt;Sinaloa&lt;/td&gt;
+      &lt;td&gt;SIN&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Sonora&lt;/td&gt;
+      &lt;td&gt;Sonora&lt;/td&gt;
+      &lt;td&gt;SON&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Tabasco&lt;/td&gt;
+      &lt;td&gt;Tabasco&lt;/td&gt;
+      &lt;td&gt;TAB&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Tamaulipas&lt;/td&gt;
+      &lt;td&gt;Tamaulipas&lt;/td&gt;
+      &lt;td&gt;TAM&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Tlaxcala&lt;/td&gt;
+      &lt;td&gt;Tlaxcala&lt;/td&gt;
+      &lt;td&gt;TLAX&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Veracruz&lt;/td&gt;
+      &lt;td&gt;Veracruz&lt;/td&gt;
+      &lt;td&gt;VER&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Yucatán&lt;/td&gt;
+      &lt;td&gt;Yucatan&lt;/td&gt;
+      &lt;td&gt;YUC&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Zacatecas&lt;/td&gt;
+      &lt;td&gt;Zacatecas&lt;/td&gt;
+      &lt;td&gt;ZAC&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If there are any suggestions or bugs, you can find me at &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;twitter&lt;/a&gt; or &lt;a href=&quot;https://github.com/Eflores89&quot;&gt;github&lt;/a&gt;.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 21 Feb 2016 00:00:00 -0600</pubDate>
+				<link>http://www.enelmargen.org/r-english/datascience/2016/02/21/inegiR_v12.html</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/r-english/datascience/2016/02/21/inegiR_v12.html</guid>
+			</item>
+		
+			<item>
 				<title>South Carolina Republican Debate with R</title>
 					<description>&lt;p&gt;Continuing with the series analyzing republican debates, the latest in South Carolina confirms a few of the trends i’ve been observing, mainly that:&lt;/p&gt;
 
