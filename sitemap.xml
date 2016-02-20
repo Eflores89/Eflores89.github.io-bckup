@@ -29,6 +29,15 @@
   </url>
   
   <url>
+    <loc>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii</loc>
+    
+    <lastmod>2016-01-19T00:00:00-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
     <loc>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</loc>
     
     <lastmod>2016-01-07T00:00:00-06:00</lastmod>
@@ -441,8 +450,6 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  
   
   
   

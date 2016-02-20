@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>inegiR version 1.2 | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 20 Feb 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>inegiR version 1.2</h1>
+          <br></br>
+    <p>Version 1.2 of <em>inegiR</em> is now on <a href="https://cran.r-project.org/web/packages/inegiR/index.html">CRAN</a> so I thought I’d write a few words/vignette about what’s new or different, if at all. By the way, i’m writing in english because more people seem to read <a href="http://www.r-bloggers.com">r-bloggers</a> than my blog (no surprise there), however the pdf manual and <a href="http://enelmargen.org/inegiR/">most documentation</a> is still in spanish.</p>
+
+<h1 id="bug-fixes">Bug fixes</h1>
+
+<p>Thanks to Diego Valle who reported a <a href="https://github.com/Eflores89/inegiR/issues/10">slight bug</a>, the more random dates (“bienal” and “decenal”) were not being parsed correctly.</p>
+
+<p>Also added warnings and error handling when the data doesn’t exist for municipalities (issue is <a href="https://github.com/Eflores89/inegiR/issues/11">here</a>)</p>
+
+<h1 id="new-functions">New functions</h1>
+
+<h2 id="grids">Grids</h2>
+
+<p>Thanks to Arturo Cardenas who unwittingly built a new function for the DENUE part of the package that’s incorporated in this version.</p>
+
+<p>As he <a href="http://arturocm.github.io/blog/r/leaflet/inegir/rtodolist/a-mexican-standoff">wrote</a> in his blog, the denue API only allows us to download businesses in a radious of a maximum of 5 kilometers. However, we can get around this limitation by asking the API a series of coordinates that we know overlap each other to create a square of a larger size. This is a picture, taken from that post, detailing what I mean:</p>
+
+<p><img src="imgs/grid_example.png" alt="example of a grid" /></p>
+
+<p>Each circle is, of course 5 kms in radius and so the API would give us everything inside.</p>
+
+<p>The <code>hacer_grid()</code> function helps us in the process by creating a data.frame with a series of coordinates that create a grid like the one in the image if we supply it 2 corners in latitud and longitud.</p>
+
+<p>But the more powerful <code>denue_grid()</code> does the interesting part. Using the former function, it also downloads the denue data and returns a unique business data.frame in that grid (if you want duplicates as well, you can eliminate the unique part by setting the <code>unicos = FALSE</code> parameter)</p>
+
+<h2 id="example-with-grids">Example with Grids</h2>
+
+<p>Here is an example with the city of Monterrey, let’s say I want all the businesses in San Pedro (a municipality that is part of the metropolitan area).</p>
+
+<p>The total area is roughly about 45 kms, <em>give or take</em> (I know this is not geographically accurate):</p>
+
+<p><img src="imgs/spgg_grid.png" alt="rough estimate of san pedro" /></p>
+
+<p>I feed the upper right hand and lower left hand coordinates to the function, and voila:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span>
+
+upper_lat <span class="o">=</span> <span class="m">25.686917</span>
+upper_long <span class="o">=</span> <span class="m">-100.429398</span>
+lower_lat <span class="o">=</span> <span class="m">25.612030</span>
+lower_long <span class="o">=</span> <span class="m">-100.333032</span>
+token_denue <span class="o">&lt;-</span> <span class="s">&quot;mytoken&quot;</span>
+
+sanpedro <span class="o">&lt;-</span> denue_grid<span class="p">(</span>upper_lat<span class="p">,</span> lower_lat<span class="p">,</span> 
+                       upper_long<span class="p">,</span> lower_long<span class="p">,</span> 
+                       token <span class="o">=</span> token_denue<span class="p">)</span></code></pre></div>
+
+<p>Simple as that!</p>
+
+<h2 id="factor-productivity">Factor productivity</h2>
+
+<p>By using two fairly consistent surveys that INEGI makes on a monthly bases, I added two functions to calculate productivity, by state in two important industries.</p>
+
+<p>For both cases, productivity is defined as total value produced in state divided by number of total occupied people in the industry in the state. Bear in mind that value produced is in thousands of pesos, so 100 would be equal to 100 thousand pesos <em>“produced”</em> by each person.</p>
+
+<p>We can simply get a time series by the doing the following:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="c1"># ts for Manufacturing in state of Nuevo León:</span>
+token <span class="o">&lt;-</span> <span class="s">&quot;mytoken&quot;</span>
+pm <span class="o">&lt;-</span> series_productividad_man<span class="p">(</span>token<span class="p">)</span>
+nl <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Productivity&quot;</span> <span class="o">=</span> pm<span class="o">$</span>NL<span class="p">,</span> <span class="s">&quot;Date&quot;</span> <span class="o">=</span> <span class="kp">as.Date</span><span class="p">(</span>pm<span class="o">$</span>Fechas<span class="p">))</span>
+ggplot<span class="p">(</span>nl<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> Date<span class="p">,</span> y <span class="o">=</span> Productivity<span class="p">))</span><span class="o">+</span>
+  geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Productivity in Manufacturing \n State of Nuevo León&quot;</span><span class="p">,</span> 
+        y <span class="o">=</span> <span class="s">&quot;Thousands of pesos x person&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="imgs/manprod_nl.png" alt="productividad manufacturera en nuevo león" /></p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># ts for Construction in state of Nuevo León:</span>
+pc <span class="o">&lt;-</span> series_productividad_const<span class="p">(</span>token<span class="p">)</span>
+nl <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Productivity&quot;</span> <span class="o">=</span> pc<span class="o">$</span>NL<span class="p">,</span> <span class="s">&quot;Date&quot;</span> <span class="o">=</span> <span class="kp">as.Date</span><span class="p">(</span>pc<span class="o">$</span>Fechas<span class="p">))</span>
+ggplot<span class="p">(</span>nl<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> Date<span class="p">,</span> y <span class="o">=</span> Productivity<span class="p">))</span><span class="o">+</span>
+  geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Productivity in Construction \n State of Nuevo León&quot;</span><span class="p">,</span> 
+        y <span class="o">=</span> <span class="s">&quot;Thousands of pesos x person&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="imgs/prodcons_nl.png" alt="productividad construcción en nuevo león" /></p>
+
+<h1 id="new-geography">New geography</h1>
+
+<p>These last two examples lead me to another point: the names in the functions with states have changed. In the first version, Nuevo León state was “NuevoLeon”, it has been changed to “NL”. This is more conscise, easier to read and consistent with the new constitutional name change for Mexico City (it is now “CDMX”, as opposed to “DF”).</p>
+
+<p>The other advantage is that these names will be consistent with Diego Valle’s <code>mxmaps</code> package to easily make chroloplethr maps (it’s available <a href="https://github.com/diegovalle/mxmaps">here</a>). There is a nifty function to make these included in the package using <em>inegiR</em>, but now you can do this both ways!</p>
+
+<p>To switch between “old names” and the new ones, i’ve left the following catalog <a href="https://github.com/Eflores89/proyectos/blob/master/data/inegiR_geo/df_oldnames.csv">here</a>:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Name of State</strong></td>
+      <td><strong>Previous Name</strong></td>
+      <td><strong>New Name</strong></td>
+    </tr>
+    <tr>
+      <td>Aguascalientes</td>
+      <td>Aguascalientes</td>
+      <td>AGS</td>
+    </tr>
+    <tr>
+      <td>Baja California</td>
+      <td>BajaCalifornia</td>
+      <td>BC</td>
+    </tr>
+    <tr>
+      <td>Baja California Sur</td>
+      <td>BajaCaliforniaSur</td>
+      <td>BCS</td>
+    </tr>
+    <tr>
+      <td>Campeche</td>
+      <td>Campeche</td>
+      <td>CAMP</td>
+    </tr>
+    <tr>
+      <td>Coahuila</td>
+      <td>Coahuila</td>
+      <td>COAH</td>
+    </tr>
+    <tr>
+      <td>Colima</td>
+      <td>Colima</td>
+      <td>COL</td>
+    </tr>
+    <tr>
+      <td>Chiapas</td>
+      <td>Chiapas</td>
+      <td>CHPS</td>
+    </tr>
+    <tr>
+      <td>Chihuahua</td>
+      <td>Chihuahua</td>
+      <td>CHIH</td>
+    </tr>
+    <tr>
+      <td>Distrito Federal</td>
+      <td>DF</td>
+      <td>CDMX</td>
+    </tr>
+    <tr>
+      <td>Durango</td>
+      <td>Durango</td>
+      <td>DGO</td>
+    </tr>
+    <tr>
+      <td>Guanajuato</td>
+      <td>Guanajuato</td>
+      <td>GTO</td>
+    </tr>
+    <tr>
+      <td>Guerrero</td>
+      <td>Guerrero</td>
+      <td>GRO</td>
+    </tr>
+    <tr>
+      <td>Hidalgo</td>
+      <td>Hidalgo</td>
+      <td>HGO</td>
+    </tr>
+    <tr>
+      <td>Jalisco</td>
+      <td>Jalisco</td>
+      <td>JAL</td>
+    </tr>
+    <tr>
+      <td>Estado de México</td>
+      <td>EdoMexico</td>
+      <td>MEX</td>
+    </tr>
+    <tr>
+      <td>Michoacán</td>
+      <td>Michoacan</td>
+      <td>MICH</td>
+    </tr>
+    <tr>
+      <td>Morelos</td>
+      <td>Morelos</td>
+      <td>MOR</td>
+    </tr>
+    <tr>
+      <td>Nayarit</td>
+      <td>Nayarit</td>
+      <td>NAY</td>
+    </tr>
+    <tr>
+      <td>Nuevo León</td>
+      <td>NuevoLeon</td>
+      <td>NL</td>
+    </tr>
+    <tr>
+      <td>Oaxaca</td>
+      <td>Oaxaca</td>
+      <td>OAX</td>
+    </tr>
+    <tr>
+      <td>Puebla</td>
+      <td>Puebla</td>
+      <td>PUE</td>
+    </tr>
+    <tr>
+      <td>Querétaro</td>
+      <td>Queretaro</td>
+      <td>QRO</td>
+    </tr>
+    <tr>
+      <td>Quintana Roo</td>
+      <td>QuintanaRoo</td>
+      <td>QROO</td>
+    </tr>
+    <tr>
+      <td>San Luís Potosí</td>
+      <td>SanLuisPotosi</td>
+      <td>SLP</td>
+    </tr>
+    <tr>
+      <td>Sinaloa</td>
+      <td>Sinaloa</td>
+      <td>SIN</td>
+    </tr>
+    <tr>
+      <td>Sonora</td>
+      <td>Sonora</td>
+      <td>SON</td>
+    </tr>
+    <tr>
+      <td>Tabasco</td>
+      <td>Tabasco</td>
+      <td>TAB</td>
+    </tr>
+    <tr>
+      <td>Tamaulipas</td>
+      <td>Tamaulipas</td>
+      <td>TAM</td>
+    </tr>
+    <tr>
+      <td>Tlaxcala</td>
+      <td>Tlaxcala</td>
+      <td>TLAX</td>
+    </tr>
+    <tr>
+      <td>Veracruz</td>
+      <td>Veracruz</td>
+      <td>VER</td>
+    </tr>
+    <tr>
+      <td>Yucatán</td>
+      <td>Yucatan</td>
+      <td>YUC</td>
+    </tr>
+    <tr>
+      <td>Zacatecas</td>
+      <td>Zacatecas</td>
+      <td>ZAC</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>If there are any suggestions or bugs, you can find me at <a href="https://twitter.com/eflores89">twitter</a> or <a href="https://github.com/Eflores89">github</a>.</p>
+
+  </div>
+</article>
+
+</body>
+</html>
