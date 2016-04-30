@@ -7,6 +7,184 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>New nasadata R package</title>
+					<description>&lt;p&gt;This package intends to provide a hassle-free way to access some of NASA’s open-source API’s to build applications or models.&lt;/p&gt;
+
+&lt;p&gt;Because the documentation seems inconsistent and there are &lt;em&gt;tons&lt;/em&gt; of API’s, I have concentrated my efforts on three which I believe provide the best “bang for my money”.&lt;/p&gt;
+
+&lt;p&gt;The source package is built around these three API’s, but for the sake of clarity, i’ll group the first two into one example.&lt;/p&gt;
+
+&lt;h2 id=&quot;eonet-webservice&quot;&gt;EONET Webservice&lt;/h2&gt;
+
+&lt;p&gt;The Earth Observatory Natural Event Tracker is a Webservice that feeds curated natural “events” that are tracked by a few sources. It is somewhat unclear what exactly constitutes an “event”…&lt;/p&gt;
+
+&lt;p&gt;From the &lt;a href=&quot;http://eonet.sci.gsfc.nasa.gov/eonet-project&quot;&gt;official docs&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The curation of events is a big component of the EONET system and while the technical details are, to an extent, straight forward, the definition of what exactly constitutes an event is fluid and daring us to be constrained. What are the contextual parameters of an event? If one curator defines a specific wildfire in Idaho as a discrete event and another defines the summer wildfire season in the Pacific Northwest as a single event, what does that mean for the end user? If an end user can filter by source/curator does that provide them with ample context for the development of their application?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We are still thinking about these issues and how to best represent them within EONET and we encourage you to get in touch with us if you have ideas or suggestions or use cases that you have developed.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;However, at least this gives us an idea. An event is something like a storm, fire, drought, etc.&lt;/p&gt;
+
+&lt;p&gt;So, let’s imagine we want to see some action that occured a few days ago.&lt;/p&gt;
+
+&lt;p&gt;I’ll start with installing the package:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# install.packages(&amp;quot;devtools&amp;quot;)&lt;/span&gt;
+devtools&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;install_github&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Eflores89/nasadata&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;nasadata&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, what &lt;strong&gt;kind&lt;/strong&gt; of event do I want? We can query the webservice to find all of the available ones like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;categories &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; eonet_categories&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# there are a few columns, I&amp;#39;ll only show two...&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;categories&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;id&amp;quot;          &amp;quot;title&amp;quot;       &amp;quot;link&amp;quot;        &amp;quot;description&amp;quot; &amp;quot;layers&amp;quot; &lt;/span&gt;
+categories&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   id                title&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   6              Drought&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   7        Dust and Haze&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  16          Earthquakes&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   9               Floods&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  14           Landslides&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  19              Manmade&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  15     Sea and Lake Ice&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  10        Severe Storms&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  17                 Snow&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  18 Temperature Extremes&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  12            Volcanoes&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  13          Water Color&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  8            Wildfires&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Who is reporting these events is probably also important, so we can see this with a similar function:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;sources &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; eonet_sources&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# there are a few columns, I&amp;#39;ll only show two...&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;sources&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;id&amp;quot;     &amp;quot;title&amp;quot;  &amp;quot;source&amp;quot; &amp;quot;link&amp;quot; &lt;/span&gt;
+sources&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        id                                                 title&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    CALFIRE California Department of Forestry and Fire Protection&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#       CEMS               Copernicus Emergency Management Service&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         EO                                     Earth Observatory&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      GDACS         Global Disaster Alert and Coordination System&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      GLIDE                      GLobal IDEntifier Number (GLIDE)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    InciWeb                                               InciWeb&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        IDC    International Charter on Space and Major Disasters&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        MRR                                  LANCE Rapid Response&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  NASA_ESRS            NASA Earth Science and Remote Sensing Unit&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ReliefWeb                                             ReliefWeb&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  SIVolcano        Smithsonian Institute Global Volcanism Program&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#     UNISYS                                        Unisys Weather&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   USGS_CMT  USGS Emergency Operations Collection Management Tool&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#       HDDS                 USGS Hazards Data Distribution System&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now that we got this out of the way, let’s see if we can get an individual event. The &lt;code&gt;earth_event()&lt;/code&gt; function does this in an intuitive way. I’m going to bring only the latest event reported by InciWeb:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;an_event &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; earth_event&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;status &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;all&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                        sources &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;InciWeb&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                        category_id &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;all&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                        limit &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        LimitType &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;limit&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;an_event&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;list&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;an_event&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# &amp;quot;Events&amp;quot;     &amp;quot;Sources&amp;quot;    &amp;quot;Categories&amp;quot; &amp;quot;Geography&amp;quot;  &amp;quot;Meta&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The event is a list with a few objects parsed together:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Events:&lt;/strong&gt; Gives us an overview of each event(s) in a data.frame. This includes id, title, description, link.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Sources:&lt;/strong&gt; Tells us the sources by event id in a data.frame.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Categories:&lt;/strong&gt; Categories by event id (also in a data.frame).&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Geography:&lt;/strong&gt; Gives us the coordinates or polygon where the event took place. This can be a list with lists. For example, if there are several coordinates and times (if it is an event that was prolonged or moved, like a hurricane).&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Meta:&lt;/strong&gt; Some metadata related to the query, including the string used.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In this case, we have a fire in North Carolina…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;an_event&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Events&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;event_id
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;EONET_382&amp;quot;&lt;/span&gt;
+an_event&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Events&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;event_title
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;Silver Mine Fire, North Carolina&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# --- We can actually find it here:&lt;/span&gt;
+an_event&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Sources&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;source_url
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;http://inciweb.nwcg.gov/incident/4706/&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And this is where it happened…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;an_event&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Geography
+&lt;span class=&quot;c1&quot;&gt;#$EONET_382&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                  date  type         coordinates&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#1 2016-04-21T15:00:00Z Point -82.80806, 35.89028&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The coordinates are of course useful because we plot the events in our favorite &lt;strong&gt;R&lt;/strong&gt; package (leaflet or ggmap is really nice) or we can also use it to “feed” into the other API’s in the package. I’ll explain these next…&lt;/p&gt;
+
+&lt;h2 id=&quot;imagery-and-assets-apis&quot;&gt;Imagery and Assets API’s&lt;/h2&gt;
+
+&lt;p&gt;The Earth Imagery API (available &lt;a href=&quot;https://api.nasa.gov/api.html#earth&quot;&gt;here&lt;/a&gt;) let’s us access imagery that is being retrieved from Landsat 8 Satellites and stored in Google Earth Engine. From what I can see, the images are poor quality but the obvious point here is to merge them and detect large variations (for example, to track deforestation).&lt;/p&gt;
+
+&lt;p&gt;The Assets API is basically a helper for the Imagery API: it gives us dates of available coordinates, so that we can query the latter and retrieve the image.&lt;/p&gt;
+
+&lt;p&gt;Let’s see if we can see the “event” we recorded earlier…&lt;/p&gt;
+
+&lt;p&gt;First, I want to see if there is any images recorded in that time frame (the frecuency is roughly every 16 days).&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Caveat: This API requieres an active key. It’s free and you can get it at api.nasa.gov&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# coordinates of event&lt;/span&gt;
+coord_long &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;-82.80806&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+coord_lat &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;35.89028&lt;/span&gt;
+key &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;example1234key&amp;quot;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# images available&lt;/span&gt;
+images &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; earth_asset&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;key&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      lon &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; coord_long&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      lat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; coord_lat&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      start_date &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;2016-03-01&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      end_date &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;2016-04-30&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;images&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;date&amp;quot;        &amp;quot;id&amp;quot;          &amp;quot;type&amp;quot;        &amp;quot;coordinates&amp;quot;&lt;/span&gt;
+images&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;date&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 2016-03-01T16:05:40 &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [2] 2016-03-17T16:05:35&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [3] 2016-04-02T16:05:26 &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [4] 2016-04-18T16:05:20&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So, it seems we’re out of luck… The fire ocurred &lt;strong&gt;after&lt;/strong&gt; the last picture taken. Nonetheless, let’s see how we can download this last image…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;img &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; earth_image&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;key&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                  lon &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; coord_long&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                  lat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; coord_lat&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                  date &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;2016-04-18&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; plot &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;img&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;list&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;code&gt;img&lt;/code&gt; object is a list consisting of two objects:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;image_data&lt;/strong&gt;: Information about the image (date, url, cloud_score (if parameter is set to TRUE), id)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;image_png&lt;/strong&gt;: Matrix representation of the image (obtained via &lt;code&gt;png::readPNG&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If the parameter is set to TRUE, you also get a rasterImage, in this case, this one…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/nasadata/imgs/earthimage_nasadata.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This package is still in the early stages of development, and I plan on submitting to CRAN in a few weeks, so any suggestions/improvements are very welcome at my twitter: &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;@eflores89&lt;/a&gt; or via issues in the github package repo: &lt;a href=&quot;https://github.com/Eflores89/nasadata&quot;&gt;https://github.com/Eflores89/nasadata&lt;/a&gt;.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 01 May 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/nasadata/vignette_v0/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/nasadata/vignette_v0/</guid>
+			</item>
+		
+			<item>
 				<title>inegiR version 1.2</title>
 					<description>&lt;p&gt;Version 1.2 of &lt;em&gt;inegiR&lt;/em&gt; is now on &lt;a href=&quot;https://cran.r-project.org/web/packages/inegiR/index.html&quot;&gt;CRAN&lt;/a&gt; so I thought I’d write a few words/vignette about what’s new or different, if at all. By the way, i’m writing in english because more people seem to read &lt;a href=&quot;http://www.r-bloggers.com&quot;&gt;r-bloggers&lt;/a&gt; than my blog (no surprise there), however the pdf manual and &lt;a href=&quot;http://enelmargen.org/inegiR/&quot;&gt;most documentation&lt;/a&gt; is still in spanish.&lt;/p&gt;
 
@@ -531,19 +709,6 @@ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;info_all&lt;span class=&quot
 &lt;p&gt;As usual, I’ve left this data openly available via github, so anyone can play around with it and find a few more insights. &lt;a href=&quot;https://github.com/Eflores89/proyectos/tree/master/data/us_debates&quot;&gt;Here&lt;/a&gt; is the link.&lt;/p&gt;
 
 &lt;p&gt;You can also contact me via twitter for any questions: @eflores89 or via an issue in github.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 19 Jan 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-iii</guid>
-			</item>
-		
-			<item>
-				<title>MBA Rankings stability</title>
-					<description>&lt;p&gt;harvard is the most rank-stable mba. Now that we got that 
-out of the way, allow me to explain.&lt;/p&gt;
-
-&lt;p&gt;Even though rankings….
-money and scholarship depend on…&lt;/p&gt;
 </description>
 				<pubDate>Tue, 19 Jan 2016 00:00:00 -0600</pubDate>
 				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii</link>

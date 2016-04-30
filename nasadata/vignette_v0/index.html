@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>New nasadata R package | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/earth_background.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 01 May 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/negocios/CDO-Mexico">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>New nasadata R package</h1>
+          <br></br>
+    <p>This package intends to provide a hassle-free way to access some of NASA’s open-source API’s to build applications or models.</p>
+
+<p>Because the documentation seems inconsistent and there are <em>tons</em> of API’s, I have concentrated my efforts on three which I believe provide the best “bang for my money”.</p>
+
+<p>The source package is built around these three API’s, but for the sake of clarity, i’ll group the first two into one example.</p>
+
+<h2 id="eonet-webservice">EONET Webservice</h2>
+
+<p>The Earth Observatory Natural Event Tracker is a Webservice that feeds curated natural “events” that are tracked by a few sources. It is somewhat unclear what exactly constitutes an “event”…</p>
+
+<p>From the <a href="http://eonet.sci.gsfc.nasa.gov/eonet-project">official docs</a>:</p>
+
+<blockquote>
+  <p>The curation of events is a big component of the EONET system and while the technical details are, to an extent, straight forward, the definition of what exactly constitutes an event is fluid and daring us to be constrained. What are the contextual parameters of an event? If one curator defines a specific wildfire in Idaho as a discrete event and another defines the summer wildfire season in the Pacific Northwest as a single event, what does that mean for the end user? If an end user can filter by source/curator does that provide them with ample context for the development of their application?</p>
+</blockquote>
+
+<blockquote>
+  <p>We are still thinking about these issues and how to best represent them within EONET and we encourage you to get in touch with us if you have ideas or suggestions or use cases that you have developed.</p>
+</blockquote>
+
+<p>However, at least this gives us an idea. An event is something like a storm, fire, drought, etc.</p>
+
+<p>So, let’s imagine we want to see some action that occured a few days ago.</p>
+
+<p>I’ll start with installing the package:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># install.packages(&quot;devtools&quot;)</span>
+devtools<span class="o">::</span>install_github<span class="p">(</span><span class="s">&quot;Eflores89/nasadata&quot;</span><span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>nasadata<span class="p">)</span></code></pre></div>
+
+<p>Now, what <strong>kind</strong> of event do I want? We can query the webservice to find all of the available ones like this:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">categories <span class="o">&lt;-</span> eonet_categories<span class="p">()</span>
+  <span class="c1"># there are a few columns, I&#39;ll only show two...</span>
+<span class="kp">names</span><span class="p">(</span>categories<span class="p">)</span>
+<span class="c1"># [1] &quot;id&quot;          &quot;title&quot;       &quot;link&quot;        &quot;description&quot; &quot;layers&quot; </span>
+categories<span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
+<span class="c1">#   id                title</span>
+<span class="c1">#   6              Drought</span>
+<span class="c1">#   7        Dust and Haze</span>
+<span class="c1">#  16          Earthquakes</span>
+<span class="c1">#   9               Floods</span>
+<span class="c1">#  14           Landslides</span>
+<span class="c1">#  19              Manmade</span>
+<span class="c1">#  15     Sea and Lake Ice</span>
+<span class="c1">#  10        Severe Storms</span>
+<span class="c1">#  17                 Snow</span>
+<span class="c1">#  18 Temperature Extremes</span>
+<span class="c1">#  12            Volcanoes</span>
+<span class="c1">#  13          Water Color</span>
+<span class="c1">#  8            Wildfires</span></code></pre></div>
+
+<p>Who is reporting these events is probably also important, so we can see this with a similar function:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">sources <span class="o">&lt;-</span> eonet_sources<span class="p">()</span>
+  <span class="c1"># there are a few columns, I&#39;ll only show two...</span>
+<span class="kp">names</span><span class="p">(</span>sources<span class="p">)</span>
+<span class="c1"># [1] &quot;id&quot;     &quot;title&quot;  &quot;source&quot; &quot;link&quot; </span>
+sources<span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
+<span class="c1">#        id                                                 title</span>
+<span class="c1">#    CALFIRE California Department of Forestry and Fire Protection</span>
+<span class="c1">#       CEMS               Copernicus Emergency Management Service</span>
+<span class="c1">#         EO                                     Earth Observatory</span>
+<span class="c1">#      GDACS         Global Disaster Alert and Coordination System</span>
+<span class="c1">#      GLIDE                      GLobal IDEntifier Number (GLIDE)</span>
+<span class="c1">#    InciWeb                                               InciWeb</span>
+<span class="c1">#        IDC    International Charter on Space and Major Disasters</span>
+<span class="c1">#        MRR                                  LANCE Rapid Response</span>
+<span class="c1">#  NASA_ESRS            NASA Earth Science and Remote Sensing Unit</span>
+<span class="c1">#  ReliefWeb                                             ReliefWeb</span>
+<span class="c1">#  SIVolcano        Smithsonian Institute Global Volcanism Program</span>
+<span class="c1">#     UNISYS                                        Unisys Weather</span>
+<span class="c1">#   USGS_CMT  USGS Emergency Operations Collection Management Tool</span>
+<span class="c1">#       HDDS                 USGS Hazards Data Distribution System</span></code></pre></div>
+
+<p>Now that we got this out of the way, let’s see if we can get an individual event. The <code>earth_event()</code> function does this in an intuitive way. I’m going to bring only the latest event reported by InciWeb:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">an_event <span class="o">&lt;-</span> earth_event<span class="p">(</span>status <span class="o">=</span> <span class="s">&quot;all&quot;</span><span class="p">,</span> 
+                        sources <span class="o">=</span> <span class="s">&quot;InciWeb&quot;</span><span class="p">,</span> 
+                        category_id <span class="o">=</span> <span class="s">&quot;all&quot;</span><span class="p">,</span> 
+                        limit <span class="o">=</span> <span class="m">1</span><span class="p">,</span>
+                        LimitType <span class="o">=</span> <span class="s">&quot;limit&quot;</span><span class="p">)</span>
+<span class="kp">class</span><span class="p">(</span>an_event<span class="p">)</span>
+<span class="c1"># [1] &quot;list&quot;</span>
+<span class="kp">names</span><span class="p">(</span>an_event<span class="p">)</span>
+<span class="c1"># &quot;Events&quot;     &quot;Sources&quot;    &quot;Categories&quot; &quot;Geography&quot;  &quot;Meta&quot;</span></code></pre></div>
+
+<p>The event is a list with a few objects parsed together:</p>
+
+<ul>
+  <li><strong>Events:</strong> Gives us an overview of each event(s) in a data.frame. This includes id, title, description, link.</li>
+  <li><strong>Sources:</strong> Tells us the sources by event id in a data.frame.</li>
+  <li><strong>Categories:</strong> Categories by event id (also in a data.frame).</li>
+  <li><strong>Geography:</strong> Gives us the coordinates or polygon where the event took place. This can be a list with lists. For example, if there are several coordinates and times (if it is an event that was prolonged or moved, like a hurricane).</li>
+  <li><strong>Meta:</strong> Some metadata related to the query, including the string used.</li>
+</ul>
+
+<p>In this case, we have a fire in North Carolina…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">an_event<span class="o">$</span>Events<span class="o">$</span>event_id
+<span class="c1"># [1] &quot;EONET_382&quot;</span>
+an_event<span class="o">$</span>Events<span class="o">$</span>event_title
+<span class="c1"># [1] &quot;Silver Mine Fire, North Carolina&quot;</span>
+<span class="c1"># --- We can actually find it here:</span>
+an_event<span class="o">$</span>Sources<span class="o">$</span>source_url
+<span class="c1"># [1] &quot;http://inciweb.nwcg.gov/incident/4706/&quot;</span></code></pre></div>
+
+<p>And this is where it happened…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">an_event<span class="o">$</span>Geography
+<span class="c1">#$EONET_382</span>
+<span class="c1">#                  date  type         coordinates</span>
+<span class="c1">#1 2016-04-21T15:00:00Z Point -82.80806, 35.89028</span></code></pre></div>
+
+<p>The coordinates are of course useful because we plot the events in our favorite <strong>R</strong> package (leaflet or ggmap is really nice) or we can also use it to “feed” into the other API’s in the package. I’ll explain these next…</p>
+
+<h2 id="imagery-and-assets-apis">Imagery and Assets API’s</h2>
+
+<p>The Earth Imagery API (available <a href="https://api.nasa.gov/api.html#earth">here</a>) let’s us access imagery that is being retrieved from Landsat 8 Satellites and stored in Google Earth Engine. From what I can see, the images are poor quality but the obvious point here is to merge them and detect large variations (for example, to track deforestation).</p>
+
+<p>The Assets API is basically a helper for the Imagery API: it gives us dates of available coordinates, so that we can query the latter and retrieve the image.</p>
+
+<p>Let’s see if we can see the “event” we recorded earlier…</p>
+
+<p>First, I want to see if there is any images recorded in that time frame (the frecuency is roughly every 16 days).</p>
+
+<blockquote>
+  <p>Caveat: This API requieres an active key. It’s free and you can get it at api.nasa.gov</p>
+</blockquote>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># coordinates of event</span>
+coord_long <span class="o">&lt;-</span> <span class="p">(</span><span class="m">-82.80806</span><span class="p">)</span>
+coord_lat <span class="o">&lt;-</span> <span class="m">35.89028</span>
+key <span class="o">&lt;-</span> <span class="s">&quot;example1234key&quot;</span>
+
+<span class="c1"># images available</span>
+images <span class="o">&lt;-</span> earth_asset<span class="p">(</span>key<span class="p">,</span> 
+                      lon <span class="o">=</span> coord_long<span class="p">,</span> 
+                      lat <span class="o">=</span> coord_lat<span class="p">,</span> 
+                      start_date <span class="o">=</span> <span class="s">&quot;2016-03-01&quot;</span><span class="p">,</span> 
+                      end_date <span class="o">=</span> <span class="s">&quot;2016-04-30&quot;</span><span class="p">)</span>
+<span class="kp">names</span><span class="p">(</span>images<span class="p">)</span>
+<span class="c1"># [1] &quot;date&quot;        &quot;id&quot;          &quot;type&quot;        &quot;coordinates&quot;</span>
+images<span class="o">$</span><span class="kp">date</span>
+<span class="c1"># [1] 2016-03-01T16:05:40 </span>
+<span class="c1"># [2] 2016-03-17T16:05:35</span>
+<span class="c1"># [3] 2016-04-02T16:05:26 </span>
+<span class="c1"># [4] 2016-04-18T16:05:20</span></code></pre></div>
+
+<p>So, it seems we’re out of luck… The fire ocurred <strong>after</strong> the last picture taken. Nonetheless, let’s see how we can download this last image…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">img <span class="o">&lt;-</span> earth_image<span class="p">(</span>key<span class="p">,</span> 
+                  lon <span class="o">=</span> coord_long<span class="p">,</span> 
+                  lat <span class="o">=</span> coord_lat<span class="p">,</span> 
+                  date <span class="o">=</span> <span class="s">&quot;2016-04-18&quot;</span><span class="p">,</span> plot <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<span class="kp">class</span><span class="p">(</span>img<span class="p">)</span>
+<span class="c1"># [1] &quot;list&quot;</span></code></pre></div>
+
+<p>The <code>img</code> object is a list consisting of two objects:</p>
+
+<ul>
+  <li><strong>image_data</strong>: Information about the image (date, url, cloud_score (if parameter is set to TRUE), id)</li>
+  <li><strong>image_png</strong>: Matrix representation of the image (obtained via <code>png::readPNG</code>)</li>
+</ul>
+
+<p>If the parameter is set to TRUE, you also get a rasterImage, in this case, this one…</p>
+
+<p><img src="/nasadata/imgs/earthimage_nasadata.png" alt="image" /></p>
+
+<p>This package is still in the early stages of development, and I plan on submitting to CRAN in a few weeks, so any suggestions/improvements are very welcome at my twitter: <a href="https://twitter.com/eflores89">@eflores89</a> or via issues in the github package repo: <a href="https://github.com/Eflores89/nasadata">https://github.com/Eflores89/nasadata</a>.</p>
+
+  </div>
+</article>
+
+</body>
+</html>
