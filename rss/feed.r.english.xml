@@ -7,6 +7,37 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>satRday in Monterrey</title>
+					<description>&lt;p&gt;I recently volunteered to host a satRday event in Monterrey through the email form and was surprised to find out it was shortlisted as an international destination. I’m writing this to convince others to vote for Monterrey.&lt;/p&gt;
+
+&lt;p&gt;If you’re nearby, like the north of Mexico, the benefits are clear (the next option is currently South Africa!).&lt;/p&gt;
+
+&lt;h2 id=&quot;overview-about-monterrey&quot;&gt;Overview about Monterrey&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Monterrey&quot;&gt;Monterrey&lt;/a&gt; is one of the largest cities in Mexico and arguably the richest in per capita terms.&lt;/p&gt;
+
+&lt;p&gt;Traditionally, the city is a business, manufacturing and educational hub. A number of very large multinationals have their global or regional corporate offices here (Coca-Cola Femsa, Arca, Axtel, Cemex, Office Depot, Ternium, Heineken, Soriana, Banorte, Alfa, etc).&lt;/p&gt;
+
+&lt;p&gt;Conectivity with the U.S. economy is stronger than with the rest of the country, meaning that growth and productivity have generally been closer to our partners in the north than the rest of the country. Monterrey is also known for its entrepreneurial spirit, which is why it also boasts a number of innovation initiatives by government and private sector. The financial sector is also considerably advanced in comparison to the rest of the region.&lt;/p&gt;
+
+&lt;p&gt;Education is also very big. Tec de Monterrey, one of the best universities in Latin America (and the world) is based in Monterrey, as well as UANL which is the second best and largest public University in the country. UDEM and UR also boast high levels of educational awards and accreditations. Thousands of students flock to these universities from the rest of the country every year.&lt;/p&gt;
+
+&lt;p&gt;Finally, the airport is extremely well connected, with more than 350 flights a day from destinations in the U.S, Mexico and even transcontinental direct flights (Japan and Europe). Flying via Mexico City is also extremely cheap and convenient (there are about 15 two-way flights a day between both cities). In 2015, the airport handled 8.4 million passengers, a 18.7% increase from 2014 (somewhere between Tampa and San Diego airports’ capacities). There also tons and tons of hotels and convention centers…&lt;/p&gt;
+
+&lt;p&gt;So, I would argue that if your based in Texas, a &lt;strong&gt;satRday&lt;/strong&gt; in Monterrey is closer to you than one in Chicago or D.C. Plus, you get to explore a new, wonderful city:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/mty1.jpg&quot; alt=&quot;Foto1 monterrey&quot; height=&quot;80%&quot; width=&quot;80%&quot; /&gt;
+&lt;img src=&quot;/images/posts/mty2.jpg&quot; alt=&quot;Foto2 monterrey&quot; height=&quot;80%&quot; width=&quot;80%&quot; /&gt;
+&lt;img src=&quot;/images/posts/mty3.jpg&quot; alt=&quot;Foto3 monterrey&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Vote for Monterrey&lt;/strong&gt; here: &lt;a href=&quot;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&quot;&gt;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sat, 14 May 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/datascience/mty-satrday/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mty-satrday/</guid>
+			</item>
+		
+			<item>
 				<title>New nasadata R package</title>
 					<description>&lt;p&gt;This package intends to provide a hassle-free way to access some of NASA’s open-source API’s to build applications or models.&lt;/p&gt;
 
