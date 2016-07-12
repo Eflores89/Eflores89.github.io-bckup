@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Analyzing Mexican votes in the U.N. | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 12 Jul 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: economics, r-english, datascience, international</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/economia/trinidad-bis">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>Analyzing Mexican votes in the U.N.</h1>
+          <br></br>
+    <p>Last week I discovered the <a href="https://github.com/dgrtwo/unvotes">unvotes</a> package on github so I thought i’d do some number-crunching to see if I find anything interesting.</p>
+
+<p>The package provides the voting history of countries in the United Nations General Assembly, along with information such as date, description, and topics for each vote.</p>
+
+<p>The author makes it clear to reference the original publication of the data:</p>
+
+<blockquote>
+  <p>Erik Voeten “Data and Analyses of Voting in the UN General Assembly” Routledge Handbook of International Organization, edited by Bob Reinalda (published May 27, 2013)</p>
+</blockquote>
+
+<p>I installed from CRAN and created a small function that counts the amount of times two countries “agree”, that is they vote the same way in a given resolution.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>magrittr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>unvotes<span class="p">)</span>
+
+<span class="c1"># the database of all votes </span>
+votes <span class="o">&lt;-</span> un_votes <span class="o">%&gt;%</span>
+  left_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> un_roll_calls<span class="p">)</span> <span class="o">%&gt;%</span>
+  left_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> un_roll_call_issues<span class="p">)</span>
+
+<span class="c1"># a function to count the amount of times any given countries &quot;agree&quot;</span>
+un_agree <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>db<span class="p">,</span> <span class="c1"># the database</span>
+                     country1<span class="p">,</span> 
+                     country2<span class="p">,</span>
+                     abstain <span class="o">=</span> <span class="kc">TRUE</span> <span class="c1"># if FALSE, do not count abstains</span>
+                     <span class="p">){</span>
+  c1 <span class="o">&lt;-</span> db <span class="o">%&gt;%</span> 
+    filter<span class="p">(</span>country <span class="o">==</span> country1<span class="p">)</span> <span class="o">%&gt;%</span>
+    mutate<span class="p">(</span><span class="s">&quot;vote2&quot;</span> <span class="o">=</span> vote<span class="p">)</span>
+  c2 <span class="o">&lt;-</span> db <span class="o">%&gt;%</span> 
+    filter<span class="p">(</span>country <span class="o">==</span> country2<span class="p">)</span>
+  j <span class="o">&lt;-</span> c1 <span class="o">%&gt;%</span> select<span class="p">(</span>vote2<span class="p">,</span> rcid<span class="p">)</span> <span class="o">%&gt;%</span>
+    left_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> c2 <span class="o">%&gt;%</span> select<span class="p">(</span>rcid<span class="p">,</span> vote<span class="p">),</span> by <span class="o">=</span> <span class="s">&quot;rcid&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+    filter<span class="p">(</span><span class="o">!</span><span class="kp">is.na</span><span class="p">(</span>vote<span class="p">))</span>
+  <span class="kr">if</span><span class="p">(</span><span class="o">!</span>abstain<span class="p">){</span>
+  j <span class="o">&lt;-</span> j <span class="o">%&gt;%</span> 
+    filter<span class="p">(</span>vote <span class="o">!=</span> <span class="s">&quot;abstain&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+    filter<span class="p">(</span>vote2 <span class="o">!=</span> <span class="s">&quot;abstain&quot;</span><span class="p">)</span>
+  <span class="p">}</span>
+  j <span class="o">&lt;-</span> j <span class="o">%&gt;%</span> 
+    mutate<span class="p">(</span><span class="s">&quot;agree&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>vote2 <span class="o">==</span> <span class="kp">as.character</span><span class="p">(</span>vote<span class="p">),</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span>
+  <span class="kp">sum</span><span class="p">(</span>j<span class="o">$</span>agree<span class="p">)</span><span class="o">/</span><span class="kp">length</span><span class="p">(</span>j<span class="o">$</span>agree<span class="p">)</span><span class="o">*</span><span class="m">100</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Now, it would be interesting to see how much my home country and its rowdy neighbour to the north see eye-to-eye…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">un_agree<span class="p">(</span>votes<span class="p">,</span> <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 23.32385</span></code></pre></div>
+
+<p>So about one-fourth of every vote. This goes up slightly when eliminating abstentions (29.7%).</p>
+
+<p>However, this might be interesting to see by “sexenio”, or Mexican presidential term. Small caveat, the last vote in the dataset is september 9th, 2014.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># some of the newest presidential terms...</span>
+votes <span class="o">%&lt;&gt;%</span> mutate<span class="p">(</span><span class="s">&quot;mxterm&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>date <span class="o">&gt;=</span> <span class="s">&#39;1988-12-01&#39;</span> <span class="o">&amp;</span> 
+                                   date <span class="o">&lt;=</span> <span class="s">&#39;1994-11-30&#39;</span><span class="p">,</span> <span class="s">&quot;salinas&quot;</span><span class="p">,</span> 
+                            <span class="kp">ifelse</span><span class="p">(</span>date <span class="o">&gt;=</span> <span class="s">&#39;1994-12-01&#39;</span> <span class="o">&amp;</span> 
+                                   date <span class="o">&lt;=</span> <span class="s">&#39;2000-11-30&#39;</span><span class="p">,</span> <span class="s">&quot;zedillo&quot;</span><span class="p">,</span>
+                            <span class="kp">ifelse</span><span class="p">(</span>date <span class="o">&gt;=</span> <span class="s">&#39;2000-12-01&#39;</span> <span class="o">&amp;</span> 
+                                   date <span class="o">&lt;=</span> <span class="s">&#39;2006-11-30&#39;</span><span class="p">,</span> <span class="s">&quot;fox&quot;</span><span class="p">,</span>
+                            <span class="kp">ifelse</span><span class="p">(</span>date <span class="o">&gt;=</span> <span class="s">&#39;2006-12-01&#39;</span> <span class="o">&amp;</span> 
+                                   date <span class="o">&lt;=</span> <span class="s">&#39;2012-11-30&#39;</span><span class="p">,</span> <span class="s">&quot;calderon&quot;</span><span class="p">,</span>
+                            <span class="kp">ifelse</span><span class="p">(</span>date <span class="o">&gt;=</span> <span class="s">&#39;2012-12-01&#39;</span> <span class="o">&amp;</span> 
+                                   date <span class="o">&lt;=</span> <span class="s">&#39;2018-11-30&#39;</span><span class="p">,</span> <span class="s">&quot;penanieto&quot;</span><span class="p">,</span> <span class="s">&quot;others&quot;</span><span class="p">))</span>
+                                   <span class="p">))))</span>
+un_agree<span class="p">(</span>votes <span class="o">%&gt;%</span> filter<span class="p">(</span>mxterm <span class="o">==</span><span class="s">&quot;salinas&quot;</span><span class="p">),</span> 
+        <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 10.77586</span>
+un_agree<span class="p">(</span>votes <span class="o">%&gt;%</span> filter<span class="p">(</span>mxterm <span class="o">==</span><span class="s">&quot;zedillo&quot;</span><span class="p">),</span> 
+        <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 20.76167</span>
+un_agree<span class="p">(</span>votes <span class="o">%&gt;%</span> filter<span class="p">(</span>mxterm <span class="o">==</span><span class="s">&quot;fox&quot;</span><span class="p">),</span> 
+        <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 9.129213</span>
+un_agree<span class="p">(</span>votes <span class="o">%&gt;%</span> filter<span class="p">(</span>mxterm <span class="o">==</span><span class="s">&quot;calderon&quot;</span><span class="p">),</span> 
+        <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 8.935743</span>
+un_agree<span class="p">(</span>votes <span class="o">%&gt;%</span> filter<span class="p">(</span>mxterm <span class="o">==</span><span class="s">&quot;penanieto&quot;</span><span class="p">),</span> 
+        <span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">)</span>
+<span class="c1"># [1] 12.92517</span></code></pre></div>
+
+<p>This is unexpected. It’s usually folk tale that the PAN-ista governments (Fox and especially Calderon) cooperated much more with their American counterparts than the rest. Maybe we could visualize this side by side in a graph:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">agree_by_year <span class="o">&lt;-</span> votes <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>country <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>year <span class="o">=</span> year<span class="p">(</span><span class="kp">date</span><span class="p">),</span> rcid<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;DifVote&quot;</span> <span class="o">=</span> n_distinct<span class="p">(</span>vote<span class="p">))</span> <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Agree&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>DifVote <span class="o">==</span> <span class="m">1</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;PercentageAgree&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>Agree<span class="p">)</span><span class="o">/</span>n_distinct<span class="p">(</span>rcid<span class="p">),</span> 
+            <span class="s">&quot;VoteCount&quot;</span> <span class="o">=</span> n_distinct<span class="p">(</span>rcid<span class="p">))</span>
+  
+g <span class="o">&lt;-</span> ggplot<span class="p">(</span>agree_by_year<span class="p">,</span> 
+        aes<span class="p">(</span>x <span class="o">=</span> year<span class="p">,</span> 
+            y <span class="o">=</span> PercentageAgree<span class="o">*</span><span class="m">100</span><span class="p">))</span><span class="o">+</span>
+  geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Do Mexico and U.S. agree in U.N. votes?&quot;</span><span class="p">,</span>
+       x <span class="o">=</span> <span class="s">&quot;Year&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;(%)&quot;</span><span class="p">)</span>
+g</code></pre></div>
+
+<p><img src="/images/posts/unvotes2.png" alt="Mexico and the US agree less on UN votes" /></p>
+
+<p>So the tendency has been to disagree more under these presidents. Off course, this could be due to a number of quirky data issues. Among them, the amount of different votes taken to the General Assembly (in orange)…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">g <span class="o">+</span>
+  geom_line<span class="p">(</span>aes<span class="p">(</span>x <span class="o">=</span> year<span class="p">,</span> y <span class="o">=</span> VoteCount<span class="p">),</span> colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">2</span><span class="p">])</span></code></pre></div>
+
+<p><img src="/images/posts/unvotes3.png" alt="Votes by year where Mexico and USA voted in UN" /></p>
+
+<p>Now, it might seem strange so much disagreement, so let’s see if this rate is small or large in the context of everyone else. I’m going to loop through every country, to see Mexico’s (historic) agreement with each one…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># I found making a function to be easier for the rest</span>
+<span class="c1"># of the post... </span>
+agree_world_with <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>db<span class="p">,</span> 
+                             country_pivot<span class="p">){</span>
+v <span class="o">&lt;-</span> <span class="kc">NULL</span>
+<span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>db<span class="o">$</span>country<span class="p">))){</span>
+country <span class="o">&lt;-</span> <span class="kp">unique</span><span class="p">(</span>db<span class="o">$</span>country<span class="p">)[</span>i<span class="p">]</span>
+p <span class="o">&lt;-</span> un_agree<span class="p">(</span>db <span class="o">=</span> votes<span class="p">,</span> 
+         country1 <span class="o">=</span> country_pivot<span class="p">,</span> 
+         country2 <span class="o">=</span> <span class="kp">unique</span><span class="p">(</span>db<span class="o">$</span>country<span class="p">)[</span>i<span class="p">])</span>
+d <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;country&quot;</span> <span class="o">=</span> country<span class="p">,</span> <span class="s">&quot;p&quot;</span> <span class="o">=</span> p<span class="p">)</span>
+v <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>v<span class="p">,</span> d<span class="p">)}</span>
+  <span class="kr">return</span><span class="p">(</span>v<span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Now for the fun part... </span>
+<span class="c1"># which countries agree most with Mexico?</span>
+agree_world_with<span class="p">(</span>votes<span class="p">,</span> <span class="s">&quot;Mexico&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  arrange<span class="p">(</span>desc<span class="p">(</span>p<span class="p">))</span> <span class="o">%&gt;%</span>
+  filter<span class="p">(</span>country <span class="o">!=</span> <span class="s">&quot;Mexico&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> <span class="c1"># obviously p=100</span>
+  <span class="kp">head</span><span class="p">()</span>
+<span class="c1">#                country        p</span>
+<span class="c1">#1           Timor-Leste 95.82192</span>
+<span class="c1">#2            Seychelles 94.46378</span>
+<span class="c1">#3 Sao Tome and Principe 93.73695</span>
+<span class="c1">#4         Guinea-Bissau 92.48287</span>
+<span class="c1">#5              Zimbabwe 92.37548</span>
+<span class="c1">#6              Suriname 92.37288</span>
+
+<span class="c1"># which countries agree less with Mexico?</span>
+agree_world_with<span class="p">(</span>votes<span class="p">,</span> <span class="s">&quot;Mexico&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  arrange<span class="p">(</span>desc<span class="p">(</span>p<span class="p">))</span> <span class="o">%&gt;%</span>
+  filter<span class="p">(</span>country <span class="o">!=</span> <span class="s">&quot;Mexico&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  <span class="kp">tail</span><span class="p">()</span>
+<span class="c1">#                            country        p</span>
+<span class="c1">#194                Marshall Islands 35.27607</span>
+<span class="c1">#195 Micronesia, Federated States of 27.76163</span>
+<span class="c1">#196                          Israel 25.96885</span>
+<span class="c1">#197                   United States 23.32385</span>
+<span class="c1">#198                           Palau 20.79327</span>
+<span class="c1">#199                        Zanzibar  0.00000</span></code></pre></div>
+
+<p>For the record, I tried doing the same exercise for each “sexenio” and basically came up with the same number of countries on top, maybe we’re not so close to the U.S. after all?</p>
+
+<p>What about abstentions? You would think Mexico’s historical no-intervention foreign policy would make it a cronical abstainer, but actually even the United States and France use this trick more often…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># count abstentions by country</span>
+abstentions <span class="o">&lt;-</span> votes <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;abstain&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>vote<span class="p">)</span> <span class="o">==</span> <span class="s">&quot;abstain&quot;</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>country<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;prct_abstentions&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>abstain<span class="p">)</span><span class="o">/</span>n_distinct<span class="p">(</span>rcid<span class="p">))</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>prct_abstentions<span class="p">))</span>
+abstentions<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">30</span><span class="p">,</span> <span class="p">]</span> <span class="o">%&gt;%</span> <span class="kp">as.data.frame</span>
+<span class="c1">#                           country prct_abstentions</span>
+<span class="c1">#1                         Zanzibar        1.0000000</span>
+<span class="c1">#2      Federal Republic of Germany        0.5183636</span>
+<span class="c1">#3                           France        0.4210017</span>
+<span class="c1">#4                            Tonga        0.4038710</span>
+<span class="c1">#5                      South Sudan        0.3958333</span>
+<span class="c1">#6                            Japan        0.3929402</span>
+<span class="c1">#7                          Georgia        0.3845050</span>
+<span class="c1">#8                            Italy        0.3822297</span>
+<span class="c1">#9  Micronesia, Federated States of        0.3818046</span>
+<span class="c1">#10                         Austria        0.3641872</span>
+<span class="c1">#11                  United Kingdom        0.3614412</span>
+<span class="c1">#12              Korea, Republic of        0.3612663</span>
+<span class="c1">#13                         Belgium        0.3587247</span>
+<span class="c1">#14                      Luxembourg        0.3495841</span>
+<span class="c1">#15                        Portugal        0.3486631</span>
+<span class="c1">#16                          Canada        0.3462857</span>
+<span class="c1">#17                Marshall Islands        0.3426431</span>
+<span class="c1">#18                     Netherlands        0.3395579</span>
+<span class="c1">#19                         Ireland        0.3381340</span>
+<span class="c1">#20                         Finland        0.3379368</span>
+<span class="c1">#21                       Australia        0.3326978</span>
+<span class="c1">#22            Moldova, Republic of        0.3320053</span>
+<span class="c1">#23                          Sweden        0.3277905</span>
+<span class="c1">#24                          Israel        0.3275574</span>
+<span class="c1">#25                         Denmark        0.3267912</span>
+<span class="c1">#26                          Norway        0.3253862</span>
+<span class="c1">#27                         Iceland        0.3208144</span>
+<span class="c1">#28                         Estonia        0.3169192</span>
+<span class="c1">#29                          Latvia        0.3159236</span>
+<span class="c1">#30                           Spain        0.3145144</span>
+
+<span class="c1"># Mexico is actually at spot 122 with only 10% of its total votes!! </span>
+abstentions<span class="p">[</span><span class="m">122</span><span class="p">,</span> <span class="p">]</span>
+<span class="c1">#  1  Mexico        0.1094109</span></code></pre></div>
+
+<p>This dataset is actually really nice, we can make a small comparison of some foreign policy. For example NAFTA partners and their agreement on some issues related to Israel…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># only the Palestinian conflict</span>
+israelset <span class="o">&lt;-</span> votes <span class="o">%&gt;%</span> filter<span class="p">(</span>issue <span class="o">==</span> <span class="s">&quot;Palestinian conflict&quot;</span><span class="p">)</span>
+nafta <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;United States&quot;</span><span class="p">,</span> <span class="s">&quot;Canada&quot;</span><span class="p">)</span>
+agree_with_israel <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;country&quot;</span> <span class="o">=</span> nafta<span class="p">,</span> 
+                                <span class="s">&quot;agree&quot;</span> <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>
+                                un_agree<span class="p">(</span>israelset<span class="p">,</span> nafta<span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="s">&quot;Israel&quot;</span><span class="p">),</span>
+                                un_agree<span class="p">(</span>israelset<span class="p">,</span> nafta<span class="p">[</span><span class="m">2</span><span class="p">],</span> <span class="s">&quot;Israel&quot;</span><span class="p">),</span>
+                                un_agree<span class="p">(</span>israelset<span class="p">,</span> nafta<span class="p">[</span><span class="m">3</span><span class="p">],</span> <span class="s">&quot;Israel&quot;</span><span class="p">)</span>
+                                <span class="p">))</span>
+agree_with_israel
+<span class="c1">#        country     agree</span>
+<span class="c1">#1        Mexico  5.156724</span>
+<span class="c1">#2 United States 77.620968</span>
+<span class="c1">#3        Canada 25.226131</span></code></pre></div>
+
+<p>I’m sure the kind readers at <strong>r-bloggers</strong> will come up with another useful analysis from this package. Maybe a map? <a href="https://twitter.com/eflores89">Tweet</a> me up!</p>
+
+  </div>
+</article>
+
+</body>
+</html>

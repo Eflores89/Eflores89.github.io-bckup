@@ -7,6 +7,233 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Analyzing Mexican votes in the U.N.</title>
+					<description>&lt;p&gt;Last week I discovered the &lt;a href=&quot;https://github.com/dgrtwo/unvotes&quot;&gt;unvotes&lt;/a&gt; package on github so I thought i’d do some number-crunching to see if I find anything interesting.&lt;/p&gt;
+
+&lt;p&gt;The package provides the voting history of countries in the United Nations General Assembly, along with information such as date, description, and topics for each vote.&lt;/p&gt;
+
+&lt;p&gt;The author makes it clear to reference the original publication of the data:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Erik Voeten “Data and Analyses of Voting in the UN General Assembly” Routledge Handbook of International Organization, edited by Bob Reinalda (published May 27, 2013)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I installed from CRAN and created a small function that counts the amount of times two countries “agree”, that is they vote the same way in a given resolution.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;magrittr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;unvotes&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# the database of all votes &lt;/span&gt;
+votes &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; un_votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  left_join&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; un_roll_calls&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  left_join&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; un_roll_call_issues&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# a function to count the amount of times any given countries &amp;quot;agree&amp;quot;&lt;/span&gt;
+un_agree &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# the database&lt;/span&gt;
+                     country1&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                     country2&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                     abstain &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# if FALSE, do not count abstains&lt;/span&gt;
+                     &lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  c1 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; db &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; country1&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+    mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;vote2&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; vote&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  c2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; db &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; country2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  j &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; c1 &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; select&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote2&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; rcid&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+    left_join&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; c2 &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; select&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; vote&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; by &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;rcid&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;is.na&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;abstain&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  j &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; j &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;abstain&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote2 &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;abstain&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  j &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; j &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+    mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;agree&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote2 &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.character&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;j&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;agree&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;j&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;agree&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;100&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, it would be interesting to see how much my home country and its rowdy neighbour to the north see eye-to-eye…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 23.32385&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So about one-fourth of every vote. This goes up slightly when eliminating abstentions (29.7%).&lt;/p&gt;
+
+&lt;p&gt;However, this might be interesting to see by “sexenio”, or Mexican presidential term. Small caveat, the last vote in the dataset is september 9th, 2014.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# some of the newest presidential terms...&lt;/span&gt;
+votes &lt;span class=&quot;o&quot;&gt;%&amp;lt;&amp;gt;%&lt;/span&gt; mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;mxterm&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;date &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;1988-12-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; 
+                                   date &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;1994-11-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;salinas&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                            &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;date &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;1994-12-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; 
+                                   date &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2000-11-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;zedillo&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;date &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2000-12-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; 
+                                   date &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2006-11-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;fox&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;date &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2006-12-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; 
+                                   date &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2012-11-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;calderon&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;date &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2012-12-01&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; 
+                                   date &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;2018-11-30&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;penanieto&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;others&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                                   &lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;mxterm &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;salinas&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+        &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 10.77586&lt;/span&gt;
+un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;mxterm &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;zedillo&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+        &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 20.76167&lt;/span&gt;
+un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;mxterm &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;fox&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+        &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 9.129213&lt;/span&gt;
+un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;mxterm &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;calderon&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+        &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 8.935743&lt;/span&gt;
+un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;mxterm &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;penanieto&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+        &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 12.92517&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is unexpected. It’s usually folk tale that the PAN-ista governments (Fox and especially Calderon) cooperated much more with their American counterparts than the rest. Maybe we could visualize this side by side in a graph:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;agree_by_year &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;year &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; year&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; rcid&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;DifVote&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Agree&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;DifVote &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;PercentageAgree&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;Agree&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+            &lt;span class=&quot;s&quot;&gt;&amp;quot;VoteCount&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  
+g &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;agree_by_year&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; year&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+            y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; PercentageAgree&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Do Mexico and U.S. agree in U.N. votes?&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Year&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;(%)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+g&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/unvotes2.png&quot; alt=&quot;Mexico and the US agree less on UN votes&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So the tendency has been to disagree more under these presidents. Off course, this could be due to a number of quirky data issues. Among them, the amount of different votes taken to the General Assembly (in orange)…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;g &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; year&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; VoteCount&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/unvotes3.png&quot; alt=&quot;Votes by year where Mexico and USA voted in UN&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, it might seem strange so much disagreement, so let’s see if this rate is small or large in the context of everyone else. I’m going to loop through every country, to see Mexico’s (historic) agreement with each one…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# I found making a function to be easier for the rest&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# of the post... &lt;/span&gt;
+agree_world_with &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                             country_pivot&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+v &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NULL&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;i &lt;span class=&quot;kr&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;country&lt;span class=&quot;p&quot;&gt;))){&lt;/span&gt;
+country &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;country&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+p &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; votes&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         country1 &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; country_pivot&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         country2 &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;db&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;country&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+d &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;country&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; country&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;p&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; p&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+v &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;v&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; d&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;v&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Now for the fun part... &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# which countries agree most with Mexico?&lt;/span&gt;
+agree_world_with&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;p&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# obviously p=100&lt;/span&gt;
+  &lt;span class=&quot;kp&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                country        p&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#1           Timor-Leste 95.82192&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#2            Seychelles 94.46378&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#3 Sao Tome and Principe 93.73695&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#4         Guinea-Bissau 92.48287&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#5              Zimbabwe 92.37548&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#6              Suriname 92.37288&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# which countries agree less with Mexico?&lt;/span&gt;
+agree_world_with&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;p&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  &lt;span class=&quot;kp&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                            country        p&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#194                Marshall Islands 35.27607&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#195 Micronesia, Federated States of 27.76163&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#196                          Israel 25.96885&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#197                   United States 23.32385&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#198                           Palau 20.79327&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#199                        Zanzibar  0.00000&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;For the record, I tried doing the same exercise for each “sexenio” and basically came up with the same number of countries on top, maybe we’re not so close to the U.S. after all?&lt;/p&gt;
+
+&lt;p&gt;What about abstentions? You would think Mexico’s historical no-intervention foreign policy would make it a cronical abstainer, but actually even the United States and France use this trick more often…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# count abstentions by country&lt;/span&gt;
+abstentions &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;abstain&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;as.character&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;vote&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;abstain&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;country&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;prct_abstentions&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;abstain&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;prct_abstentions&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+abstentions&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                           country prct_abstentions&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#1                         Zanzibar        1.0000000&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#2      Federal Republic of Germany        0.5183636&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#3                           France        0.4210017&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#4                            Tonga        0.4038710&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#5                      South Sudan        0.3958333&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#6                            Japan        0.3929402&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#7                          Georgia        0.3845050&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#8                            Italy        0.3822297&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#9  Micronesia, Federated States of        0.3818046&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#10                         Austria        0.3641872&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#11                  United Kingdom        0.3614412&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#12              Korea, Republic of        0.3612663&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#13                         Belgium        0.3587247&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#14                      Luxembourg        0.3495841&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#15                        Portugal        0.3486631&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#16                          Canada        0.3462857&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#17                Marshall Islands        0.3426431&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#18                     Netherlands        0.3395579&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#19                         Ireland        0.3381340&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#20                         Finland        0.3379368&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#21                       Australia        0.3326978&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#22            Moldova, Republic of        0.3320053&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#23                          Sweden        0.3277905&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#24                          Israel        0.3275574&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#25                         Denmark        0.3267912&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#26                          Norway        0.3253862&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#27                         Iceland        0.3208144&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#28                         Estonia        0.3169192&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#29                          Latvia        0.3159236&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#30                           Spain        0.3145144&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Mexico is actually at spot 122 with only 10% of its total votes!! &lt;/span&gt;
+abstentions&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;122&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  1  Mexico        0.1094109&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This dataset is actually really nice, we can make a small comparison of some foreign policy. For example NAFTA partners and their agreement on some issues related to Israel…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# only the Palestinian conflict&lt;/span&gt;
+israelset &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;issue &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Palestinian conflict&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+nafta &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Mexico&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;United States&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Canada&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+agree_with_israel &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;country&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; nafta&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                                &lt;span class=&quot;s&quot;&gt;&amp;quot;agree&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                                un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;israelset&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; nafta&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Israel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                                un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;israelset&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; nafta&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Israel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                                un_agree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;israelset&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; nafta&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Israel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                                &lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+agree_with_israel
+&lt;span class=&quot;c1&quot;&gt;#        country     agree&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#1        Mexico  5.156724&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#2 United States 77.620968&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#3        Canada 25.226131&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I’m sure the kind readers at &lt;strong&gt;r-bloggers&lt;/strong&gt; will come up with another useful analysis from this package. Maybe a map? &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up!&lt;/p&gt;
+</description>
+				<pubDate>Tue, 12 Jul 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/datascience/un-voting-patterns</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-patterns</guid>
+			</item>
+		
+			<item>
 				<title>satRday in Monterrey</title>
 					<description>&lt;p&gt;I recently volunteered to host a satRday event in Monterrey through the email form and was surprised to find out it was shortlisted as an international destination. I’m writing this to convince others to vote for Monterrey.&lt;/p&gt;
 
