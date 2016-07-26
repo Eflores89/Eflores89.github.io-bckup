@@ -7,6 +7,139 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Voting clusters in the U.N.</title>
+					<description>&lt;p&gt;After some more digging, and a suggestion by &lt;a href=&quot;https://twitter.com/theMexIndian&quot;&gt;@theMexIndian&lt;/a&gt; I decided to see more in the depth the unvotes database that I &lt;a href=&quot;http://enelmargen.org/datascience/un-voting-patterns/&quot;&gt;wrote about&lt;/a&gt; some weeks ago.&lt;/p&gt;
+
+&lt;p&gt;This time, amit suggested I do some hierarchical clustering of the votes. So here goes a &lt;strong&gt;very dirty&lt;/strong&gt; first attempt…&lt;/p&gt;
+
+&lt;h2 id=&quot;data-and-setup&quot;&gt;Data and setup&lt;/h2&gt;
+
+&lt;p&gt;Nothing too impressive here… (for a discussion of the package, see the original post).&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;magrittr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;unvotes&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;reshape2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# number of roll-calls&lt;/span&gt;
+votes &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; un_votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  left_join&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; un_roll_calls&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  left_join&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; un_roll_call_issues&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;votes&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 5275 # number of unique roll call votes&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;There are more than 5k unique roll calls, so if we where to open up dimensionality by each roll call, this is going to be huge, but i’ll go ahead and do it anyways, to test a hypothesis towards the end…&lt;/p&gt;
+
+&lt;h2 id=&quot;widen-data&quot;&gt;‘Widen’ data…&lt;/h2&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;wide &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  select&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rcid&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; country&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; vote&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  dcast&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; formula &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; rcid&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;country &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt; vote&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  dcast&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; formula &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; country&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;rcid&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;yes&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;no&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;abstain&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+str&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;wide&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# &amp;#39;data.frame&amp;#39;:	200 obs. of  14352 variables:&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now that we have a very high dimension data set (each variable is the vote in a roll call, for example, abstain_120, yes_120, no_120 would be a count of abstain, yes and no votes in roll call 120). This data set is basically ones and ceros. Now to do some cleaning and get the distance matrix…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;wide&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;is.na&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;wide&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;
+d_wide &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;wide&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;row.names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; wide&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;country &lt;span class=&quot;c1&quot;&gt;# to name rows&lt;/span&gt;
+d_wide &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; dist&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# distance matrix&lt;/span&gt;
+hc_wide &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hclust&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# hierarchical cluster&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s graph this hierarchical clustering using the &lt;code&gt;ggdendro&lt;/code&gt; package…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ggdendro&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;eem&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# blog colors&lt;/span&gt;
+ggdendrogram&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_wide&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+  rotate &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    theme&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;axis.text.y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; element_text&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;size&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;country&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Hierarchical clusters of votes \n in U.N.&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/dendo_1.png&quot; alt=&quot;Dendogram of UN votes by country&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’m going to export these clusters and upload them on &lt;a href=&quot;https://github.com/Eflores89/proyectos/tree/master/data&quot;&gt;my github&lt;/a&gt; for anyone to download.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;hc_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; cutree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_wide&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; k &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+hc_c &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; row.names &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+hc_c&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;row.names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+cc &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hc_c &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;hc_c&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+write.csv&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;cc&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; file &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;country_clusters.csv&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;by-issues&quot;&gt;By issues&lt;/h2&gt;
+
+&lt;p&gt;Now, because the latest data set was very high dimension, i’m going to condense the analysis to just votes on particular issues. The data base has seven core issues, so i’m going to try to group by issue instead of roll call. This might let us see if there are different voting blocs from the earlier set (maybe countries vote the same, except when important issues come up).&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Widen, by issue...&lt;/span&gt;
+wide_byissue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; votes &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  select&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;issue&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; country&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; vote&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  dcast&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; formula &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; country &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt; vote&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;issue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+wide_byissue&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;is.na&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;wide_byissue&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;
+d_wide_issue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;wide_byissue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kp&quot;&gt;row.names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide_issue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; wide_byissue&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;country
+d_wide_issue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; dist&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide_issue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+hc_wide_issue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hclust&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d_wide_issue&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+ggdendrogram&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_wide_issue&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+  rotate &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    theme&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;axis.text.y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; element_text&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;size&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+    labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;country&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+         title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Hierarchical clusters of votes \n in U.N. (issues)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/dendo_2.png&quot; alt=&quot;Dendogram of UN votes by country, when grouping by issue&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ll export this too…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;hc_c2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; cutree&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_wide_issue&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; k &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+hc_c2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c2&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; row.names &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c2&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+hc_c2&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;row.names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+cc2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hc_c2 &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;hc_c2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+write.csv&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;cc2&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; file &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;country_clusters_issue.csv&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To disprove the earlier hypothesis, i’m going to find Mexico’s neighborhood, and see if there are many countries that repeat themselves in both sets…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# find cluster where Mexico lives ... &lt;/span&gt;
+neighborhood_mx &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hc_c &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+neighborhood_mx_issue &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; hc_c2 &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c2 &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;neighborhood_mx_issue&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%in%&lt;/span&gt; neighborhood_mx&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;neighborhood_mx_issue&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] 0.8&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# export mexico&amp;#39;s neighborhood&lt;/span&gt;
+write.csv&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;neighborhood_mx_issue&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; file &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;neighborhood_mx_issue.csv&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So 80% of the country’s are “close” to Mexico whether the vote is by issue or by roll call. This is a rough first attempt (there are probably many slight errors) but there are some interesting things to be found.&lt;/p&gt;
+
+&lt;p&gt;In the issues groups, the outliers in a single group are the United States and Israel (the Palestinian conflict probably is the culprit here, as I found earlier, they agree on 77% of the votes).&lt;/p&gt;
+
+&lt;p&gt;Then there are countries that seem to be very close culturally, and they show it in the votes…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# advanced foreign policy&lt;/span&gt;
+hc_c2 &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hc_c2 &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;6&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;Austria&amp;quot;     &amp;quot;Denmark&amp;quot;     &amp;quot;Finland&amp;quot;     &amp;quot;Greece&amp;quot;      &amp;quot;Iceland&amp;quot;   &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [6] &amp;quot;Ireland&amp;quot;     &amp;quot;Japan&amp;quot;       &amp;quot;New Zealand&amp;quot; &amp;quot;Norway&amp;quot;      &amp;quot;Spain&amp;quot;      &lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [11] &amp;quot;Sweden&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, some like-minded countries, like Chile, Colombia, Panama, Paraguay, Peru, etc are in Mexico’s neighborhood (although it’s one of the largest groups).&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any questions with the data!&lt;/p&gt;
+</description>
+				<pubDate>Wed, 27 Jul 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/datascience/un-voting-communities</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-communities</guid>
+			</item>
+		
+			<item>
 				<title>Analyzing Mexican votes in the U.N.</title>
 					<description>&lt;p&gt;Last week I discovered the &lt;a href=&quot;https://github.com/dgrtwo/unvotes&quot;&gt;unvotes&lt;/a&gt; package on github so I thought i’d do some number-crunching to see if I find anything interesting.&lt;/p&gt;
 
