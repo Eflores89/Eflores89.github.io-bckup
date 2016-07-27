@@ -39,10 +39,11 @@ h1 {
 }
 
 h1title {
-  line-height: 1.3;
+  line-height: 0.9;
   font-weight: 600;
   font-size: 24px;
   color: #000000;
+  text-shadow: 2px;
 }
 
 ftr {
@@ -115,7 +116,7 @@ article {
 .title {
   padding: 100px 50px;
   width: 100%;
-  padding: 30px;
+  padding: 10px;
   border: 5px red;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -125,7 +126,8 @@ article {
 hr { 
     border: 0;
     height: 1px;
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.4));
+    background-color: black;
+    <!--background-image: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.4));-->
 }
 
 
@@ -142,15 +144,16 @@ hr {
 
 header {
   position: relative;
-  width: 30%;
+  width: 35%;
   background-repeat: no-repeat;
   background-position: center;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  -webkit-filter: grayscale(0.2);
-  <!-- filter: grayscale(1); -->
+  <!-- opacity: 1;-->
+  <!-- -webkit-filter: grayscale(0.0); -->
+  <!-- -filter: grayscale(1); -->
   <!-- -webkit-filter: sepia(1); -->
   overflow: hidden;
   overflow-x: hidden;
@@ -178,7 +181,7 @@ header:after {
 }
 
 header .container {
-  padding: 0 50px;
+  padding: 0 10px;
   z-index: 1;
 }
 
@@ -342,13 +345,13 @@ header ul.meta li span {
 /* Article */
 
 article {
-  width: 70%;
+  width: 65%;
   overflow-x: hidden;
 }
 
 
 article .container {
-  padding-top: 80px;
+  padding-top: 40px;
 }
 
 @media (max-width: 960px) {
@@ -396,6 +399,10 @@ a:hover {
 }
 
 /* Posts List */
+ul.posts {
+      padding: 0px 60px 0px 0px;
+}
+
 
 ul.posts li {
   list-style-type: none;
@@ -404,11 +411,12 @@ ul.posts li {
 
 ul.posts .meta {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   text-decoration: italic;
   color: #c3be9a;
+  
 }
 
 ul.posts p {
-  margin-bottom: 36px;
+  margin-bottom: 16px;
 }
