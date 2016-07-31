@@ -199,6 +199,11 @@ header .container {
   }
 }
 
+header .post-container .inner-container p {
+   color:black
+  }
+
+
 @media screen and (max-width: 960px){
   #home-header .container {
     padding: 100px 50px;
