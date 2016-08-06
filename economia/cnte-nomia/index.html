@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>CNTE-nomía | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 07 Aug 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: economía, nacional, educación, méxico, política</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/un-voting-communities">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>CNTE-nomía</h1>
+          <br></br>
+    <p>Por mucho tiempo, el Gobierno Federal ha estado en la encrucijada de lidiar con la CNTE ante las (cada vez más violentas) demostraciones que han llevado a cabo por todo el país en contra de la Reforma Educativa. Sin embargo, la iniciativa privada ya hizo notar que este cálculo político podría costar dinero real.</p>
+
+<p>Una huelga esporádica que otra no debería de afectar de manera significativamente a la economía, pero <strong>bloquear</strong> las vías de comunicación en teoría si podría causar escasez relativa de bienes, y por ende inflación.</p>
+
+<p>Por fortuna el INEGI recopila información detallada de inflación en varias ciudades, por lo que podemos probar esta tesis descargando datos desde el 2013.</p>
+
+<p>Agrupe las ciudades en aquellas “grandes” (Monterrey, D.F. y Guadalajara), las medianas sin efectos de CNTE y las que si han sufrido bajo el estrago de los maestros. Sus tasas de inflación se pueden resumir así:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Tipo</th>
+      <th style="text-align: right">Promedio</th>
+      <th style="text-align: right">Mediana</th>
+      <th style="text-align: right">Desv.</th>
+      <th style="text-align: right">Max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">sin CNTE</td>
+      <td style="text-align: right">3.22</td>
+      <td style="text-align: right">3.28</td>
+      <td style="text-align: right">0.88</td>
+      <td style="text-align: right">5.08</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Ciudad grande</td>
+      <td style="text-align: right">3.34</td>
+      <td style="text-align: right">3.28</td>
+      <td style="text-align: right">0.80</td>
+      <td style="text-align: right">5.46</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>Nacional</strong></td>
+      <td style="text-align: right">3.39</td>
+      <td style="text-align: right">3.42</td>
+      <td style="text-align: right">0.71</td>
+      <td style="text-align: right">4.65</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">CNTE</td>
+      <td style="text-align: right">3.62</td>
+      <td style="text-align: right">3.50</td>
+      <td style="text-align: right">1.01</td>
+      <td style="text-align: right">6.43</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>La tabla nos muestra que las ciudades con huelgas de la CNTE tienen desde entonces un promedio de inflación más alto. ¿Será significativo? Una simple (<strong>muy simple, lo sé</strong>) prueba “t”, nos arroja que las medias sopresivamente si:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># data:  inf_CNTE$value and inf_noCNTE$value</span>
+<span class="c1"># t = 3.72, df = 221.78, p-value = 0.0002524</span>
+<span class="c1"># alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="c1"># 95 percent confidence interval:</span>
+<span class="c1">#  0.1850243 0.6019065</span>
+<span class="c1"># sample estimates:</span>
+<span class="c1"># mean of x mean of y </span>
+<span class="c1">#  3.617527  3.224062</span></code></pre></div>
+
+<p>Es decir, entre 18 y 60 puntos base de diferencia entre la tasa de inflación promedio.</p>
+
+<p>Dos cosas particulares a notar aquí:</p>
+
+<ul>
+  <li>Es <em>muy</em> probable un error de muestreo por que la muestra es pequeña y la escogí básicamente a <em>ojo de buen cubero</em>. De hecho, esto se vuelve un poco más evidente cuando vemos unos boxplots y algunos outliers de las ciudades de la CNTE:
+ <img src="/images/posts/cnte_2.png" alt="comparativas tasas inflación CNTE" /></li>
+  <li>La correlación puede no tener nada que ver con la CNTE. Es decir, no implica causalidad.</li>
+</ul>
+
+<p>Para tratar de aislar un poco el segundo caso, podríamos ver más de cerca los datos por ciudad:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: right">Promedio</th>
+      <th style="text-align: right">Mediana</th>
+      <th style="text-align: right">Desv.</th>
+      <th style="text-align: right">Max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Culiacán</td>
+      <td style="text-align: right">2.65</td>
+      <td style="text-align: right">2.89</td>
+      <td style="text-align: right">0.92</td>
+      <td style="text-align: right">4.08</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: right">2.85</td>
+      <td style="text-align: right">2.78</td>
+      <td style="text-align: right">0.66</td>
+      <td style="text-align: right">3.91</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Torreón</td>
+      <td style="text-align: right">2.97</td>
+      <td style="text-align: right">2.97</td>
+      <td style="text-align: right">0.71</td>
+      <td style="text-align: right">4.28</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">LaPaz</td>
+      <td style="text-align: right">3.26</td>
+      <td style="text-align: right">3.13</td>
+      <td style="text-align: right">1.04</td>
+      <td style="text-align: right">5.08</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oaxaca</td>
+      <td style="text-align: right">3.26</td>
+      <td style="text-align: right">3.30</td>
+      <td style="text-align: right">0.51</td>
+      <td style="text-align: right">4.37</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monclova</td>
+      <td style="text-align: right">3.38</td>
+      <td style="text-align: right">3.46</td>
+      <td style="text-align: right">0.86</td>
+      <td style="text-align: right">4.71</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>Nacional</strong></td>
+      <td style="text-align: right">3.39</td>
+      <td style="text-align: right">3.41</td>
+      <td style="text-align: right">0.71</td>
+      <td style="text-align: right">4.65</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Guadalajara</td>
+      <td style="text-align: right">3.42</td>
+      <td style="text-align: right">3.28</td>
+      <td style="text-align: right">0.58</td>
+      <td style="text-align: right">4.66</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Toluca</td>
+      <td style="text-align: right">3.47</td>
+      <td style="text-align: right">3.55</td>
+      <td style="text-align: right">0.78</td>
+      <td style="text-align: right">4.67</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Iguala</td>
+      <td style="text-align: right">3.61</td>
+      <td style="text-align: right">3.54</td>
+      <td style="text-align: right">1.05</td>
+      <td style="text-align: right">6.43</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Querétaro</td>
+      <td style="text-align: right">3.61</td>
+      <td style="text-align: right">3.49</td>
+      <td style="text-align: right">0.58</td>
+      <td style="text-align: right">4.98</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">CDMX</td>
+      <td style="text-align: right">3.76</td>
+      <td style="text-align: right">3.73</td>
+      <td style="text-align: right">0.86</td>
+      <td style="text-align: right">5.46</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Tapachula</td>
+      <td style="text-align: right">3.98</td>
+      <td style="text-align: right">4.01</td>
+      <td style="text-align: right">1.22</td>
+      <td style="text-align: right">6.38</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Y comparamos contra datos del inicio del 2016 (dónde en teoría el efecto CNTE es más notorio):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: right">Promedio</th>
+      <th style="text-align: right">Mediana</th>
+      <th style="text-align: right">Desv.</th>
+      <th style="text-align: right">Max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Culiacán</td>
+      <td style="text-align: right">1.94</td>
+      <td style="text-align: right">1.88</td>
+      <td style="text-align: right">0.21</td>
+      <td style="text-align: right">2.28</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: right">1.99</td>
+      <td style="text-align: right">1.95</td>
+      <td style="text-align: right">0.15</td>
+      <td style="text-align: right">2.23</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monclova</td>
+      <td style="text-align: right">2.14</td>
+      <td style="text-align: right">2.12</td>
+      <td style="text-align: right">0.26</td>
+      <td style="text-align: right">2.47</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Torreón</td>
+      <td style="text-align: right">2.16</td>
+      <td style="text-align: right">2.04</td>
+      <td style="text-align: right">0.28</td>
+      <td style="text-align: right">2.55</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Toluca</td>
+      <td style="text-align: right">2.32</td>
+      <td style="text-align: right">2.36</td>
+      <td style="text-align: right">0.16</td>
+      <td style="text-align: right">2.52</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">LaPaz</td>
+      <td style="text-align: right">2.38</td>
+      <td style="text-align: right">2.38</td>
+      <td style="text-align: right">0.20</td>
+      <td style="text-align: right">2.68</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Tapachula</td>
+      <td style="text-align: right">2.51</td>
+      <td style="text-align: right">2.47</td>
+      <td style="text-align: right">0.27</td>
+      <td style="text-align: right">2.99</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>Nacional</strong></td>
+      <td style="text-align: right">2.63</td>
+      <td style="text-align: right">2.60</td>
+      <td style="text-align: right">0.12</td>
+      <td style="text-align: right">2.87</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Iguala</td>
+      <td style="text-align: right">2.68</td>
+      <td style="text-align: right">2.40</td>
+      <td style="text-align: right">0.53</td>
+      <td style="text-align: right">3.62</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">CDMX</td>
+      <td style="text-align: right">2.74</td>
+      <td style="text-align: right">2.67</td>
+      <td style="text-align: right">0.18</td>
+      <td style="text-align: right">2.99</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oaxaca</td>
+      <td style="text-align: right">3.27</td>
+      <td style="text-align: right">3.27</td>
+      <td style="text-align: right">0.16</td>
+      <td style="text-align: right">3.45</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Guadalajara</td>
+      <td style="text-align: right">3.31</td>
+      <td style="text-align: right">3.28</td>
+      <td style="text-align: right">0.21</td>
+      <td style="text-align: right">3.61</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Querétaro</td>
+      <td style="text-align: right">3.45</td>
+      <td style="text-align: right">3.41</td>
+      <td style="text-align: right">0.19</td>
+      <td style="text-align: right">3.72</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Oaxaca sube del lugar 5 al 11 en esta tabla, y supera al promedio nacional, pero Iguala hasta baja un lugar. De hecho, van para abajo las tasas, siguiendo la tendencia nacional de este año… (Oaxaca es el único caso que se queda casi flat)</p>
+
+<p><img src="/images/posts/cnte_1.png" alt="comparativas tasas inflación CNTE 2016" /></p>
+
+<p><em>Bottom-line</em> es que todavía la diferencia no parece ser significativa con respecto a otras ciudades que no tienen el “problema” de la CNTE, como Guadalajara o Querétaro. Tal vez dentro de unos meses si veamos esto.</p>
+
+<p>Sin embargo, esto no significa que los comerciantes están alarmados y dispuestos a irse a huelga por nada. Es bastante probable que sí esten sufriendo pérdidas millonarias y simplemente están golpeando sus márgenes sin traducir las alzas a consumidores que, probablemente, son muy elasticos en precio.</p>
+
+<p>También está el argumento moral. El descaro de decir que “no pagar impuestos es un delito” mientras que no se hace nada por detener a quienes están a todas luces haciendo otro delito es increíble.</p>
+
+<p>Llegar a un acuerdo puede ser complejo por <a href="http://www.elfinanciero.com.mx/monterrey/brexit-salarios-magisteriales-y-la-comparticion-de-riesgo.html">un problema de asignación de riesgo</a>, pero esto no significa que mientras tanto los maestros pueden violar los derechos de otros. Detener esto es justamente la <a href="http://www.eluniversal.com.mx/articulo/nacion/politica/2016/08/5/avalan-amparo-de-ip-contra-gobierno-por-conflicto-con-cnte">responsabilidad del ejecutivo federal</a>.</p>
+
+<p><em>Para los interesados, pueden replicar este análisis usando <a href="http://enelmargen.org/inegiR/">inegiR</a>, aquí está el <a href="https://github.com/Eflores89/proyectos/blob/master/scripts/cnte_economia.R">código</a></em></p>
+
+  </div>
+</article>
+
+</body>
+</html>
