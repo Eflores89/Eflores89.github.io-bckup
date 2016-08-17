@@ -7,6 +7,119 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>New banxicoR package</title>
+					<description>&lt;p&gt;The &lt;strong&gt;banxicoR&lt;/strong&gt; package is now available on CRAN. Much like &lt;a href=&quot;https://github.com/Eflores89/inegiR&quot;&gt;inegiR&lt;/a&gt; this package aims to bring official Mexican data easily into R, in this case by scrapping &lt;em&gt;iqy&lt;/em&gt; calls to the SIE (Sistema de Información Económica) webservice of the Bank of Mexico.&lt;/p&gt;
+
+&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
+
+&lt;p&gt;The major difference with inegiR is that the Bank of Mexico does not have an API, so this package basically uses &lt;code&gt;rvest&lt;/code&gt; to scrape the generated html. The package then does what it can to save it in a convenient &lt;code&gt;data.frame&lt;/code&gt; or &lt;code&gt;list&lt;/code&gt; (same as inegiR).&lt;/p&gt;
+
+&lt;p&gt;A few caveats:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I do not control the data definitions at the source (Banxico), so I can’t guarantee continuos use.&lt;/li&gt;
+  &lt;li&gt;Finding the ID of each series has proven a manual, slow and tedious process because they are not available in the webpage. I’m trying to contact Banxico about getting a catalog, but basically use at your own risk.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;finding-series-ids&quot;&gt;Finding series ID’s&lt;/h3&gt;
+
+&lt;p&gt;To find a specific series ID, I would recommend going to the &lt;a href=&quot;http://www.banxico.org.mx/SieInternet/&quot;&gt;SIE webpage&lt;/a&gt;, navigating towards the desired indicators and then consulting them via HTML. The column name should be the series id (they are usually in this format: “SF60653”, with two characters followed by numbers). The package includes a &lt;strong&gt;small and non exhaustive&lt;/strong&gt; catalog of series &lt;strong&gt;in spanish&lt;/strong&gt;. You can access this by &lt;code&gt;data(&quot;BanxicoCatalog&quot;)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Then you can find some id’s…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;banxicoR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+data&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;BanxicoCatalog&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# To see how many id&amp;#39;s by parent subject &lt;/span&gt;
+BanxicoCatalog &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;PARENT&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Id&amp;#39;s&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Source: local data frame [4 x 2]&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;#                       PARENT     Id&amp;#39;s&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                       (chr)     (int)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  1          Billetes y Monedas    45&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  2 Intermediarios Financierios    37&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  3            Sistemas de Pago    49&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  4              Tipo de Cambio     2&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# to bring the specific id of the average duration of 200 peso bills...&lt;/span&gt;
+BanxicoCatalog &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;PARENT &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Billetes y Monedas&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;LEVEL_1 &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Duración promedio del billete&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;LEVEL_2 &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;200 pesos&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  select&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ID&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Source: local data frame [1 x 1]&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;#      ID&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    (chr)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#1    SM32&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;usage&quot;&gt;Usage&lt;/h3&gt;
+&lt;p&gt;Now that you have some id’s to download, we can use the &lt;code&gt;banxico_series&lt;/code&gt; function…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# Download the Bank of Mexico international reserves&lt;/span&gt;
+rsv &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; banxico_series&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;series &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;SF110168&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;kp&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rsv&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#          DATE SF110168&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-01-01 176321.4&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-02-01 178408.8&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-03-01 179708.0&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-04-01 182118.8&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-05-01 179351.0&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    2016-06-01 178829.9&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you want some other fancy things, you can use the options…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;rsv &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; banxico_series&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;series &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;SF110168&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      metadata &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                      verbose &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;Data series: SF110168 downloaded&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;Data series in monthly frequency&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# [1] &amp;quot;Parsing data with 198 rows&amp;quot;&lt;/span&gt;
+
+str&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rsv&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#List of 2&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# $ MetaData:List of 6&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ IndicatorName: chr &amp;quot;I. Official Reserve Assets And Other Foreign Currency Assets - A. Official Reserve Assets&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ IndicatorId  : chr &amp;quot;SF110168&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ Units        : chr &amp;quot;millions of u.s. dollar&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ DataType     : chr &amp;quot;market value/price&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ Period       : chr &amp;quot;jan 2000 - jun 2016&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ Frequency    : chr &amp;quot;monthly&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# $ Data    :&amp;#39;data.frame&amp;#39;:	198 obs. of  2 variables:&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ Dates   : Date[1:198], format: &amp;quot;2000-01-01&amp;quot; ...&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  ..$ SF110168: num [1:198] 33689 33382 36435 34749 33624 ...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, we can graph this…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ggplot2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;eem&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# theme from: https://github.com/Eflores89/eem&lt;/span&gt;
+
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;rsv&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Data&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; Dates&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; SF110168&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+       geom_path&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+       theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+       labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Dates&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+            y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Reserves in U.S. Dollars \n (&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; rsv&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;MetaData&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Units&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+            title &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Bank of Mexico International Reserves&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://enelmargen.org/banxicoR/imgs/banxicoR_1.png&quot; alt=&quot;bank of mexico reserves&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This data series is also available at INEGI and can be downloaded with &lt;a href=&quot;https://github.com/Eflores89/inegiR&quot;&gt;inegiR&lt;/a&gt; but Banxico has other interesting series exclusive to them, like financial loans or money in circulation, which I encourage everyone to check out!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any suggestions / improvements or open &lt;a href=&quot;https://github.com/Eflores89/banxicoR&quot;&gt;an issue at Github&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sun, 21 Aug 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/banxicoR/vignette-v09</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/banxicoR/vignette-v09</guid>
+			</item>
+		
+			<item>
 				<title>Voting clusters in the U.N.</title>
 					<description>&lt;p&gt;After some more digging, and a suggestion by &lt;a href=&quot;https://twitter.com/theMexIndian&quot;&gt;@theMexIndian&lt;/a&gt; I decided to see more in the depth the unvotes database that I &lt;a href=&quot;http://enelmargen.org/datascience/un-voting-patterns/&quot;&gt;wrote about&lt;/a&gt; some weeks ago.&lt;/p&gt;
 

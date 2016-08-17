@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>New banxicoR package | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 21 Aug 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/cultura/power-ideas">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>New banxicoR package</h1>
+          <br></br>
+    <p>The <strong>banxicoR</strong> package is now available on CRAN. Much like <a href="https://github.com/Eflores89/inegiR">inegiR</a> this package aims to bring official Mexican data easily into R, in this case by scrapping <em>iqy</em> calls to the SIE (Sistema de Información Económica) webservice of the Bank of Mexico.</p>
+
+<h3 id="introduction">Introduction</h3>
+
+<p>The major difference with inegiR is that the Bank of Mexico does not have an API, so this package basically uses <code>rvest</code> to scrape the generated html. The package then does what it can to save it in a convenient <code>data.frame</code> or <code>list</code> (same as inegiR).</p>
+
+<p>A few caveats:</p>
+
+<ul>
+  <li>I do not control the data definitions at the source (Banxico), so I can’t guarantee continuos use.</li>
+  <li>Finding the ID of each series has proven a manual, slow and tedious process because they are not available in the webpage. I’m trying to contact Banxico about getting a catalog, but basically use at your own risk.</li>
+</ul>
+
+<h3 id="finding-series-ids">Finding series ID’s</h3>
+
+<p>To find a specific series ID, I would recommend going to the <a href="http://www.banxico.org.mx/SieInternet/">SIE webpage</a>, navigating towards the desired indicators and then consulting them via HTML. The column name should be the series id (they are usually in this format: “SF60653”, with two characters followed by numbers). The package includes a <strong>small and non exhaustive</strong> catalog of series <strong>in spanish</strong>. You can access this by <code>data("BanxicoCatalog")</code>.</p>
+
+<p>Then you can find some id’s…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>banxicoR<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+data<span class="p">(</span><span class="s">&quot;BanxicoCatalog&quot;</span><span class="p">)</span>
+
+<span class="c1"># To see how many id&#39;s by parent subject </span>
+BanxicoCatalog <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>PARENT<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;Id&#39;s&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+
+<span class="c1"># Source: local data frame [4 x 2]</span>
+
+<span class="c1">#                       PARENT     Id&#39;s</span>
+<span class="c1">#                       (chr)     (int)</span>
+<span class="c1">#  1          Billetes y Monedas    45</span>
+<span class="c1">#  2 Intermediarios Financierios    37</span>
+<span class="c1">#  3            Sistemas de Pago    49</span>
+<span class="c1">#  4              Tipo de Cambio     2</span>
+
+<span class="c1"># to bring the specific id of the average duration of 200 peso bills...</span>
+BanxicoCatalog <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>PARENT <span class="o">==</span> <span class="s">&quot;Billetes y Monedas&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>LEVEL_1 <span class="o">==</span> <span class="s">&quot;Duración promedio del billete&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>LEVEL_2 <span class="o">==</span> <span class="s">&quot;200 pesos&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  select<span class="p">(</span>ID<span class="p">)</span>
+
+<span class="c1"># Source: local data frame [1 x 1]</span>
+
+<span class="c1">#      ID</span>
+<span class="c1">#    (chr)</span>
+<span class="c1">#1    SM32</span></code></pre></div>
+
+<h3 id="usage">Usage</h3>
+<p>Now that you have some id’s to download, we can use the <code>banxico_series</code> function…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Download the Bank of Mexico international reserves</span>
+rsv <span class="o">&lt;-</span> banxico_series<span class="p">(</span>series <span class="o">=</span> <span class="s">&quot;SF110168&quot;</span><span class="p">)</span>
+
+<span class="kp">tail</span><span class="p">(</span>rsv<span class="p">)</span>
+<span class="c1">#          DATE SF110168</span>
+<span class="c1">#    2016-01-01 176321.4</span>
+<span class="c1">#    2016-02-01 178408.8</span>
+<span class="c1">#    2016-03-01 179708.0</span>
+<span class="c1">#    2016-04-01 182118.8</span>
+<span class="c1">#    2016-05-01 179351.0</span>
+<span class="c1">#    2016-06-01 178829.9</span></code></pre></div>
+
+<p>If you want some other fancy things, you can use the options…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">rsv <span class="o">&lt;-</span> banxico_series<span class="p">(</span>series <span class="o">=</span> <span class="s">&quot;SF110168&quot;</span><span class="p">,</span> 
+                      metadata <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> 
+                      verbose <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<span class="c1"># [1] &quot;Data series: SF110168 downloaded&quot;</span>
+<span class="c1"># [1] &quot;Data series in monthly frequency&quot;</span>
+<span class="c1"># [1] &quot;Parsing data with 198 rows&quot;</span>
+
+str<span class="p">(</span>rsv<span class="p">)</span>
+<span class="c1">#List of 2</span>
+<span class="c1"># $ MetaData:List of 6</span>
+<span class="c1">#  ..$ IndicatorName: chr &quot;I. Official Reserve Assets And Other Foreign Currency Assets - A. Official Reserve Assets&quot;</span>
+<span class="c1">#  ..$ IndicatorId  : chr &quot;SF110168&quot;</span>
+<span class="c1">#  ..$ Units        : chr &quot;millions of u.s. dollar&quot;</span>
+<span class="c1">#  ..$ DataType     : chr &quot;market value/price&quot;</span>
+<span class="c1">#  ..$ Period       : chr &quot;jan 2000 - jun 2016&quot;</span>
+<span class="c1">#  ..$ Frequency    : chr &quot;monthly&quot;</span>
+<span class="c1"># $ Data    :&#39;data.frame&#39;:	198 obs. of  2 variables:</span>
+<span class="c1">#  ..$ Dates   : Date[1:198], format: &quot;2000-01-01&quot; ...</span>
+<span class="c1">#  ..$ SF110168: num [1:198] 33689 33382 36435 34749 33624 ...</span></code></pre></div>
+
+<p>Finally, we can graph this…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span> <span class="c1"># theme from: https://github.com/Eflores89/eem</span>
+
+ggplot<span class="p">(</span>rsv<span class="o">$</span>Data<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> Dates<span class="p">,</span> y <span class="o">=</span> SF110168<span class="p">))</span><span class="o">+</span>
+       geom_path<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
+       theme_eem<span class="p">()</span><span class="o">+</span>
+       labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Dates&quot;</span><span class="p">,</span> 
+            y <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Reserves in U.S. Dollars \n (&quot;</span><span class="p">,</span> rsv<span class="o">$</span>MetaData<span class="o">$</span>Units<span class="p">,</span> <span class="s">&quot;)&quot;</span><span class="p">),</span> 
+            title <span class="o">=</span> <span class="s">&quot;Bank of Mexico International Reserves&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="http://enelmargen.org/banxicoR/imgs/banxicoR_1.png" alt="bank of mexico reserves" /></p>
+
+<p>This data series is also available at INEGI and can be downloaded with <a href="https://github.com/Eflores89/inegiR">inegiR</a> but Banxico has other interesting series exclusive to them, like financial loans or money in circulation, which I encourage everyone to check out!</p>
+
+<p><a href="https://twitter.com/eflores89">Tweet</a> me up if you have any suggestions / improvements or open <a href="https://github.com/Eflores89/banxicoR">an issue at Github</a></p>
+
+  </div>
+</article>
+
+</body>
+</html>
