@@ -443,6 +443,33 @@
   </url>
   
   <url>
+    <loc>http://www.enelmargen.org/economia/indicadores-enganan</loc>
+    
+    <lastmod>2014-11-19T00:00:00-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.enelmargen.org/politica/menos-mas</loc>
+    
+    <lastmod>2014-10-15T00:00:00-05:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.enelmargen.org/politica/presupuesto-optimismo</loc>
+    
+    <lastmod>2014-09-12T00:00:00-05:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
     <loc>http://www.enelmargen.org/economia/irin-propiedad</loc>
     
     <lastmod>2014-04-04T00:00:00-06:00</lastmod>
