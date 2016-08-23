@@ -355,12 +355,6 @@ article .container {
   padding-top: 40px;
 }
 
-article .container-mba {
-  padding: 30px;
-  padding-right: 220px;
-   /* top, right, bottom, left*/
-}
-
 @media (max-width: 960px) {
   article {
     width: 100%;

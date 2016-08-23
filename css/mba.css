@@ -114,7 +114,8 @@ article {
 }
 
 .container {
-  padding: 100px 120px 40px 60px;
+  padding: 100px 80px 40px 60px;
+  /* top, right, bottom, left */
   width: 100%;
 }
 
@@ -131,7 +132,7 @@ article {
 
 header {
   position: relative;
-  width: 25%;
+  width: 15%;
   background-repeat: no-repeat;
   background-position: center;
   -webkit-background-size: cover;
@@ -339,7 +340,7 @@ article {
 
 
 article .container {
-  padding-top: 80px;
+  padding-top: 40px;
 }
 
 @media (max-width: 960px) {
@@ -511,5 +512,17 @@ table tr:hover td {
 
 .photo-gallery li img {
 	width: 100%;
+}
+
+.vertical-line-mba {
+    border-left: solid #A41E35;
+    padding-right: 5px;
+    padding-left: 20px;
+}
+
+article .container-mba {
+  padding: 30px;
+  padding-right: 140px;
+   /* top, right, bottom, left*/
 }
 
