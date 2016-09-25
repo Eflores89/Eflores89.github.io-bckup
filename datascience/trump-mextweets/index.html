@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>When Trump visits... tweets from his trip to Mexico | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 26 Sep 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: general, datascience, r-english, política</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/cultura/plagio-epn">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+
+<article>
+  <div class="container">
+          <h1>When Trump visits... tweets from his trip to Mexico</h1>
+          <br></br>
+    <p>I’m sure many of my fellow Mexicans will remember the historically ill-advised (to say the least) decision by our President to invite Donald Trump for a meeting.</p>
+
+<p>Talking to some fellow colleagues, we couldn’t help but notice that <strong>maybe</strong> in another era this decision would have been good policy. The problem, some concluded, was the influence of social media today. In fact, the Trump debacle did cause outcry among leading politica voices online.</p>
+
+<p>I wanted to investigate this further, and thankfully for me, I’ve been using <strong>R</strong> to collect tweets from a catalog of leading political personalities in Mexico for a <a href="http://numbersmart.mx/">personal business project</a>.</p>
+
+<p>Here is a short descriptive look at what the 65 twitter accounts I’m following tweeted between August 27th and September 5th (the Donald announced his visit on August the 30th). I’m sorry I can’t share the dataset, but you get the idea with the code…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>stringr<span class="p">)</span>
+
+<span class="c1"># 42 of the 65 accounts tweeted between those dates.</span>
+d <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;n&quot;</span> <span class="o">=</span> n_distinct<span class="p">(</span>NOMBRE<span class="p">))</span>
+<span class="c1">#   n</span>
+<span class="c1">#  42</span></code></pre></div>
+
+<p>We can see how mentions of trump spike just about the time it was announced…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">byhour <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;MONTH&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>month<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;DAY&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>day<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;HOUR&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>hour<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>MONTH<span class="p">,</span> DAY<span class="p">,</span> HOUR<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;N&quot;</span> <span class="o">=</span> n<span class="p">(),</span> 
+            <span class="s">&quot;TRUMP_MENTIONS&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>TRUMP_MENTION<span class="p">))</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;PCT_MENTIONS&quot;</span> <span class="o">=</span> TRUMP_MENTIONS<span class="o">/</span>N<span class="o">*</span><span class="m">100</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>MONTH<span class="p">),</span> desc<span class="p">(</span>DAY<span class="p">),</span> HOUR<span class="p">)</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;CHART_DATE&quot;</span> <span class="o">=</span> <span class="kp">as.POSIXct</span><span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;2016-&quot;</span><span class="p">,</span>MONTH<span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span>DAY<span class="p">,</span><span class="s">&quot; &quot;</span><span class="p">,</span> HOUR<span class="p">,</span> <span class="s">&quot;:00&quot;</span><span class="p">)))</span>
+
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>  
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+ggplot<span class="p">(</span>byhour<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> CHART_DATE<span class="p">,</span> 
+           y <span class="o">=</span> PCT_MENTIONS<span class="p">))</span> <span class="o">+</span> 
+        geom_line<span class="p">(</span>colour<span class="o">=</span>eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span> 
+        theme_eem<span class="p">()</span><span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Time&quot;</span><span class="p">,</span> 
+             y <span class="o">=</span> <span class="s">&quot;Trump mentions \n (% of Tweets)&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot1.png" alt="Trump tweets by mexican officials, percent" /></p>
+
+<p>The peak of mentions (as a percentage of tweets) was September 1st at 6 am (75%). But it terms of amount of tweets, it is much more obvious the outcry was following the anouncement and later visit of the candidate:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">ggplot<span class="p">(</span>byhour<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> CHART_DATE<span class="p">,</span> 
+           y <span class="o">=</span> TRUMP_MENTIONS<span class="p">))</span> <span class="o">+</span> 
+        geom_line<span class="p">(</span>colour<span class="o">=</span>eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span> 
+        theme_eem<span class="p">()</span><span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Time&quot;</span><span class="p">,</span> 
+             y <span class="o">=</span> <span class="s">&quot;Trump mentions \n (# of Tweets)&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot2.png" alt="Trump tweets by mexican officials, total" /></p>
+
+<p>We can also (sort-of) identify the effect of these influencers tweeting. I’m going to add the followers, which are potential viewers, of each tweet mentioning Trump, by hour.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">byaudience <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;MONTH&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>month<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;DAY&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>day<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;HOUR&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>hour<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>TRUMP_MENTION <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>MONTH<span class="p">,</span> DAY<span class="p">,</span> HOUR<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;TWEETS&quot;</span> <span class="o">=</span> n<span class="p">(),</span> 
+            <span class="s">&quot;AUDIENCE&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>U_FOLLOWERS<span class="p">))</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>MONTH<span class="p">),</span> desc<span class="p">(</span>DAY<span class="p">),</span> HOUR<span class="p">)</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;CHART_DATE&quot;</span> <span class="o">=</span> <span class="kp">as.POSIXct</span><span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;2016-&quot;</span><span class="p">,</span>MONTH<span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span>DAY<span class="p">,</span><span class="s">&quot; &quot;</span><span class="p">,</span> HOUR<span class="p">,</span> <span class="s">&quot;:00&quot;</span><span class="p">)))</span>
+
+
+ggplot<span class="p">(</span>byaudience<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> CHART_DATE<span class="p">,</span> 
+           y <span class="o">=</span> AUDIENCE<span class="p">))</span> <span class="o">+</span> 
+        geom_line<span class="p">(</span>colour<span class="o">=</span>eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span> 
+        theme_eem<span class="p">()</span><span class="o">+</span>
+        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Time&quot;</span><span class="p">,</span> 
+             y <span class="o">=</span> <span class="s">&quot;Potential audience \n (# of followers)&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot4.png" alt="Total audience of trump tweets" /></p>
+
+<p>So clearly, I’m stating the obvious. People were talking. But how was the conversation being developed? Let’s first see the type of tweets (RT’s vs drafted individually):</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">bytype <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  <span class="c1"># only the tweets that mention trump</span>
+  filter<span class="p">(</span>TRUMP_MENTION<span class="o">&gt;</span><span class="m">0</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>T_ISRT<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;count&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+kable<span class="p">(</span>bytype<span class="p">)</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">T_ISRT</th>
+      <th style="text-align: right">count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">FALSE</td>
+      <td style="text-align: right">313</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">TRUE</td>
+      <td style="text-align: right">164</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>About 1 in 3 was a RT. Comparing to the overall tweets, (1389 out of 3833) this seems not too much of a difference, so it wasn’t necesarrily an influencer pushing the discourse. In terms of the most mentioned by tweet it was our President on the spotlight:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">bymentionchain <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  <span class="c1"># only the tweets that mention trump</span>
+  group_by<span class="p">(</span>TRUMP_MENTION<span class="p">,</span> MENTION_CHAIN<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;count&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
+  ungroup<span class="p">()</span> <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;GROUPED_CHAIN&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span><span class="kp">grepl</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;EPN&quot;</span><span class="p">,</span> 
+                                        x <span class="o">=</span> MENTION_CHAIN<span class="p">),</span> 
+                                  <span class="s">&quot;EPN&quot;</span><span class="p">,</span> MENTION_CHAIN<span class="p">))</span> <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;GROUPED_CHAIN&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span><span class="kp">grepl</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;realDonaldTrump&quot;</span><span class="p">,</span> 
+                                        x <span class="o">=</span> MENTION_CHAIN<span class="p">),</span> 
+                                  <span class="s">&quot;realDonaldTrump&quot;</span><span class="p">,</span> GROUPED_CHAIN<span class="p">))</span>
+                                  
+ggplot<span class="p">(</span>order_axis<span class="p">(</span>bymentionchain <span class="o">%&gt;%</span> 
+                    filter<span class="p">(</span>count<span class="o">&gt;</span><span class="m">10</span> <span class="o">&amp;</span> GROUPED_CHAIN<span class="o">!=</span><span class="s">&quot;ND&quot;</span><span class="p">),</span> 
+                  axis <span class="o">=</span> GROUPED_CHAIN<span class="p">,</span> 
+                  column <span class="o">=</span> count<span class="p">),</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> GROUPED_CHAIN_o<span class="p">,</span> 
+           y <span class="o">=</span> count<span class="p">))</span> <span class="o">+</span> 
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span> <span class="o">+</span> 
+  theme_eem<span class="p">()</span> <span class="o">+</span> 
+  labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Mention chain \n (separated by _|.|_ )&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Tweets&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot3.png" alt="Mentions" /></p>
+
+<p>How about the actual persons who tweeted? It seemed like news anchor Joaquin Lopez-Doriga and security analyst Alejandro Hope were the most vocal about the visit (out of the influencers i’m following).</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">bytweetstar <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">)</span><span class="o">&lt;</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>TRUMP_MENTION<span class="p">,</span> NOMBRE<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;count&quot;</span> <span class="o">=</span> n_distinct<span class="p">(</span>TXT<span class="p">))</span>
+<span class="c1">## plot with ggplot2</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot5.png" alt="Mentions" /></p>
+
+<p>I also grouped each person by his political affiliation and I found it confirms the notion that the conversation on the eve of the visit, at least among this <strong>very small</strong> subset of twitter accounts, was driven by those with no party afiliation or in the “PAN” (opposition party).</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">byafiliation <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;MONTH&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>month<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;DAY&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>day<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;HOUR&quot;</span> <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>hour<span class="p">(</span>T_CREATED<span class="p">)),</span> 
+         <span class="s">&quot;TRUMP_MENTION&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>str_count<span class="p">(</span>TXT<span class="p">,</span> pattern <span class="o">=</span> <span class="s">&quot;Trump|TRUMP|trump&quot;</span><span class="p">)</span><span class="o">&gt;</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>MONTH<span class="p">,</span> DAY<span class="p">,</span> HOUR<span class="p">,</span> TRUMP_MENTION<span class="p">,</span> AFILIACION<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;TWEETS&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>MONTH<span class="p">),</span> desc<span class="p">(</span>DAY<span class="p">),</span> HOUR<span class="p">)</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;CHART_DATE&quot;</span> <span class="o">=</span> <span class="kp">as.POSIXct</span><span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;2016-&quot;</span><span class="p">,</span>MONTH<span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span>DAY<span class="p">,</span><span class="s">&quot; &quot;</span><span class="p">,</span> HOUR<span class="p">,</span> <span class="s">&quot;:00&quot;</span><span class="p">)))</span>
+  
+ ggplot<span class="p">(</span>byafiliation<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> CHART_DATE<span class="p">,</span> 
+           y <span class="o">=</span> TWEETS<span class="p">,</span> 
+           group <span class="o">=</span> AFILIACION<span class="p">,</span> 
+           fill <span class="o">=</span> AFILIACION<span class="p">))</span> <span class="o">+</span> 
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span> <span class="o">+</span> 
+  theme_eem<span class="p">()</span> <span class="o">+</span> 
+  scale_fill_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> 
+  facet_grid<span class="p">(</span>TRUMP_MENTION <span class="o">~</span><span class="m">.</span><span class="p">)</span> <span class="o">+</span>
+  labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Time&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Tweets \n (By mention of Trump)&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/trump_mex_plot6.png" alt="Mentions" /></p>
+
+<p>However, It’s interesting to note how there is a small spike of the accounts afiliated with the PRI (party in power) on the day after his visit (Sept. 1st). Maybe they were trying to drive the conversation to another place?</p>
+
+  </div>
+</article>
+
+</body>
+</html>

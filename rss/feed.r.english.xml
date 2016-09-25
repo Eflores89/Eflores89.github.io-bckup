@@ -7,6 +7,186 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>When Trump visits... tweets from his trip to Mexico</title>
+					<description>&lt;p&gt;I’m sure many of my fellow Mexicans will remember the historically ill-advised (to say the least) decision by our President to invite Donald Trump for a meeting.&lt;/p&gt;
+
+&lt;p&gt;Talking to some fellow colleagues, we couldn’t help but notice that &lt;strong&gt;maybe&lt;/strong&gt; in another era this decision would have been good policy. The problem, some concluded, was the influence of social media today. In fact, the Trump debacle did cause outcry among leading politica voices online.&lt;/p&gt;
+
+&lt;p&gt;I wanted to investigate this further, and thankfully for me, I’ve been using &lt;strong&gt;R&lt;/strong&gt; to collect tweets from a catalog of leading political personalities in Mexico for a &lt;a href=&quot;http://numbersmart.mx/&quot;&gt;personal business project&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Here is a short descriptive look at what the 65 twitter accounts I’m following tweeted between August 27th and September 5th (the Donald announced his visit on August the 30th). I’m sorry I can’t share the dataset, but you get the idea with the code…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stringr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# 42 of the 65 accounts tweeted between those dates.&lt;/span&gt;
+d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;NOMBRE&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   n&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#  42&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;We can see how mentions of trump spike just about the time it was announced…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;byhour &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;MONTH&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;month&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;DAY&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;day&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;HOUR&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hour&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;N&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; 
+            &lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTIONS&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;PCT_MENTIONS&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; TRUMP_MENTIONS&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;N&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CHART_DATE&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.POSIXct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;2016-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:00&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;ggplot2&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;eem&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;byhour&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CHART_DATE&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; PCT_MENTIONS&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+        labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Time&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+             y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump mentions \n (% of Tweets)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot1.png&quot; alt=&quot;Trump tweets by mexican officials, percent&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The peak of mentions (as a percentage of tweets) was September 1st at 6 am (75%). But it terms of amount of tweets, it is much more obvious the outcry was following the anouncement and later visit of the candidate:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;byhour&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CHART_DATE&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; TRUMP_MENTIONS&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+        labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Time&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+             y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump mentions \n (# of Tweets)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot2.png&quot; alt=&quot;Trump tweets by mexican officials, total&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We can also (sort-of) identify the effect of these influencers tweeting. I’m going to add the followers, which are potential viewers, of each tweet mentioning Trump, by hour.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;byaudience &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;MONTH&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;month&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;DAY&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;day&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;HOUR&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hour&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TWEETS&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; 
+            &lt;span class=&quot;s&quot;&gt;&amp;quot;AUDIENCE&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;U_FOLLOWERS&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CHART_DATE&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.POSIXct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;2016-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:00&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;byaudience&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CHART_DATE&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; AUDIENCE&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        geom_line&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;colour&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;eem_colors&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+        theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+        labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Time&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+             y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Potential audience \n (# of followers)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot4.png&quot; alt=&quot;Total audience of trump tweets&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So clearly, I’m stating the obvious. People were talking. But how was the conversation being developed? Let’s first see the type of tweets (RT’s vs drafted individually):&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;bytype &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# only the tweets that mention trump&lt;/span&gt;
+  filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_ISRT&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;count&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+kable&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;bytype&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;T_ISRT&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;count&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;FALSE&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;313&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRUE&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;164&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;About 1 in 3 was a RT. Comparing to the overall tweets, (1389 out of 3833) this seems not too much of a difference, so it wasn’t necesarrily an influencer pushing the discourse. In terms of the most mentioned by tweet it was our President on the spotlight:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;bymentionchain &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# only the tweets that mention trump&lt;/span&gt;
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; MENTION_CHAIN&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;count&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  ungroup&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;GROUPED_CHAIN&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;grepl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;EPN&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                                        x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; MENTION_CHAIN&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                                  &lt;span class=&quot;s&quot;&gt;&amp;quot;EPN&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; MENTION_CHAIN&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;GROUPED_CHAIN&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;grepl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;realDonaldTrump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                                        x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; MENTION_CHAIN&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                                  &lt;span class=&quot;s&quot;&gt;&amp;quot;realDonaldTrump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; GROUPED_CHAIN&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                                  
+ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;order_axis&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;bymentionchain &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+                    filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;count&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; GROUPED_CHAIN&lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;ND&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                  axis &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; GROUPED_CHAIN&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                  column &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; count&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; GROUPED_CHAIN_o&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; count&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  geom_bar&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;identity&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Mention chain \n (separated by _|.|_ )&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Tweets&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot3.png&quot; alt=&quot;Mentions&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;How about the actual persons who tweeted? It seemed like news anchor Joaquin Lopez-Doriga and security analyst Alejandro Hope were the most vocal about the visit (out of the influencers i’m following).&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;bytweetstar &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; NOMBRE&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;count&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n_distinct&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;## plot with ggplot2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot5.png&quot; alt=&quot;Mentions&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I also grouped each person by his political affiliation and I found it confirms the notion that the conversation on the eve of the visit, at least among this &lt;strong&gt;very small&lt;/strong&gt; subset of twitter accounts, was driven by those with no party afiliation or in the “PAN” (opposition party).&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;byafiliation &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;MONTH&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;month&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;DAY&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;day&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;HOUR&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;hour&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;T_CREATED&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; 
+         &lt;span class=&quot;s&quot;&gt;&amp;quot;TRUMP_MENTION&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;str_count&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TXT&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Trump|TRUMP|trump&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  group_by&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; TRUMP_MENTION&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; AFILIACION&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; 
+  summarise&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;TWEETS&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; n&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  arrange&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; desc&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt;
+  mutate&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;CHART_DATE&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.POSIXct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;2016-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;MONTH&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;DAY&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; HOUR&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:00&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+  
+ ggplot&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;byafiliation&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+       aes&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; CHART_DATE&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; TWEETS&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           group &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; AFILIACION&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           fill &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; AFILIACION&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  geom_bar&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;stat &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;identity&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  theme_eem&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  scale_fill_eem&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; 
+  facet_grid&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;TRUMP_MENTION &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;
+  labs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Time&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; y &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Tweets \n (By mention of Trump)&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/trump_mex_plot6.png&quot; alt=&quot;Mentions&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;However, It’s interesting to note how there is a small spike of the accounts afiliated with the PRI (party in power) on the day after his visit (Sept. 1st). Maybe they were trying to drive the conversation to another place?&lt;/p&gt;
+</description>
+				<pubDate>Mon, 26 Sep 2016 00:00:00 -0500</pubDate>
+				<link>http://www.enelmargen.org/datascience/trump-mextweets</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/trump-mextweets</guid>
+			</item>
+		
+			<item>
 				<title>New banxicoR package</title>
 					<description>&lt;p&gt;The &lt;strong&gt;banxicoR&lt;/strong&gt; package is now available on CRAN. Much like &lt;a href=&quot;https://github.com/Eflores89/inegiR&quot;&gt;inegiR&lt;/a&gt; this package aims to bring official Mexican data easily into R, in this case by scrapping &lt;em&gt;iqy&lt;/em&gt; calls to the SIE (Sistema de Información Económica) webservice of the Bank of Mexico.&lt;/p&gt;
 
