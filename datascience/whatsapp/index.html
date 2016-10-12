@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Analizando un grupo típico de Whatsapp | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 11 Oct 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: datascience, curioso</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/trump-mextweets">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>Analizando un grupo típico de Whatsapp</h1>
+    <p>Hace unos días surgió la curiosidad por confirmar algunas hipótesis que tenía sobre lo que se dice en uno de mis grupos más activos de WhatsApp. Entonces, decidí explorar con <em>R</em> estas preguntas, usando la exportación del chat a texto. Aquí están algunos resultados.</p>
+
+<h2 id="limpia-de-datos">Limpia de datos</h2>
+
+<p>Primero, un poco sobre los datos. Hagamos la importación de la conversación:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">d <span class="o">&lt;-</span> read.table<span class="p">(</span>file <span class="o">=</span> <span class="s">&quot;venados.txt&quot;</span><span class="p">,</span> 
+                stringsAsFactors <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> 
+                sep <span class="o">=</span> <span class="s">&quot;\n&quot;</span><span class="p">,</span> encoding <span class="o">=</span> <span class="s">&quot;UTF-8&quot;</span><span class="p">)</span></code></pre></div>
+
+<p>Hay algunos mensajes que empiezan con un “enter”, por ejemplo cuando se escribe en dos líneas <em>dentro del mismo mensaje</em>. Estos los tengo que quitar, para limpiar un poco la información. Si es la misma persona, pero manda el mensaje con enter, <em>si</em> aparece como dos mensajes (tú sabes quien eres).</p>
+
+<p>En proporción, los mensajes que voy a quitar son pocos, solo 556 mensajes (3.1% del total):</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>magrittr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>knitr<span class="p">)</span>
+d <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Correcto&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>
+    <span class="kp">grepl</span><span class="p">(</span>x <span class="o">=</span> V1<span class="p">,</span> 
+          pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;</span><span class="p">),</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>Correcto<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
+  kable<span class="p">()</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">Correcto</th>
+      <th style="text-align: right">Mensajes</th>
+      <th style="text-align: right">(%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">0</td>
+      <td style="text-align: right">556</td>
+      <td style="text-align: right">3.09%</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">17,426</td>
+      <td style="text-align: right">96.9%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Ahora, para analizar bien el texto, hice la siguiente función que me parsea la hora, fecha, minuto, persona y mensaje en diferentes columas.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">DividirTexto <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>s<span class="p">){</span>
+  <span class="kn">require</span><span class="p">(</span>stringr<span class="p">)</span>
+  <span class="c1"># patrones</span>
+  tiempo <span class="o">&lt;-</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-&quot;</span>
+  p <span class="o">&lt;-</span> <span class="s">&quot;^[^\\:]+&quot;</span>
+  b <span class="o">&lt;-</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\- [^\\:]+&quot;</span>
+  k <span class="o">&lt;-</span> <span class="m">2</span>
+  
+  <span class="c1"># Tiempo, Fecha y Hora</span>
+  TimeStamp <span class="o">&lt;-</span> <span class="kp">unlist</span><span class="p">(</span>
+    str_extract_all<span class="p">(</span>string <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> tiempo<span class="p">))</span>
+    <span class="c1"># Fecha</span>
+  Fecha <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>
+    str_extract<span class="p">(</span>string <span class="o">=</span> TimeStamp<span class="p">,</span>
+                pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}&quot;</span><span class="p">),</span> 
+    format <span class="o">=</span> <span class="s">&quot;%m/%d/%y&quot;</span><span class="p">)</span>
+  
+  Hora <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>
+    <span class="kp">gsub</span><span class="p">(</span>x <span class="o">=</span> str_extract<span class="p">(</span>
+      string <span class="o">=</span> str_extract<span class="p">(</span>
+        string <span class="o">=</span> TimeStamp<span class="p">,</span> 
+        pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
+      pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\:&quot;</span><span class="p">),</span> 
+      pattern <span class="o">=</span> <span class="s">&quot;\\:&quot;</span><span class="p">,</span> 
+      replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="c1"># eliminar el :</span>
+    <span class="p">)</span> <span class="c1"># fin de hora</span>
+  
+  Minutos <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>
+    <span class="kp">gsub</span><span class="p">(</span>x <span class="o">=</span> str_extract<span class="p">(</span>
+      string <span class="o">=</span> str_extract<span class="p">(</span>
+        string <span class="o">=</span> TimeStamp<span class="p">,</span> 
+        pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
+      pattern <span class="o">=</span> <span class="s">&quot;\\:[0-9]{2,}&quot;</span><span class="p">),</span> <span class="c1"># solo dos digitos despues de... </span>
+      pattern <span class="o">=</span> <span class="s">&quot;\\:&quot;</span><span class="p">,</span> 
+      replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="c1"># eliminar el :</span>
+  <span class="p">)</span>
+    
+  MitadDia <span class="o">&lt;-</span> str_extract<span class="p">(</span>
+    string <span class="o">=</span> str_extract<span class="p">(</span>
+      string <span class="o">=</span> TimeStamp<span class="p">,</span> 
+      pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
+    pattern <span class="o">=</span> <span class="s">&quot;[A|P]&quot;</span><span class="p">)</span>
+    
+  
+  Persona <span class="o">&lt;-</span> stri_split_regex<span class="p">(</span>str <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> tiempo<span class="p">)</span>
+  Persona <span class="o">&lt;-</span> <span class="kp">unlist</span><span class="p">(</span>str_extract_all<span class="p">(</span>pattern <span class="o">=</span> p<span class="p">,</span> string <span class="o">=</span> <span class="kp">unlist</span><span class="p">(</span>Persona<span class="p">)[</span>k<span class="p">]))</span>
+  
+  msj <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;^:&quot;</span><span class="p">,</span>
+              x <span class="o">=</span> <span class="kp">unlist</span><span class="p">(</span>str_split<span class="p">(</span>string <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> b<span class="p">))[</span><span class="m">2</span><span class="p">],</span> 
+              replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+  
+  df <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;TiempoWA&quot;</span> <span class="o">=</span> TimeStamp<span class="p">,</span> 
+                   <span class="s">&quot;Fecha&quot;</span> <span class="o">=</span> Fecha<span class="p">,</span> 
+                   <span class="s">&quot;Hora&quot;</span> <span class="o">=</span> Hora<span class="p">,</span> 
+                   <span class="s">&quot;Minutos&quot;</span> <span class="o">=</span> Minutos<span class="p">,</span> 
+                   <span class="s">&quot;MitadDia&quot;</span> <span class="o">=</span> MitadDia<span class="p">,</span> 
+                   <span class="s">&quot;Persona&quot;</span> <span class="o">=</span> Persona<span class="p">,</span> 
+                   <span class="s">&quot;Mensaje&quot;</span> <span class="o">=</span> msj<span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Entonces, pasemos los datos por esta función, para tener columnas que nos sirven para analizar…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># quitando los datos &quot;malos&quot;</span>
+d <span class="o">%&lt;&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;Correcto&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span>
+         <span class="p">(</span><span class="kp">grepl</span><span class="p">(</span>x <span class="o">=</span> V1<span class="p">,</span> 
+                pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;</span><span class="p">),</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  filter<span class="p">(</span>Correcto <span class="o">==</span> <span class="m">1</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  select<span class="p">(</span><span class="o">-</span>Correcto<span class="p">)</span>
+  
+<span class="c1"># dividiendo columnas</span>
+<span class="kn">library</span><span class="p">(</span>stringi<span class="p">)</span>
+d_limpio <span class="o">&lt;-</span> <span class="kp">lapply</span><span class="p">(</span>d<span class="o">$</span>V1<span class="p">,</span> DividirTexto<span class="p">)</span></code></pre></div>
+
+<p>Tenemos una lista así (estoy escondiendo el nombre real):</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span>d_limpio<span class="p">[[</span><span class="m">7110</span><span class="p">]])</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">TiempoWA</th>
+      <th style="text-align: left">Fecha</th>
+      <th style="text-align: right">Hora</th>
+      <th style="text-align: right">Mins</th>
+      <th style="text-align: left">Mitad</th>
+      <th style="text-align: left">Persona</th>
+      <th style="text-align: left">Mensaje</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">10/4/16, 1:39 PM -</td>
+      <td style="text-align: left">2016-10-04</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">39</td>
+      <td style="text-align: left">P</td>
+      <td style="text-align: left">Nombre</td>
+      <td style="text-align: left">Estaba en iglesia.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Por obvias razones, voy a “anonimizar” los nombres de mis amigos, sustituyendo por el nombre de una ciudad cada uno. Después, convertimos a un data.frame (esto lo esconderé).</p>
+
+<p>Ya que tenemos los datos limpios, podemos probar algunas de estas hipótesis…</p>
+
+<h2 id="mensajes-por-miembros">Mensajes por miembros</h2>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">a1 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Palabras_Total&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>Mensaje<span class="p">,</span> 
+                                      pattern <span class="o">=</span> <span class="s">&quot;\\S+&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>Ciudad<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;PalabraxMsj&quot;</span> <span class="o">=</span> <span class="kp">round</span><span class="p">(</span><span class="kp">mean</span><span class="p">(</span>Palabras_Total<span class="p">),</span><span class="m">2</span><span class="p">),</span> 
+            <span class="s">&quot;Palabras&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>Palabras_Total<span class="p">),</span> 
+            <span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;(% Msj)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Mensajes<span class="o">/</span><span class="m">17415</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">),</span>
+         <span class="s">&quot;(% Palabras)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Palabras<span class="o">/</span><span class="m">90579</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>Palabras<span class="p">))</span>
+kable<span class="p">(</span>a1<span class="p">)</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: right">PalabraxMsj</th>
+      <th style="text-align: right">Palabras</th>
+      <th style="text-align: right">Mensajes</th>
+      <th style="text-align: left">(% Msj)</th>
+      <th style="text-align: left">(% Palabras)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Madrid</td>
+      <td style="text-align: right">4.17</td>
+      <td style="text-align: right">16250</td>
+      <td style="text-align: right">3893</td>
+      <td style="text-align: left">22.4%</td>
+      <td style="text-align: left">17.9%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Mexico</td>
+      <td style="text-align: right">5.38</td>
+      <td style="text-align: right">10279</td>
+      <td style="text-align: right">1911</td>
+      <td style="text-align: left">11%</td>
+      <td style="text-align: left">11.3%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Boston</td>
+      <td style="text-align: right">6.45</td>
+      <td style="text-align: right">7186</td>
+      <td style="text-align: right">1114</td>
+      <td style="text-align: left">6.4%</td>
+      <td style="text-align: left">7.9%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oslo</td>
+      <td style="text-align: right">6.01</td>
+      <td style="text-align: right">6984</td>
+      <td style="text-align: right">1162</td>
+      <td style="text-align: left">6.7%</td>
+      <td style="text-align: left">7.7%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cairo</td>
+      <td style="text-align: right">4.15</td>
+      <td style="text-align: right">5973</td>
+      <td style="text-align: right">1438</td>
+      <td style="text-align: left">8.3%</td>
+      <td style="text-align: left">6.6%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: right">6.54</td>
+      <td style="text-align: right">5768</td>
+      <td style="text-align: right">882</td>
+      <td style="text-align: left">5.1%</td>
+      <td style="text-align: left">6.4%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Beijing</td>
+      <td style="text-align: right">6.00</td>
+      <td style="text-align: right">5765</td>
+      <td style="text-align: right">961</td>
+      <td style="text-align: left">5.5%</td>
+      <td style="text-align: left">6.4%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Bogota</td>
+      <td style="text-align: right">5.53</td>
+      <td style="text-align: right">4803</td>
+      <td style="text-align: right">869</td>
+      <td style="text-align: left">5%</td>
+      <td style="text-align: left">5.3%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Paris</td>
+      <td style="text-align: right">6.17</td>
+      <td style="text-align: right">4587</td>
+      <td style="text-align: right">744</td>
+      <td style="text-align: left">4.3%</td>
+      <td style="text-align: left">5.1%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cancun</td>
+      <td style="text-align: right">4.27</td>
+      <td style="text-align: right">3590</td>
+      <td style="text-align: right">841</td>
+      <td style="text-align: left">4.8%</td>
+      <td style="text-align: left">4%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Roma</td>
+      <td style="text-align: right">4.24</td>
+      <td style="text-align: right">3310</td>
+      <td style="text-align: right">781</td>
+      <td style="text-align: left">4.5%</td>
+      <td style="text-align: left">3.7%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Milan</td>
+      <td style="text-align: right">5.94</td>
+      <td style="text-align: right">2968</td>
+      <td style="text-align: right">500</td>
+      <td style="text-align: left">2.9%</td>
+      <td style="text-align: left">3.3%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Seoul</td>
+      <td style="text-align: right">5.76</td>
+      <td style="text-align: right">2846</td>
+      <td style="text-align: right">494</td>
+      <td style="text-align: left">2.8%</td>
+      <td style="text-align: left">3.1%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Taipei</td>
+      <td style="text-align: right">5.21</td>
+      <td style="text-align: right">2393</td>
+      <td style="text-align: right">459</td>
+      <td style="text-align: left">2.6%</td>
+      <td style="text-align: left">2.6%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Lima</td>
+      <td style="text-align: right">6.05</td>
+      <td style="text-align: right">1543</td>
+      <td style="text-align: right">255</td>
+      <td style="text-align: left">1.5%</td>
+      <td style="text-align: left">1.7%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: right">5.46</td>
+      <td style="text-align: right">1419</td>
+      <td style="text-align: right">260</td>
+      <td style="text-align: left">1.5%</td>
+      <td style="text-align: left">1.6%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston</td>
+      <td style="text-align: right">8.60</td>
+      <td style="text-align: right">1350</td>
+      <td style="text-align: right">157</td>
+      <td style="text-align: left">0.9%</td>
+      <td style="text-align: left">1.5%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Caracas</td>
+      <td style="text-align: right">4.90</td>
+      <td style="text-align: right">1180</td>
+      <td style="text-align: right">241</td>
+      <td style="text-align: left">1.4%</td>
+      <td style="text-align: left">1.3%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago</td>
+      <td style="text-align: right">4.49</td>
+      <td style="text-align: right">889</td>
+      <td style="text-align: right">198</td>
+      <td style="text-align: left">1.1%</td>
+      <td style="text-align: left">1%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Vienna</td>
+      <td style="text-align: right">4.49</td>
+      <td style="text-align: right">830</td>
+      <td style="text-align: right">185</td>
+      <td style="text-align: left">1.1%</td>
+      <td style="text-align: left">0.9%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia</td>
+      <td style="text-align: right">9.51</td>
+      <td style="text-align: right">666</td>
+      <td style="text-align: right">70</td>
+      <td style="text-align: left">0.4%</td>
+      <td style="text-align: left">0.7%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>En un grupo de 21 personas, uno de los miembros manda el 22.4% de los mensajes (el esperado sería de 1/21)!</p>
+
+<h2 id="el-encanto-del-enviar">El encanto del “enviar”</h2>
+
+<p>Desde la tabla pasada, se puede ver un poco esto, pero hagamos una gráfica sencilla para ilustrar…</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
+ggplot<span class="p">(</span>data <span class="o">=</span> a1<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> Mensajes<span class="p">,</span> 
+           y <span class="o">=</span> PalabraxMsj<span class="p">))</span><span class="o">+</span>
+  geom_point<span class="p">(</span>colour<span class="o">=</span>eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
+  theme_eem<span class="p">()</span><span class="o">+</span>
+  ggrepel<span class="o">::</span>geom_label_repel<span class="p">(</span>aes<span class="p">(</span>label <span class="o">=</span> Ciudad<span class="p">))</span><span class="o">+</span>
+  labs<span class="p">(</span>x<span class="o">=</span><span class="s">&quot;Mensajes&quot;</span><span class="p">,</span> y <span class="o">=</span><span class="s">&quot;Palabras por Mensaje&quot;</span><span class="p">,</span> 
+       title <span class="o">=</span> <span class="s">&quot;Distribución de Mensajes en Grupo&quot;</span><span class="p">)</span></code></pre></div>
+
+<p><img src="/images/posts/wa_1.png" alt="Distribución de Mensajes en Grupo de Whatsapp" /></p>
+
+<p>Entonces, <strong>Madrid</strong> es fan del “enter”.</p>
+
+<h2 id="mensajes-de-multimedia">Mensajes de multimedia</h2>
+
+<p>Para probar esta hipótesis, extraemos un indicador por mensaje que nos dice si contiene multimedia. Ojo que Whatsapp no exporta el tipo de media, sino solamente una leyenda que dice “<media ommitted="">", por lo que pueden ser también voicenotes o fotos.</media></p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">a2 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Media&quot;</span> <span class="o">=</span> stri_count_regex<span class="p">(</span>str <span class="o">=</span> Mensaje<span class="p">,</span> 
+                                    pattern <span class="o">=</span> <span class="s">&quot;&lt;Media omitted&gt;&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>Ciudad<span class="p">)</span> <span class="o">%&gt;%</span>
+  summarise<span class="p">(</span><span class="s">&quot;Media&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>Media<span class="p">),</span> <span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;Msj/Media&quot;</span> <span class="o">=</span> Mensajes<span class="o">/</span>Media<span class="p">)</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;(% Media)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Media<span class="o">/</span><span class="m">1200</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">2</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>Media<span class="p">))</span>
+kable<span class="p">(</span>a2<span class="p">)</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: right">Media</th>
+      <th style="text-align: right">Mensajes</th>
+      <th style="text-align: right">Msj/Media</th>
+      <th style="text-align: left">(% Media)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Mexico</td>
+      <td style="text-align: right">229</td>
+      <td style="text-align: right">1911</td>
+      <td style="text-align: right">8.344978</td>
+      <td style="text-align: left">19.08%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid</td>
+      <td style="text-align: right">184</td>
+      <td style="text-align: right">3893</td>
+      <td style="text-align: right">21.157609</td>
+      <td style="text-align: left">15.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Paris</td>
+      <td style="text-align: right">104</td>
+      <td style="text-align: right">744</td>
+      <td style="text-align: right">7.153846</td>
+      <td style="text-align: left">8.67%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: right">86</td>
+      <td style="text-align: right">882</td>
+      <td style="text-align: right">10.255814</td>
+      <td style="text-align: left">7.17%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Milan</td>
+      <td style="text-align: right">65</td>
+      <td style="text-align: right">500</td>
+      <td style="text-align: right">7.692308</td>
+      <td style="text-align: left">5.42%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Boston</td>
+      <td style="text-align: right">64</td>
+      <td style="text-align: right">1114</td>
+      <td style="text-align: right">17.406250</td>
+      <td style="text-align: left">5.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cairo</td>
+      <td style="text-align: right">64</td>
+      <td style="text-align: right">1438</td>
+      <td style="text-align: right">22.468750</td>
+      <td style="text-align: left">5.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oslo</td>
+      <td style="text-align: right">57</td>
+      <td style="text-align: right">1162</td>
+      <td style="text-align: right">20.385965</td>
+      <td style="text-align: left">4.75%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cancun</td>
+      <td style="text-align: right">56</td>
+      <td style="text-align: right">841</td>
+      <td style="text-align: right">15.017857</td>
+      <td style="text-align: left">4.67%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Bogota</td>
+      <td style="text-align: right">52</td>
+      <td style="text-align: right">869</td>
+      <td style="text-align: right">16.711538</td>
+      <td style="text-align: left">4.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Roma</td>
+      <td style="text-align: right">49</td>
+      <td style="text-align: right">781</td>
+      <td style="text-align: right">15.938776</td>
+      <td style="text-align: left">4.08%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Seoul</td>
+      <td style="text-align: right">49</td>
+      <td style="text-align: right">494</td>
+      <td style="text-align: right">10.081633</td>
+      <td style="text-align: left">4.08%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Beijing</td>
+      <td style="text-align: right">48</td>
+      <td style="text-align: right">961</td>
+      <td style="text-align: right">20.020833</td>
+      <td style="text-align: left">4%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Lima</td>
+      <td style="text-align: right">32</td>
+      <td style="text-align: right">255</td>
+      <td style="text-align: right">7.968750</td>
+      <td style="text-align: left">2.67%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: right">17</td>
+      <td style="text-align: right">260</td>
+      <td style="text-align: right">15.294118</td>
+      <td style="text-align: left">1.42%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Taipei</td>
+      <td style="text-align: right">17</td>
+      <td style="text-align: right">459</td>
+      <td style="text-align: right">27.000000</td>
+      <td style="text-align: left">1.42%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago</td>
+      <td style="text-align: right">13</td>
+      <td style="text-align: right">198</td>
+      <td style="text-align: right">15.230769</td>
+      <td style="text-align: left">1.08%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Caracas</td>
+      <td style="text-align: right">6</td>
+      <td style="text-align: right">241</td>
+      <td style="text-align: right">40.166667</td>
+      <td style="text-align: left">0.5%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Vienna</td>
+      <td style="text-align: right">4</td>
+      <td style="text-align: right">185</td>
+      <td style="text-align: right">46.250000</td>
+      <td style="text-align: left">0.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston</td>
+      <td style="text-align: right">3</td>
+      <td style="text-align: right">157</td>
+      <td style="text-align: right">52.333333</td>
+      <td style="text-align: left">0.25%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">70</td>
+      <td style="text-align: right">70.000000</td>
+      <td style="text-align: left">0.08%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Mexico</strong> manda cada 8 mensajes en promedio un mensaje de multimedia y acumula el 19% de todos los que se han enviado, mientras que el que menos manda es <strong>Morelia</strong> (ha mandado 1 solamente).</p>
+
+<p>Dado esto, y la cantidad de mensajes que llegan al día, podemos calcular la probabilidad de manera muy arbitraria que un día cualquiera nos llegue multimedia por cada persona:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># mensajes por día</span>
+msj_x_dia <span class="o">&lt;-</span> <span class="kp">nrow</span><span class="p">(</span>d_limpio<span class="p">)</span><span class="o">/</span><span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>d_limpio<span class="o">$</span>Fecha<span class="p">))</span>
+
+a3 <span class="o">&lt;-</span> a2 <span class="o">%&gt;%</span> 
+  inner_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> a1<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ciudad&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;ProbabilidadMedia&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>
+    <span class="p">((</span>Mensajes.y<span class="o">/</span><span class="m">17415</span><span class="p">)</span><span class="o">*</span><span class="sb">`Msj/Media`</span><span class="p">)</span><span class="o">/</span>msj_x_dia<span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">2</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>ProbabilidadMedia<span class="p">))</span> <span class="o">%&gt;%</span>
+  select<span class="p">(</span><span class="kt">c</span><span class="p">(</span>Ciudad<span class="p">,</span> ProbabilidadMedia<span class="p">))</span> 
+kable<span class="p">(</span>a3<span class="p">)</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: left">ProbabilidadMedia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Madrid</td>
+      <td style="text-align: left">5.13%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cairo</td>
+      <td style="text-align: left">2.01%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oslo</td>
+      <td style="text-align: left">1.48%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Boston</td>
+      <td style="text-align: left">1.21%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Beijing</td>
+      <td style="text-align: left">1.2%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Mexico</td>
+      <td style="text-align: left">0.99%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Bogota</td>
+      <td style="text-align: left">0.91%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cancun</td>
+      <td style="text-align: left">0.79%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Roma</td>
+      <td style="text-align: left">0.78%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Taipei</td>
+      <td style="text-align: left">0.77%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Caracas</td>
+      <td style="text-align: left">0.6%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: left">0.56%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Vienna</td>
+      <td style="text-align: left">0.53%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston</td>
+      <td style="text-align: left">0.51%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Paris</td>
+      <td style="text-align: left">0.33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Seoul</td>
+      <td style="text-align: left">0.31%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia</td>
+      <td style="text-align: left">0.31%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">0.25%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Milan</td>
+      <td style="text-align: left">0.24%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago</td>
+      <td style="text-align: left">0.19%</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Lima</td>
+      <td style="text-align: left">0.13%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="variacin-de-horas-por-persona">Variación de horas por persona</h2>
+
+<p>En este caso, parece que no hay tendencia muy establecida por persona, aunque en total es obvio que hay diferencias por hora. Un cuarto de los mensajes (23.9%) se mandan en las horas de trabajo (10 y 11 am) o a las 5 pm. Aquí les va una gráfica:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">a4 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>Ciudad<span class="p">,</span> Hora<span class="p">,</span> MitadDia<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+
+ggplot<span class="p">(</span>a4<span class="p">,</span> 
+       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">as.factor</span><span class="p">(</span>Hora<span class="p">),</span> 
+           y <span class="o">=</span> Mensajes<span class="p">))</span> <span class="o">+</span> 
+  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
+           aes<span class="p">(</span>fill<span class="o">=</span> Ciudad<span class="p">))</span> <span class="o">+</span> 
+  facet_wrap<span class="p">(</span> <span class="o">~</span> MitadDia<span class="p">)</span> <span class="o">+</span> 
+  theme_eem<span class="p">()</span> <span class="o">+</span> 
+  scale_fill_manual<span class="p">(</span><span class="kt">c</span><span class="p">(</span>eem_colors<span class="p">,</span><span class="s">&quot;#B0034F&quot;</span><span class="p">,</span> <span class="s">&quot;e72712&quot;</span><span class="p">))</span></code></pre></div>
+
+<p><img src="/images/posts/wa_2.png" alt="Mensajes por hora" /></p>
+
+<h2 id="conversacion-entre-personas">Conversacion entre personas</h2>
+<p>Finalmente, estaría interesante ver quienes son los que más se responden entre sí. Obviamente lo más común es un mensaje de <em>Madrid</em> seguido por otro de <em>Madrid</em>, pero aquí filtraré los mensajes que son de la misma persona. Es decir, son combinaciones de mensaje-respuesta entre dos participantes del grupo.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">a5 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Respuesta&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span>Ciudad<span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span>lag<span class="p">(</span>Ciudad<span class="p">)),</span> 
+         <span class="s">&quot;Igual&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>Ciudad<span class="o">==</span>lag<span class="p">(</span>Ciudad<span class="p">),</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
+  filter<span class="p">(</span>Igual<span class="o">&lt;</span><span class="m">1</span><span class="p">)</span> <span class="o">%&gt;%</span> 
+  group_by<span class="p">(</span>Respuesta<span class="p">)</span> <span class="o">%&gt;%</span> 
+  summarise<span class="p">(</span><span class="s">&quot;Conteo&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
+  arrange<span class="p">(</span>desc<span class="p">(</span>Conteo<span class="p">))</span></code></pre></div>
+
+<p>Aquí está en top 10 de combinaciones:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span>a5 <span class="o">%&gt;%</span> <span class="kp">head</span><span class="p">(</span><span class="m">.</span><span class="p">,</span> n <span class="o">=</span> <span class="m">10</span><span class="p">))</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Respuesta</th>
+      <th style="text-align: right">Conteo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Mexico-Madrid</td>
+      <td style="text-align: right">255</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid-Mexico</td>
+      <td style="text-align: right">234</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Boston-Madrid</td>
+      <td style="text-align: right">188</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid-Oslo</td>
+      <td style="text-align: right">178</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid-Boston</td>
+      <td style="text-align: right">177</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid-Beijing</td>
+      <td style="text-align: right">165</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Beijing-Madrid</td>
+      <td style="text-align: right">164</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oslo-Madrid</td>
+      <td style="text-align: right">155</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cancun-Madrid</td>
+      <td style="text-align: right">154</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Madrid-Cancun</td>
+      <td style="text-align: right">154</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Para aquel que está acostumbrado a estas cosas, esto no es necesariamente relevante, por que <em>Madrid</em>, <em>Mexico</em> y <em>Boston</em> están relativamente sobre-representados en la muestra. Lo conveniente sería tratar a esta canasta de respuestas con un procedimiento bayesiano simple para encontrar las relaciones que probabilísticamente no ocurrirían de manera independiente.</p>
+
+<p>Esto se reduce a simplemente a seguir el teorema de Bayes: P(A|B) = P(A)P(B) y comparar contra lo observado (la hipótesis nula es que no son independientes). Hagamos una función para esto.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">ObtenerIndependiente <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>d<span class="p">,</span> p<span class="p">){</span>
+  tm <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>d<span class="o">$</span>Mensaje<span class="p">)</span>
+  a <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+    filter<span class="p">(</span>Ciudad <span class="o">==</span> p<span class="p">)</span>
+  pa <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>a<span class="o">$</span>Mensaje<span class="p">)</span>
+  pa <span class="o">&lt;-</span> pa<span class="o">/</span>tm
+  
+  n <span class="o">&lt;-</span> <span class="kp">unique</span><span class="p">(</span>d<span class="o">$</span>Ciudad<span class="p">)</span>
+  v <span class="o">&lt;-</span> <span class="kc">NULL</span>
+  k <span class="o">&lt;-</span> <span class="kc">NULL</span>
+  <span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>n<span class="p">)){</span>
+    b <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
+      filter<span class="p">(</span>Ciudad <span class="o">==</span> <span class="kp">as.character</span><span class="p">(</span>n<span class="p">[</span>i<span class="p">]))</span>
+    pb <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>b<span class="o">$</span>Mensaje<span class="p">)</span>
+    pb <span class="o">&lt;-</span> pb<span class="o">/</span>tm
+    v<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="p">(</span>pa<span class="o">*</span>pb<span class="o">*</span>tm<span class="p">)</span>
+    k<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>n<span class="p">[</span>i<span class="p">])</span>
+  <span class="p">}</span>
+  df <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Ciudad&quot;</span> <span class="o">=</span> <span class="kp">rep</span><span class="p">(</span>p<span class="p">,</span> times <span class="o">=</span> <span class="kp">length</span><span class="p">(</span>n<span class="p">)),</span>
+                   <span class="s">&quot;Ciudad2&quot;</span> <span class="o">=</span> k<span class="p">,</span> 
+                   <span class="s">&quot;P_Independiente&quot;</span> <span class="o">=</span> v<span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Ahora voy a generar indicadores para cada “país”:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">associacion <span class="o">&lt;-</span> <span class="kc">NULL</span>
+<span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">21</span><span class="p">){</span>
+  tmp <span class="o">&lt;-</span> ObtenerIndependiente<span class="p">(</span>d_limpio<span class="p">,</span> <span class="kp">unique</span><span class="p">(</span>d_limpio<span class="o">$</span>Ciudad<span class="p">)[</span>i<span class="p">])</span>
+  associacion <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>associacion<span class="p">,</span> tmp<span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Obtenemos un data.frame así:</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span><span class="kp">head</span><span class="p">(</span>associacion<span class="p">))</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Ciudad</th>
+      <th style="text-align: left">Ciudad2</th>
+      <th style="text-align: right">P_Independiente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: right">3.881711</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Paris</td>
+      <td style="text-align: right">11.107666</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Monterrey</td>
+      <td style="text-align: right">13.167959</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Mexico</td>
+      <td style="text-align: right">28.530577</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Cancun</td>
+      <td style="text-align: right">12.555843</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres</td>
+      <td style="text-align: left">Houston</td>
+      <td style="text-align: right">2.343956</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Esto básicamente quiere decir que, si realmente existiese independencia estadística, deberíamos de encontrar casi 4 (3.88) mensajes con en dónde Londres manda un mensaje antes o después de si mismo.</p>
+
+<p>Dado que vamos a comparar solamente contra lo observado <em>después</em> de un mensaje particular, vamos a dividir estas probabilidades entre dos (el supuesto fuerte aquí es que asumimos que no hay diferencia entre mandar antes o después un mensaje…).</p>
+
+<p>Finalmente, comparamos contra lo observado.</p>
+
+<div class="highlight"><pre><code class="language-r" data-lang="r">a6 <span class="o">&lt;-</span> associacion <span class="o">%&gt;%</span> 
+  mutate<span class="p">(</span><span class="s">&quot;Combinacion&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span>Ciudad<span class="p">,</span> <span class="s">&quot;-&quot;</span><span class="p">,</span> Ciudad2<span class="p">),</span> 
+         <span class="s">&quot;P_Independiente&quot;</span> <span class="o">=</span> P_Independiente<span class="o">/</span><span class="m">2</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  inner_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> a5<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Combinacion&quot;</span> <span class="o">=</span> <span class="s">&quot;Respuesta&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span><span class="s">&quot;Asociacion&quot;</span> <span class="o">=</span> Conteo<span class="o">/</span>P_Independiente<span class="p">)</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>desc<span class="p">(</span>Asociacion<span class="p">))</span> <span class="o">%&gt;%</span>
+  <span class="kp">head</span><span class="p">(</span><span class="m">.</span><span class="p">,</span> n <span class="o">=</span> <span class="m">20</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  select<span class="p">(</span><span class="kt">c</span><span class="p">(</span>Combinacion<span class="p">,</span> Asociacion<span class="p">))</span>
+kable<span class="p">(</span>a6<span class="p">)</span></code></pre></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Combinacion</th>
+      <th style="text-align: right">Asociacion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Morelia-Caracas</td>
+      <td style="text-align: right">8.258447</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston-Caracas</td>
+      <td style="text-align: right">6.443693</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago-Morelia</td>
+      <td style="text-align: right">5.025974</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Vienna-Taipei</td>
+      <td style="text-align: right">4.922099</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cairo-Morelia</td>
+      <td style="text-align: right">4.498212</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia-Cairo</td>
+      <td style="text-align: right">4.498212</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston-Taipei</td>
+      <td style="text-align: right">4.349944</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago-Lima</td>
+      <td style="text-align: right">4.139037</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Lima-Chicago</td>
+      <td style="text-align: right">4.139037</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia-Lima</td>
+      <td style="text-align: right">3.902521</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Houston-Bogota</td>
+      <td style="text-align: right">3.829352</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelia-Londres</td>
+      <td style="text-align: right">3.827472</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Vienna-Cancun</td>
+      <td style="text-align: right">3.805701</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Cancun-Lima</td>
+      <td style="text-align: right">3.735469</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Caracas-Houston</td>
+      <td style="text-align: right">3.682110</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Londres-Vienna</td>
+      <td style="text-align: right">3.620582</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chicago-Seoul</td>
+      <td style="text-align: right">3.560913</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Taipei-Londres</td>
+      <td style="text-align: right">3.502262</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Lima-Cancun</td>
+      <td style="text-align: right">3.248234</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Caracas-Seoul</td>
+      <td style="text-align: right">3.218119</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>La tabla de arriba se lee básicamente así: <em>Morelia</em> tiende a responder <strong>estadísticamente</strong> ocho veces más después de <em>Caracas</em> que lo esperado. A pesar de que no son los que más escriben, estas relaciones son las más fuertes.</p>
+
+<p>Se me acaba el tiempo, pero tal vez en un futuro cercano valga la pena hacer algo de sentiment analysis sobre lo que se dice, o explorar el grado de diferencia entre palabras usadas…</p>
+
+  </div>
+</article>
+
+</body>
+</html>
