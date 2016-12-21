@@ -7,6 +7,192 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Shiny App for MBA Interviews</title>
+					<description>&lt;p&gt;A couple of weeks ago I attended some interviews as part of my process for admission into an MBA program. While most candidates would pore over the possible questions and then try to teach them to a third party to help them with a mock interview, I decided to expedite the process by building a shiny app in &lt;em&gt;R&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the name of helping anyone out there who knows R and is applying to an MBA (I know it is probably very few people), here is the code and a simple explanation of my workflow.&lt;/p&gt;
+
+&lt;h2 id=&quot;workflow&quot;&gt;Workflow&lt;/h2&gt;
+
+&lt;p&gt;First, you will need an excel with all the possible questions to ask. I compiled one &lt;a href=&quot;http://enelmargen.org/docs/qs.xlsx&quot;&gt;here&lt;/a&gt;. You place this excel in the folder with the ui.R and server.R files. When a button is pressed on the app (the “score”), the shiny app will export a very small text file into that folder. This file will be separated by pipes and have 6 columns and one row: each indicating what question and school it is and the subjective score given by the interviewer to the question.&lt;/p&gt;
+
+&lt;p&gt;When you want to analyze the results, you simply import each file and rbind them to have a nifty data.frame. I’ll also leave the code to do this later on.&lt;/p&gt;
+
+&lt;p&gt;Now, on to the code.&lt;/p&gt;
+
+&lt;h2 id=&quot;serverr&quot;&gt;server.R&lt;/h2&gt;
+
+&lt;p&gt;Change it as you wish. There is a timer, that will indicate when time is running more the standard the interview suggests.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;shiny&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;readxl&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;shinyjs&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dplyr&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+d &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; read_excel&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;qs.xlsx&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+jsResetCode &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;shinyjs.reset = function() {history.go(0)}&amp;quot;&lt;/span&gt;
+
+shinyServer&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;input&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; output&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; session&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  EventTime &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;Sys.time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  
+  qqt &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; reactive&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;response&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;To interviewer&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+      d &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;RESPONSE&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;To Interviewer&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      d &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d &lt;span class=&quot;o&quot;&gt;%&amp;gt;%&lt;/span&gt; filter&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;RESPONSE&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;To applicant&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    
+    qs &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; d&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Q
+    qn &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;row.names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;d&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    qr &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; qs&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;qn&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;grepl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;(\\[SCHOOL\\])&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;qr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)){&lt;/span&gt;
+      qr &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;gsub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;(\\[SCHOOL\\])&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; replacement &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;school&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;qr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;kp&quot;&gt;as.character&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Q&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;qn&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;: &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;qr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  
+  output&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;qqt2 &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; renderText&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt; 
+    txt &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; qqt&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    txt 
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+ 
+  output&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;eventTimeRemaining &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; renderUI&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+    invalidateLater&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; session&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    tm &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;difftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;kp&quot;&gt;Sys.time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; EventTime&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; units &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;secs&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    
+    &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;NormalTime&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    HTML&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Elapsed time: &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot; seconds.&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                                    &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;o&quot;&gt;%/%&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; tm&lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot; mins.&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      HTML&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;lt;p style=&amp;quot;color:#9f1317;&amp;quot;&amp;gt;&amp;lt;strong&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Time-up!! (&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;ifelse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot; seconds).&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                                      &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;tm&lt;span class=&quot;o&quot;&gt;%/%&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; tm&lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot; mins).&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))),&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  
+  observeEvent&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;reset&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    shinyjs&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;reset&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;qqt&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  
+  observeEvent&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;reset_button&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;js&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;reset&lt;span class=&quot;p&quot;&gt;()})&lt;/span&gt;  
+  
+  observeEvent&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;submit&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    tm &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.numeric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;difftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;kp&quot;&gt;Sys.time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; EventTime&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; units &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;secs&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    
+    nq &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;substr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;as.character&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;qqt&lt;span class=&quot;p&quot;&gt;()),&lt;/span&gt; start &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+           stop &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;gregexpr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; qqt&lt;span class=&quot;p&quot;&gt;())[[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]][&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;-1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    dtm &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;School&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;school&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                       &lt;span class=&quot;s&quot;&gt;&amp;quot;Seconds&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; tm&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                       &lt;span class=&quot;s&quot;&gt;&amp;quot;Question&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; qqt&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+                       &lt;span class=&quot;s&quot;&gt;&amp;quot;Number&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; nq&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                       &lt;span class=&quot;s&quot;&gt;&amp;quot;Fluid&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;score1&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                       &lt;span class=&quot;s&quot;&gt;&amp;quot;Content&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; input&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;score2&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                      &lt;span class=&quot;s&quot;&gt;&amp;quot;Hour&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;Sys.time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+                      &lt;span class=&quot;s&quot;&gt;&amp;quot;Date&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;Sys.Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+                      &lt;span class=&quot;s&quot;&gt;&amp;quot;Type&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;New&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    nm &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;Sys.Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+                 &lt;span class=&quot;kp&quot;&gt;gsub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                      replacement &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;_&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                      x &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;substr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;Sys.time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;19&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    
+    write.table&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;dtm&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; file &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Interviews_&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; nm&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;.txt&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                sep &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;|&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; row.names &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;uir&quot;&gt;ui.R&lt;/h2&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;shiny&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;shinyjs&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+jsResetCode &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;shinyjs.reset = function() {history.go(0)}&amp;quot;&lt;/span&gt;
+
+shinyUI&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;fluidPage&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  useShinyjs&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# Application title&lt;/span&gt;
+  titlePanel&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;MBA Interview Questions&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;# Sidebar with a slider input for number of bins&lt;/span&gt;
+  sidebarLayout&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    sidebarPanel&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      sliderInput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;NormalTime&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Minutes per response:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                  min &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; max &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; value &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      selectInput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;response&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Question type:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                  &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;To applicant&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;To interviewer&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+          &lt;span class=&quot;c1&quot;&gt;# you can select which schools here...        &lt;/span&gt;
+      selectInput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;school&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;School:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                  &lt;span class=&quot;kt&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;School 1&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;School 2&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+      HTML&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;lt;h4&amp;gt; Typical Methods for Behavioural Questions &amp;lt;/h4&amp;gt; &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;           &amp;lt;h4&amp;gt; &amp;lt;strong&amp;gt; STAR: &amp;lt;/strong&amp;gt;&amp;lt;h4&amp;gt; &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;strong&amp;gt;S&amp;lt;/strong&amp;gt;ituation: indentify the situation &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;strong&amp;gt;T&amp;lt;/strong&amp;gt;ask: identify task or project &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;strong&amp;gt;A&amp;lt;/strong&amp;gt;ction: describe what you did &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;strong&amp;gt;R&amp;lt;/strong&amp;gt;esult: summarize the results &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;h4&amp;gt; &amp;lt;strong&amp;gt; CAR: &amp;lt;/strong&amp;gt;&amp;lt;h4&amp;gt; &amp;lt;/ br&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;          &amp;lt;strong&amp;gt;C&amp;lt;/strong&amp;gt;ontext: describe the context &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;           &amp;lt;strong&amp;gt;A&amp;lt;/strong&amp;gt;ction: describe what you did &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;           &amp;lt;strong&amp;gt;R&amp;lt;/strong&amp;gt;esult: summarize the results &amp;lt;br/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;           &amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    mainPanel&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      HTML&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;lt;h1&amp;gt; Question &amp;lt;/h1&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      hr&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+      h2&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;textOutput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;qqt2&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+      uiOutput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;eventTimeRemaining&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      hr&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+      sliderInput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;score1&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Fluidity and Security:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                  min &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; max &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; value &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      sliderInput&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;score2&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Content:&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                  min &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; max &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; value &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      extendShinyjs&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;text &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; jsResetCode&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      actionButton&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;reset_button&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;New Question&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      actionButton&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;submit&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Score&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;import-to-analyze&quot;&gt;Import to analyze&lt;/h2&gt;
+
+&lt;p&gt;This is the code used to import all of the files starting with “Interviews” from the folder.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;LoadManyTxt &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;regex&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; separator &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;|&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  a &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;list.files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;grepl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;pattern &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; regex&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                          &lt;span class=&quot;kp&quot;&gt;list.files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())]&lt;/span&gt;
+  datos &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NULL&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;#import&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;i &lt;span class=&quot;kr&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;p&quot;&gt;)){&lt;/span&gt;
+    temp &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;as.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;read.delim&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      a&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; sep &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; separator&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      stringsAsFactors &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    
+    &lt;span class=&quot;kp&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Importing... &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; a&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;temp&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+      temp&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Hora &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NA&lt;/span&gt;
+      temp&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Fecha &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;NA&lt;/span&gt;
+      temp&lt;span class=&quot;o&quot;&gt;$&lt;/span&gt;Tipo &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Previous&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    datos &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;rbind.data.frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;datos&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; temp&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kp&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;paste&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Data: &amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;datos&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot; rows&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;kr&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;datos&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# when in the folder, just do...&lt;/span&gt;
+d &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; LoadManyTxt&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Interviews_&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It might seem intense, but this definitely saved me a few hours. As for the outcome of the interviews, I was invited to join two of my school choices, so it all worked out! Although, having gone through the experience, I think the old mantra: “be yourself” is probably better advice than using this app, so use at your own risk!&lt;/p&gt;
+
+</description>
+				<pubDate>Tue, 20 Dec 2016 00:00:00 -0600</pubDate>
+				<link>http://www.enelmargen.org/datascience/mba-shiny</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mba-shiny</guid>
+			</item>
+		
+			<item>
 				<title>When Trump visits... tweets from his trip to Mexico</title>
 					<description>&lt;p&gt;I’m sure many of my fellow Mexicans will remember the historically ill-advised (to say the least) decision by our President to invite Donald Trump for a meeting.&lt;/p&gt;
 
