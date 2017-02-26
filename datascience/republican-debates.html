@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>What the candidates say, analyzing republican debates using R | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 26 Nov 2015</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/negocios/sobrevivir-b-players">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/economia/Zonas-Econ-Urgentes">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>What the candidates say, analyzing republican debates using R</h1>
+    <p>As most people realize, this is probably one of the most data-rich primary campaigns in history, with hundreds of professional pollsters poring over every data-point trying to understand voter’s intention.</p>
+
+<p>So here is another data-rich post to that end.</p>
+
+<p>I was glad to discover the University of California at Santa Barbara’s <a href="http://www.presidency.ucsb.edu/">webpage</a> with tons of high-quality data related to the elections.</p>
+
+<p>Amongst these are the transcripts of presidential debates going back to 1960, which I will pore over a bit further.</p>
+
+<p>Because the Republican race is arguably more fun to watch, i’ll be concentrating on these debates.</p>
+
+<h2 id="getting-and-cleaning-the-data">Getting and cleaning the data</h2>
+
+<p>A few things to set-up before downloading the data:</p>
+
+<blockquote>
+  <p>Update (1/4/2015) - Thanks to Alan Jordan who nicely corrected my regex with a more robust version and a more sucinct function for cleaning the data below..</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># some packages for scraping and cleaning the data
+library(rvest)
+library(plyr)
+library(dplyr)
+library(stringi)
+library(magrittr)
+
+# function to partially separate and clean into a data.frame a debate from the presidency project
+MakeDebateDF&lt;-function(df){
+  newdf &lt;- data.frame(
+    person = apply(df, 
+                   MARGIN = 1, 
+                   function(x){
+                     stri_extract_first_regex(x, 
+                                              &quot;[A-Z&#39;-]+(?=(:\\s))&quot;)
+                   }),
+    message = apply(df, 
+                    MARGIN = 1, 
+                    function(x){
+                      stri_replace_first_regex(x,
+                                               &quot;[A-Z&#39;-]+:\\s+&quot;, 
+                                               &quot;&quot;)
+                    }),
+    stringsAsFactors=FALSE
+  )
+  for (j in 2:nrow(newdf)) { 
+  if (is.na(newdf[j,&#39;person&#39;])) 
+		{newdf[j,&#39;person&#39;] &lt;-  newdf[(j-1),&#39;person&#39;] }
+	}
+
+  return(newdf)
+}</code></pre></figure>
+
+<p>Now, to download the last 4 debates (i’m only going to analyze the “big-boy” debates between top contenders and omit New Hampshire because it is not in the database). I’ll use the main webpage for the presidency project:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># Importing debates --- 
+# url for all debates
+url &lt;- &quot;http://www.presidency.ucsb.edu/ws/index.php?pid=&quot;</code></pre></figure>
+
+<p>And download and fix each debate:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">### -------- debate in Wisconsin (fourth debate)
+wisconsin &lt;- &quot;110908&quot;
+
+debate_w &lt;- read_html(paste0(url, wisconsin)) %&gt;% 
+  html_nodes(&quot;p&quot;) %&gt;%
+  html_text()
+
+debate_w &lt;- ldply(debate_w, rbind)
+debate_w &lt;- MakeDebateDF(debate_w)
+
+### -------- debate in Boulder, Col. (third debate)
+boulder &lt;- &quot;110906&quot;
+
+debate_b &lt;- read_html(paste0(url, boulder)) %&gt;% 
+  html_nodes(&quot;p&quot;) %&gt;%
+  html_text()
+
+debate_b &lt;- ldply(debate_b, rbind)
+debate_b &lt;- MakeDebateDF(debate_b)
+
+### -------- debate in Simi Valley, California (second debate)
+california &lt;- &quot;110756&quot;
+
+debate_c &lt;- read_html(paste0(url, california)) %&gt;% 
+  html_nodes(&quot;p&quot;) %&gt;%
+  html_text()
+
+debate_c &lt;- ldply(debate_c, rbind)
+debate_c &lt;- MakeDebateDF(debate_c)
+
+### -------- debate in Cleveland, Ohio (first debate)
+ohio &lt;- &quot;110489&quot;
+
+debate_h &lt;- read_html(paste0(url, ohio)) %&gt;% 
+  html_nodes(&quot;p&quot;) %&gt;%
+  html_text()
+
+debate_h &lt;- ldply(debate_h, rbind)
+debate_h &lt;- MakeDebateDF(debate_h)</code></pre></figure>
+
+<h2 id="analyzing">Analyzing</h2>
+
+<p>Now, for the fun part. First, let’s start with some simply word-clouds (using <a href="http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need">this excellent example</a> as a starting point)</p>
+
+<p>I’m going to use the <code>rquery.wordcloud</code> the function, taken shamelessly from sthda.com in the previous link to see what contenders like to talk about the most…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># Join into large d.f.
+all_debates &lt;- rbind(debate_w, 
+                     debate_b,
+                     debate_c,
+                     debate_h)
+
+# these are necesary for plots 
+library(ggplot2)
+# this is for order_axis and theme_eem
+# it can be downloaded using 
+# devtools::install_github(&quot;eflores/eem&quot;)
+library(eem)
+
+trump_words &lt;- apply(subset(all_debates, person == &quot;TRUMP&quot;)[&#39;message&#39;],
+                    1,
+                    paste)
+# cloud
+trump_cloud &lt;- rquery.wordcloud(trump_words, 
+    &quot;text&quot;, 
+    max.words = 300,
+    excludeWords = c(&quot;going&quot;,&quot;and&quot;,
+                    &quot;applause&quot;,&quot;get&quot;,
+                    &quot;got&quot;,&quot;let&quot;))
+
+trump_freq &lt;- trump_cloud$freqTable
+
+# top 10
+trump_top &lt;- ggplot(order_axis(
+      trump_freq[1:10,],
+        word, freq), 
+      aes(x = word_o, 
+          y = freq))+
+    geom_bar(stat=&quot;identity&quot;,
+              fill = eem_colors[1]) +
+    theme_eem() + 
+    labs(title = &quot;Top 10 words in Debates \n Donald Trump&quot;, 
+          x = &quot;Word&quot;,
+          y = &quot;Frequency&quot;)</code></pre></figure>
+
+<p>Donald really likes “great” more than the other candidates…</p>
+
+<p><img src="/images/posts/trump_wordcloud.png" alt="trump_wordcloud" /></p>
+
+<p><img src="/images/posts/trump_top10.png" alt="trump_top10" /></p>
+
+<p>Using the same process… What about Jeb Bush? He prefers to mention Hillary…</p>
+
+<p><img src="/images/posts/bush_wordcloud.png" alt="bush_wordcloud" /></p>
+
+<p><img src="/images/posts/bush_top10.png" alt="bush_top10" /></p>
+
+<p>Marco Rubio likes to present his tax plan…</p>
+
+<p><img src="/images/posts/rubio_wordcloud.png" alt="rubio_wordcloud" /></p>
+
+<p><img src="/images/posts/rubio_top10.png" alt="rubio_top10" /></p>
+
+<p>And the notoriously outspoken Cruz omits “people”, talks tax and prefers to confront “washington” more than his colleagues:</p>
+
+<p><img src="/images/posts/cruz_wordcloud.png" alt="cruz_wordcloud" /></p>
+
+<p><img src="/images/posts/cruz_top10.png" alt="cruz_top10" /></p>
+
+<h2 id="more-stats">More stats!</h2>
+
+<p>The former stats are all about the total participation in debates, but more interesting is probably the way these candidates have (if they have), shifted views over the course of these debates.</p>
+
+<p>It would be interesting to do some simple arithmetic on the corpus of words…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">UnlistAndExtractInfo &lt;- function(candidate){
+# this function is not general - it only applies to these particular debates...
+# all the debates must be named the same in the parent env.
+# for example: debate_h ...
+
+allwords_1 &lt;- tolower(unlist(
+              stri_extract_all_words(
+              apply(
+              subset(debate_h, person == candidate)[&#39;message&#39;],
+                    1,
+                    paste))))
+allwords_2 &lt;- tolower(unlist(
+              stri_extract_all_words(
+              apply(
+              subset(debate_c, person == candidate)[&#39;message&#39;],
+                    1,
+                    paste))))
+allwords_3 &lt;- tolower(unlist(
+              stri_extract_all_words(
+              apply(
+              subset(debate_b, person == candidate)[&#39;message&#39;],
+                    1,
+                    paste))))
+allwords_4 &lt;- tolower(unlist(
+              stri_extract_all_words(
+              apply(
+              subset(debate_w, person == candidate)[&#39;message&#39;],
+                    1,
+                    paste))))
+df_insights &lt;- data.frame(
+debate = c(&quot;Ohio&quot;, &quot;California&quot;, &quot;Colorado&quot;, &quot;Wisconsin&quot;),
+average_intervention = c(mean(stri_count_words(
+                        apply(
+                          subset(debate_h, person == candidate)[&#39;message&#39;],
+                                  1,
+                        paste))),
+                        mean(stri_count_words(
+                        apply(
+                          subset(debate_c, person == candidate)[&#39;message&#39;],
+                                  1,
+                        paste))),
+                        mean(stri_count_words(
+                        apply(
+                          subset(debate_b, person == candidate)[&#39;message&#39;],
+                                  1,
+                        paste))),
+                        mean(stri_count_words(
+                        apply(
+                          subset(debate_w, person == candidate)[&#39;message&#39;],
+                                  1,
+                        paste)))
+                        ),
+words_total = c(length(allwords_1),length(allwords_2),length(allwords_3),length(allwords_4)),
+words_unique = c(length(unique(allwords_1)),
+                 length(unique(allwords_2)),
+                 length(unique(allwords_3)),
+                 length(unique(allwords_4))),
+words_repeated_fromfirst = c(0, sum(allwords_2 %in% allwords_1), 
+                            sum(allwords_3 %in% allwords_1),
+                            sum(allwords_4 %in% allwords_1)),
+unique_words_repeated_fromfirst = c(0,
+                            length(unique(allwords_2[allwords_2 %in% allwords_1])),
+                            length(unique(allwords_3[allwords_3 %in% allwords_1])),
+                            length(unique(allwords_4[allwords_4 %in% allwords_1]))
+                            ),
+words_repeated_fromsecond = c(0, 0, 
+                            sum(allwords_3 %in% allwords_2),
+                            sum(allwords_4 %in% allwords_2)),
+unique_words_repeated_fromsecond = c(0, 0,
+                            length(unique(allwords_3[allwords_3 %in% allwords_2])),
+                            length(unique(allwords_4[allwords_4 %in% allwords_2]))
+                            ),
+words_repeated_fromthird = c(0, 0, 0,
+                            sum(allwords_4 %in% allwords_3)),
+unique_words_repeated_fromthird = c(0, 0, 0,
+                            length(unique(allwords_4[allwords_4 %in% allwords_3]))
+                            )   
+, stringsAsFactors = FALSE)
+return(df_insights)
+}
+
+# going to create a data frame with all the counts from the top candidates...
+candidates &lt;- c(&quot;TRUMP&quot;,&quot;CARSON&quot;,&quot;RUBIO&quot;,
+                &quot;KASICH&quot;,&quot;CRUZ&quot;,&quot;BUSH&quot;,
+                &quot;FIORINA&quot;,&quot;PAUL&quot;,&quot;CHRISTIE&quot;)
+info &lt;- NULL
+info_all &lt;- NULL
+for(i in 1:9){
+info &lt;- UnlistAndExtractInfo(candidates[i])
+info$CANDIDATE &lt;- candidates[i]
+info_all &lt;- rbind(info_all, info)
+}
+
+# i&#39;m going to add a few more columns...
+info_all %&lt;&gt;% mutate(carry_over_p1 = unique_words_repeated_fromfirst/words_unique,
+                     word_repeat = words_total/words_unique)</code></pre></figure>
+
+<p>Let’s make some nice graphs with this information…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># graph of most words spoken by debate
+ggplot(order_axis(
+  subset(info_all, debate != &quot;Ohio&quot; &amp; CANDIDATE != &quot;CHRISTIE&quot;), # christie didn&#39;t go to wisconsin
+    CANDIDATE, carry_over_p1), 
+       aes(x = CANDIDATE_o, 
+           y = carry_over_p1)) + 
+  geom_bar(stat = &quot;identity&quot;, 
+           aes(fill = CANDIDATE_o)) + 
+  facet_grid(debate ~.) + 
+  theme_eem() +
+  scale_fill_eem(20) + 
+  labs(title = &quot;Repetition of words by candidate&quot;, 
+       x = &quot;Candidate&quot;, 
+       y = &quot;% of unique words repeated from first debate&quot;)</code></pre></figure>
+
+<p>If we take the full amount of unique words from the first debate, it’s clear the candidates haven’t been saying very different things. For example in California (the second debate), 41% of the words Trump said were the same he said in Ohio. The Donald is arguably the most repetitive, increasing this to 49% and 48% in Colorado and Wisconsin.</p>
+
+<p>On the other hand, Fiorina always seems to have a surprise for viewers…</p>
+
+<p><img src="/images/posts/repetitions.png" alt="repetitions" /></p>
+
+<p>Although this could simply be due to the fact that she got very few words in the first debate (the outlier at the bottom is Fiorina) …</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ggplot(subset(info_all,CANDIDATE != &quot;CHRISTIE&quot;), 
+       aes(x = words_total, 
+           y = words_unique)) + 
+    geom_point(aes(colour = CANDIDATE), size = 3, shape = 2) +
+    theme_eem()+ # uses &quot;eflores/eem&quot;
+    scale_colour_eem(20) + # uses &quot;eflores/eem&quot;
+    labs(title = &quot;Words per Debate&quot;,
+         x = &quot;Total Words&quot;, 
+         y = &quot;Unique Words&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/words_v_unique.png" alt="repetitions" /></p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># average length of interventions
+ggplot(info_all, 
+       aes(x = factor(CANDIDATE), 
+           y = average_intervention, 
+                fill = eem_colors[1])) + # the eem colors are from &quot;eflores/eem&quot;
+  geom_boxplot() +
+  theme_eem()+
+  labs(title = &quot;Average words per intervention&quot;,
+       x = &quot;Candidate&quot;, 
+       y = &quot;Words&quot;) + theme(legend.position = &quot;none&quot;)</code></pre></figure>
+
+<p>When it comes to the average length of “interventions” (I define one as the slot a candidate is speaking in without being interrupted), Fiorina and Trump like to keep it short and simple while Rubio takes his time…</p>
+
+<p><img src="/images/posts/candidate_words.png" alt="words_int" /></p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># average times unique word is repeated...
+
+ggplot(info_all, 
+       aes(x = factor(CANDIDATE), 
+           y = word_repeat, 
+           fill = eem_colors[1])) +
+  geom_boxplot() +
+  theme_eem()+
+  labs(title = &quot;Average repetition of unique words&quot;,
+       x = &quot;Candidate&quot;, 
+       y = &quot;Repetitions&quot;) + theme(legend.position = &quot;none&quot;)</code></pre></figure>
+
+<p>Another interesting tid-bit is the average repetitions of words. Again, Trump seems like an outlier, he repeated an average of 5 times every unique word in the California debate and has been repetitive since then.</p>
+
+<p><img src="/images/posts/words_repeat.png" alt="repetition_avg" /></p>
+
+<p>A trend seems to be emerging: Trump repeats the same thing every debate. But there should be much more proof after a few more debates…</p>
+
+
+  </div>
+</article>
+
+</body>
+</html>

@@ -62,53 +62,53 @@
 
 <p>El estado 1 tiene el 75% del PIB generado en los últimos 4 años en la región a la que pertenece (es una de solo 2 estados):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">estado_1 <span class="o">&lt;-</span> <span class="m">0.75</span>
-estado_2 <span class="o">&lt;-</span> <span class="m">0.25</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">estado_1 &lt;- 0.75
+estado_2 &lt;- 0.25</code></pre></figure>
 
 <p>Obtenemos el ITAE de ambos estados y por consecuente, su crecimiento en los últimos 4 trimestres:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">crecim_1 <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="m">1.04</span><span class="p">,</span> <span class="c1">#crecimiento 4%</span>
-              <span class="m">1.02</span><span class="p">,</span> <span class="c1">#crecimiento 2%, etc..</span>
-              <span class="m">1.05</span><span class="p">,</span>
-              <span class="m">1.07</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">crecim_1 &lt;- c(1.04, #crecimiento 4%
+              1.02, #crecimiento 2%, etc..
+              1.05,
+              1.07)
 
-crecim_2 <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="m">1.10</span><span class="p">,</span> 
-              <span class="m">1.12</span><span class="p">,</span>
-              <span class="m">1.15</span><span class="p">,</span>
-              <span class="m">1.20</span><span class="p">)</span></code></pre></div>
+crecim_2 &lt;- c(1.10, 
+              1.12,
+              1.15,
+              1.20)</code></pre></figure>
 
 <p>Usando un trimestre (por ejemplo el n-4) como inicio de la serie, usamos la función <code>crecer()</code> en “inegiR”</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(inegiR)
 
-<span class="c1"># solo para demostrar la función:</span>
-crecer <span class="o">&lt;-</span> <span class="kr">function</span> <span class="p">(</span>tasas<span class="p">,</span> comienzo<span class="p">)</span> 
-<span class="p">{</span>
-    m <span class="o">&lt;-</span> tasas
-    r <span class="o">&lt;-</span> <span class="m">0</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>m<span class="p">)</span>
-    n <span class="o">&lt;-</span> comienzo
-    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>m<span class="p">))</span> <span class="p">{</span>
-        r<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> m<span class="p">[</span>i<span class="p">]</span> <span class="o">*</span> n
-        n <span class="o">&lt;-</span> r<span class="p">[</span>i<span class="p">]</span>
-    <span class="p">}</span>
-    salida <span class="o">&lt;-</span> r<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>m<span class="p">)]</span>
-    <span class="kr">return</span><span class="p">(</span>salida<span class="p">)</span>
-<span class="p">}</span>
+# solo para demostrar la función:
+crecer &lt;- function (tasas, comienzo) 
+{
+    m &lt;- tasas
+    r &lt;- 0:length(m)
+    n &lt;- comienzo
+    for (i in 1:length(m)) {
+        r[i] &lt;- m[i] * n
+        n &lt;- r[i]
+    }
+    salida &lt;- r[1:length(m)]
+    return(salida)
+}
 
-<span class="c1"># calculamos los indicadores en base a sus crecimientos</span>
-ind_1 <span class="o">&lt;-</span> crecer<span class="p">(</span>tasas <span class="o">=</span> crecim_1<span class="p">,</span> <span class="m">100</span> <span class="o">*</span> estado_1<span class="p">)</span>
-ind_2 <span class="o">&lt;-</span> crecer<span class="p">(</span>tasas <span class="o">=</span> crecim_2<span class="p">,</span> <span class="m">100</span> <span class="o">*</span> estado_2<span class="p">)</span>
+# calculamos los indicadores en base a sus crecimientos
+ind_1 &lt;- crecer(tasas = crecim_1, 100 * estado_1)
+ind_2 &lt;- crecer(tasas = crecim_2, 100 * estado_2)
 
-<span class="c1"># ver indicadores la serie</span>
+# ver indicadores la serie
 ind_1
-<span class="c1"># [1] 78.00000 79.56000 83.53800 89.38566</span></code></pre></div>
+# [1] 78.00000 79.56000 83.53800 89.38566</code></pre></figure>
 
 <p>Estos dos indicadores representan el PIB (aunque en índice) que puede ser sumado para obtener un indicador a nivel región. Esto se hace finalmente mediante una simple suma:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">region <span class="o">&lt;-</span> ind_1 <span class="o">+</span> ind_2
+<figure class="highlight"><pre><code class="language-r" data-lang="r">region &lt;- ind_1 + ind_2
 
 region
-<span class="c1"># [1] 105.5000 110.3600 118.9580 131.8897</span></code></pre></div>
+# [1] 105.5000 110.3600 118.9580 131.8897</code></pre></figure>
 
 <p>La tasa de crecimiento de esa serie es la tasa de crecimiento de la región.</p>
 

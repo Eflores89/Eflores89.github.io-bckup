@@ -2,7 +2,16 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://www.enelmargen.org/politica/inter-hiper-democracia</loc>
+    <loc>http://localhost:4000/economia/automatizacion</loc>
+    
+    <lastmod>2017-02-26T04:00:30-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/politica/inter-hiper-democracia</loc>
     
     <lastmod>2016-12-27T00:00:00-06:00</lastmod>
     
@@ -11,7 +20,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/mba-shiny</loc>
+    <loc>http://localhost:4000/datascience/mba-shiny</loc>
     
     <lastmod>2016-12-20T00:00:00-06:00</lastmod>
     
@@ -20,7 +29,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/whatsapp</loc>
+    <loc>http://localhost:4000/datascience/whatsapp</loc>
     
     <lastmod>2016-10-11T00:00:00-05:00</lastmod>
     
@@ -29,7 +38,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/trump-mextweets</loc>
+    <loc>http://localhost:4000/datascience/trump-mextweets</loc>
     
     <lastmod>2016-09-26T00:00:00-05:00</lastmod>
     
@@ -38,7 +47,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/plagio-epn</loc>
+    <loc>http://localhost:4000/cultura/plagio-epn</loc>
     
     <lastmod>2016-08-23T00:00:00-05:00</lastmod>
     
@@ -47,7 +56,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/banxicoR/vignette-v09</loc>
+    <loc>http://localhost:4000/banxicoR/vignette-v09</loc>
     
     <lastmod>2016-08-19T00:00:00-05:00</lastmod>
     
@@ -56,7 +65,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/power-ideas</loc>
+    <loc>http://localhost:4000/cultura/power-ideas</loc>
     
     <lastmod>2016-08-17T00:00:00-05:00</lastmod>
     
@@ -65,7 +74,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/cnte-nomia</loc>
+    <loc>http://localhost:4000/economia/cnte-nomia</loc>
     
     <lastmod>2016-08-07T00:00:00-05:00</lastmod>
     
@@ -74,7 +83,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/un-voting-communities</loc>
+    <loc>http://localhost:4000/datascience/un-voting-communities</loc>
     
     <lastmod>2016-07-27T00:00:00-05:00</lastmod>
     
@@ -83,7 +92,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/un-voting-patterns</loc>
+    <loc>http://localhost:4000/datascience/un-voting-patterns</loc>
     
     <lastmod>2016-07-12T00:00:00-05:00</lastmod>
     
@@ -92,7 +101,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/trinidad-bis</loc>
+    <loc>http://localhost:4000/economia/trinidad-bis</loc>
     
     <lastmod>2016-06-29T00:00:00-05:00</lastmod>
     
@@ -101,7 +110,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/mty-satrday/</loc>
+    <loc>http://localhost:4000/datascience/mty-satrday/</loc>
     
     <lastmod>2016-05-14T00:00:00-05:00</lastmod>
     
@@ -110,7 +119,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/movilidad-todos</loc>
+    <loc>http://localhost:4000/economia/movilidad-todos</loc>
     
     <lastmod>2016-05-11T00:00:00-05:00</lastmod>
     
@@ -119,7 +128,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/nasadata/vignette_v0/</loc>
+    <loc>http://localhost:4000/nasadata/vignette_v0/</loc>
     
     <lastmod>2016-05-01T00:00:00-05:00</lastmod>
     
@@ -128,7 +137,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/negocios/CDO-Mexico</loc>
+    <loc>http://localhost:4000/negocios/CDO-Mexico</loc>
     
     <lastmod>2016-04-09T00:00:00-05:00</lastmod>
     
@@ -137,7 +146,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/voyeur-personal</loc>
+    <loc>http://localhost:4000/cultura/voyeur-personal</loc>
     
     <lastmod>2016-04-06T00:00:00-05:00</lastmod>
     
@@ -146,7 +155,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/Problema-no-es-Trump</loc>
+    <loc>http://localhost:4000/politica/Problema-no-es-Trump</loc>
     
     <lastmod>2016-03-09T00:00:00-06:00</lastmod>
     
@@ -155,16 +164,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/inegir-v1-2</loc>
-    
-    <lastmod>2016-02-21T00:00:00-06:00</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/arte/The-Revenant-Review</loc>
+    <loc>http://localhost:4000/arte/The-Revenant-Review</loc>
     
     <lastmod>2016-01-23T00:00:00-06:00</lastmod>
     
@@ -173,7 +173,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/The-Big-Short-Review</loc>
+    <loc>http://localhost:4000/arte/The-Big-Short-Review</loc>
     
     <lastmod>2016-01-20T00:00:00-06:00</lastmod>
     
@@ -182,7 +182,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii</loc>
+    <loc>http://localhost:4000/datascience/r-debate-analysis-part-iii</loc>
     
     <lastmod>2016-01-19T00:00:00-06:00</lastmod>
     
@@ -191,7 +191,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii</loc>
+    <loc>http://localhost:4000/datascience/r-debate-analysis-part-ii</loc>
     
     <lastmod>2016-01-07T00:00:00-06:00</lastmod>
     
@@ -200,7 +200,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/Conocer-Mexico</loc>
+    <loc>http://localhost:4000/economia/Conocer-Mexico</loc>
     
     <lastmod>2015-12-15T00:00:00-06:00</lastmod>
     
@@ -209,7 +209,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/Zonas-Econ-Urgentes</loc>
+    <loc>http://localhost:4000/economia/Zonas-Econ-Urgentes</loc>
     
     <lastmod>2015-12-13T00:00:00-06:00</lastmod>
     
@@ -218,7 +218,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/republican-debates</loc>
+    <loc>http://localhost:4000/datascience/republican-debates</loc>
     
     <lastmod>2015-11-26T00:00:00-06:00</lastmod>
     
@@ -227,7 +227,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/negocios/sobrevivir-b-players</loc>
+    <loc>http://localhost:4000/negocios/sobrevivir-b-players</loc>
     
     <lastmod>2015-11-11T00:00:00-06:00</lastmod>
     
@@ -236,7 +236,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/jekyll-to-pdf</loc>
+    <loc>http://localhost:4000/datascience/jekyll-to-pdf</loc>
     
     <lastmod>2015-11-11T00:00:00-06:00</lastmod>
     
@@ -245,7 +245,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/que-pasa-baja-inflacion</loc>
+    <loc>http://localhost:4000/economia/que-pasa-baja-inflacion</loc>
     
     <lastmod>2015-11-09T00:00:00-06:00</lastmod>
     
@@ -254,7 +254,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/revisar-r-downloads</loc>
+    <loc>http://localhost:4000/datascience/revisar-r-downloads</loc>
     
     <lastmod>2015-11-02T00:00:00-06:00</lastmod>
     
@@ -263,7 +263,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/negocios/Tercer-TLCAN</loc>
+    <loc>http://localhost:4000/negocios/Tercer-TLCAN</loc>
     
     <lastmod>2015-10-25T00:00:00-05:00</lastmod>
     
@@ -272,7 +272,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/tenencia-nl</loc>
+    <loc>http://localhost:4000/politica/tenencia-nl</loc>
     
     <lastmod>2015-10-21T00:00:00-05:00</lastmod>
     
@@ -281,7 +281,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/amartya-sen</loc>
+    <loc>http://localhost:4000/arte/amartya-sen</loc>
     
     <lastmod>2015-10-17T00:00:00-05:00</lastmod>
     
@@ -290,7 +290,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/The-Martian-Review</loc>
+    <loc>http://localhost:4000/arte/The-Martian-Review</loc>
     
     <lastmod>2015-10-09T00:00:00-05:00</lastmod>
     
@@ -299,7 +299,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/doce-porciento</loc>
+    <loc>http://localhost:4000/economia/doce-porciento</loc>
     
     <lastmod>2015-09-08T00:00:00-05:00</lastmod>
     
@@ -308,7 +308,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/percepcion-realidad</loc>
+    <loc>http://localhost:4000/economia/percepcion-realidad</loc>
     
     <lastmod>2015-09-05T00:00:00-05:00</lastmod>
     
@@ -317,16 +317,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/apuntes-ecopred</loc>
+    <loc>http://localhost:4000/datascience/apuntes-ecopred</loc>
     
-    <lastmod>2015-09-02T02:29:01Z</lastmod>
+    <lastmod>2015-09-01T21:29:01-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/otra-mala</loc>
+    <loc>http://localhost:4000/economia/otra-mala</loc>
     
     <lastmod>2015-08-11T00:00:00-05:00</lastmod>
     
@@ -335,7 +335,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/baches-mty</loc>
+    <loc>http://localhost:4000/datascience/baches-mty</loc>
     
     <lastmod>2015-08-09T00:00:00-05:00</lastmod>
     
@@ -344,25 +344,25 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/datascience/fuerzas-armadas-bajas</loc>
+    <loc>http://localhost:4000/datascience/fuerzas-armadas-bajas</loc>
     
-    <lastmod>2015-07-29T15:54:43Z</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/economia/euromex</loc>
-    
-    <lastmod>2015-07-19T11:44:59Z</lastmod>
+    <lastmod>2015-07-29T10:54:43-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/senales-mixtas</loc>
+    <loc>http://localhost:4000/economia/euromex</loc>
+    
+    <lastmod>2015-07-19T06:44:59-05:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/economia/senales-mixtas</loc>
     
     <lastmod>2015-07-03T00:00:00-05:00</lastmod>
     
@@ -371,16 +371,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/bandera-confederate</loc>
+    <loc>http://localhost:4000/politica/bandera-confederate</loc>
     
-    <lastmod>2015-06-24T15:44:59Z</lastmod>
+    <lastmod>2015-06-24T10:44:59-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/tactica-de-trump</loc>
+    <loc>http://localhost:4000/politica/tactica-de-trump</loc>
     
     <lastmod>2015-06-18T00:00:00-05:00</lastmod>
     
@@ -389,7 +389,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/post-eleccion-nl2015</loc>
+    <loc>http://localhost:4000/politica/post-eleccion-nl2015</loc>
     
     <lastmod>2015-06-09T00:00:00-05:00</lastmod>
     
@@ -398,16 +398,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/causal-homosexualidad</loc>
+    <loc>http://localhost:4000/politica/causal-homosexualidad</loc>
     
-    <lastmod>2015-04-22T17:49:32Z</lastmod>
+    <lastmod>2015-04-22T12:49:32-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/obama-iran-deal</loc>
+    <loc>http://localhost:4000/politica/obama-iran-deal</loc>
     
     <lastmod>2015-04-07T00:00:00-05:00</lastmod>
     
@@ -416,7 +416,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/unir-aiib</loc>
+    <loc>http://localhost:4000/economia/unir-aiib</loc>
     
     <lastmod>2015-03-27T00:00:00-06:00</lastmod>
     
@@ -425,70 +425,70 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/lecturas-recomendadas-marzo2015</loc>
+    <loc>http://localhost:4000/arte/lecturas-recomendadas-marzo2015</loc>
     
-    <lastmod>2015-03-26T17:07:10Z</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/politica/predial-iva</loc>
-    
-    <lastmod>2015-01-07T04:52:38Z</lastmod>
+    <lastmod>2015-03-26T11:07:10-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/pemex-bonferroni</loc>
+    <loc>http://localhost:4000/politica/predial-iva</loc>
     
-    <lastmod>2015-01-07T04:44:26Z</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/politica/locura-usa-local</loc>
-    
-    <lastmod>2015-01-07T04:44:11Z</lastmod>
+    <lastmod>2015-01-06T22:52:38-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/aguinaldos-productividad</loc>
+    <loc>http://localhost:4000/economia/pemex-bonferroni</loc>
     
-    <lastmod>2015-01-07T04:43:58Z</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/politica/sobre-cuaron</loc>
-    
-    <lastmod>2015-01-07T04:43:16Z</lastmod>
+    <lastmod>2015-01-06T22:44:26-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/madurez-bonos</loc>
+    <loc>http://localhost:4000/politica/locura-usa-local</loc>
     
-    <lastmod>2014-12-20T04:53:41Z</lastmod>
+    <lastmod>2015-01-06T22:44:11-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/indicadores-enganan</loc>
+    <loc>http://localhost:4000/economia/aguinaldos-productividad</loc>
+    
+    <lastmod>2015-01-06T22:43:58-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/politica/sobre-cuaron</loc>
+    
+    <lastmod>2015-01-06T22:43:16-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/economia/madurez-bonos</loc>
+    
+    <lastmod>2014-12-19T22:53:41-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/economia/indicadores-enganan</loc>
     
     <lastmod>2014-11-19T00:00:00-06:00</lastmod>
     
@@ -497,7 +497,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/menos-mas</loc>
+    <loc>http://localhost:4000/politica/menos-mas</loc>
     
     <lastmod>2014-10-15T00:00:00-05:00</lastmod>
     
@@ -506,7 +506,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/presupuesto-optimismo</loc>
+    <loc>http://localhost:4000/politica/presupuesto-optimismo</loc>
     
     <lastmod>2014-09-12T00:00:00-05:00</lastmod>
     
@@ -515,7 +515,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/irin-propiedad</loc>
+    <loc>http://localhost:4000/economia/irin-propiedad</loc>
     
     <lastmod>2014-04-04T00:00:00-06:00</lastmod>
     
@@ -524,16 +524,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/evaluacion-panacea</loc>
+    <loc>http://localhost:4000/politica/evaluacion-panacea</loc>
     
-    <lastmod>2013-08-25T04:52:14Z</lastmod>
+    <lastmod>2013-08-24T23:52:14-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/lecturas-agosto2013</loc>
+    <loc>http://localhost:4000/arte/lecturas-agosto2013</loc>
     
     <lastmod>2013-08-15T00:00:00-05:00</lastmod>
     
@@ -542,7 +542,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/frontera-usa-descuidada</loc>
+    <loc>http://localhost:4000/politica/frontera-usa-descuidada</loc>
     
     <lastmod>2013-06-04T00:00:00-05:00</lastmod>
     
@@ -551,25 +551,25 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/lapices-libertad</loc>
+    <loc>http://localhost:4000/economia/lapices-libertad</loc>
     
-    <lastmod>2013-06-02T00:01:27Z</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.enelmargen.org/negocios/primeros-corporativos</loc>
-    
-    <lastmod>2012-11-14T01:30:01Z</lastmod>
+    <lastmod>2013-06-01T19:01:27-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/deuda-nl-2012</loc>
+    <loc>http://localhost:4000/negocios/primeros-corporativos</loc>
+    
+    <lastmod>2012-11-13T19:30:01-06:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://localhost:4000/politica/deuda-nl-2012</loc>
     
     <lastmod>2012-10-31T00:00:00-06:00</lastmod>
     
@@ -578,16 +578,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/arte/egoismo-cooperacion-evolucion</loc>
+    <loc>http://localhost:4000/arte/egoismo-cooperacion-evolucion</loc>
     
-    <lastmod>2012-10-06T17:18:49Z</lastmod>
+    <lastmod>2012-10-06T12:18:49-05:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/ley-director</loc>
+    <loc>http://localhost:4000/politica/ley-director</loc>
     
     <lastmod>2012-08-09T00:00:00-05:00</lastmod>
     
@@ -596,7 +596,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/que-es-inflacion</loc>
+    <loc>http://localhost:4000/economia/que-es-inflacion</loc>
     
     <lastmod>2012-06-12T00:00:00-05:00</lastmod>
     
@@ -605,7 +605,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/oferta-trabajo-politicos</loc>
+    <loc>http://localhost:4000/economia/oferta-trabajo-politicos</loc>
     
     <lastmod>2012-06-12T00:00:00-05:00</lastmod>
     
@@ -614,7 +614,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/linea-pobreza</loc>
+    <loc>http://localhost:4000/economia/linea-pobreza</loc>
     
     <lastmod>2012-04-26T00:00:00-05:00</lastmod>
     
@@ -623,16 +623,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/dos-mitos-deuda</loc>
+    <loc>http://localhost:4000/economia/dos-mitos-deuda</loc>
     
-    <lastmod>2012-02-22T05:18:41Z</lastmod>
+    <lastmod>2012-02-21T23:18:41-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/impuesto-cuerpo</loc>
+    <loc>http://localhost:4000/cultura/impuesto-cuerpo</loc>
     
     <lastmod>2012-01-18T00:00:00-06:00</lastmod>
     
@@ -641,7 +641,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/dos-caras-moneda</loc>
+    <loc>http://localhost:4000/cultura/dos-caras-moneda</loc>
     
     <lastmod>2011-12-12T00:00:00-06:00</lastmod>
     
@@ -650,7 +650,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/decretando-prosperidad</loc>
+    <loc>http://localhost:4000/economia/decretando-prosperidad</loc>
     
     <lastmod>2011-12-11T00:00:00-06:00</lastmod>
     
@@ -659,7 +659,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/negocios/Judios-Diamantes</loc>
+    <loc>http://localhost:4000/negocios/Judios-Diamantes</loc>
     
     <lastmod>2011-12-03T00:00:00-06:00</lastmod>
     
@@ -668,7 +668,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/regulacion-importa</loc>
+    <loc>http://localhost:4000/economia/regulacion-importa</loc>
     
     <lastmod>2011-11-20T00:00:00-06:00</lastmod>
     
@@ -677,7 +677,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/cultura/fundamentalismo-cristiano</loc>
+    <loc>http://localhost:4000/cultura/fundamentalismo-cristiano</loc>
     
     <lastmod>2011-11-20T00:00:00-06:00</lastmod>
     
@@ -686,16 +686,16 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/macroeconomistas-optimismo</loc>
+    <loc>http://localhost:4000/economia/macroeconomistas-optimismo</loc>
     
-    <lastmod>2011-11-01T20:32:53Z</lastmod>
+    <lastmod>2011-11-01T14:32:53-06:00</lastmod>
     
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/politica/mundo-violent</loc>
+    <loc>http://localhost:4000/politica/mundo-violent</loc>
     
     <lastmod>2011-06-14T00:00:00-05:00</lastmod>
     
@@ -704,7 +704,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/reinventando-utilidad</loc>
+    <loc>http://localhost:4000/economia/reinventando-utilidad</loc>
     
     <lastmod>2011-06-11T00:00:00-05:00</lastmod>
     
@@ -713,7 +713,7 @@
   </url>
   
   <url>
-    <loc>http://www.enelmargen.org/economia/elasticidad-cigarros</loc>
+    <loc>http://localhost:4000/economia/elasticidad-cigarros</loc>
     
     <lastmod>2010-10-15T00:00:00-05:00</lastmod>
     

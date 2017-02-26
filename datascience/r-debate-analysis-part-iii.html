@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>South Carolina Republican Debate with R | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 19 Jan 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, datascience</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/r-debate-analysis-part-ii">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/arte/The-Big-Short-Review">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>South Carolina Republican Debate with R</h1>
+    <p>Continuing with the series analyzing republican debates, the latest in South Carolina confirms a few of the trends i’ve been observing, mainly that:</p>
+
+<ul>
+  <li>Trump likes to repeat himself (maybe he likes to stick with what has worked so far?).</li>
+  <li>Trump also likes to keep it short: everyone else says more things for longer at a time.</li>
+  <li>The most relevant person in republican debates is actually a democrat: Mr. Obama. Only “people” was mentioned more often in the South Carolina.</li>
+  <li>Cruz vs. Trump is happening.</li>
+</ul>
+
+<p>For those <a href="http://enelmargen.org/datascience/r-debate-analysis-part-ii/">following along</a>, this is the new url ending:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">south_carolina &lt;- &quot;111395&quot;</code></pre></figure>
+
+<p>To save some precious real estate, i’ve done the work previously explained in the last posts, and built the data.frame with the debate. (You can see the <em>rough</em> scripts <a href="https://github.com/Eflores89/proyectos/tree/master/scripts">here</a>)</p>
+
+<h2 id="some-word-clouds">Some word-clouds</h2>
+
+<p>I’ll start with the usual word-clouds. In this case, it’s actually interesting to see how the “war” between Cruz and Trump has been playing out.</p>
+
+<p>First we see an overall word-cloud (all the debates) for Mr. Cruz:
+<img src="/images/posts/cruz_wc_total.png" alt="Ted Cruz all debates wordcloud" /></p>
+
+<p>But this last debate, the Donald made it to Ted’s most frequent words:
+<img src="/images/posts/cruz_wc_scarolina.png" alt="Ted Cruz all debates wordcloud" /></p>
+
+<p>Trump, on the other hand, barely flinched. China was on his top agenda:</p>
+
+<p><img src="/images/posts/trump_sc_wc.png" alt="Donald Trump south carolina debate word cloud" /></p>
+
+<h2 id="debate-cloud">Debate-cloud</h2>
+
+<p>As for the entire debate, the most frequent words were “people” (intuitively makes sense) and “president”.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># all debates
+scarolina &lt;- apply(subset(all_debates, debate == &quot;SouthCarolina&quot;)[&#39;message&#39;],
+                    1,
+                    paste)
+debate_cloud &lt;- rquery.wordcloud(scarolina, 
+    &quot;text&quot;, 
+    max.words = 300,
+    excludeWords = c(&quot;going&quot;,&quot;and&quot;,
+                    &quot;applause&quot;,&quot;get&quot;,
+                    &quot;got&quot;,&quot;let&quot;))</code></pre></figure>
+
+<p><img src="/images/posts/all_scarolina_wc.png" alt="Republican debate in South Carolina word cloud" /></p>
+
+<h2 id="individual-obsessions">Individual obsessions</h2>
+
+<p>It’s also pretty clear from a few minutes of watching the debate, that candidates have their own quirky obsessions and mostly resort to talking about them as much as they can.</p>
+
+<p>First, a small function to give me the counts of words…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">TopMentions &lt;- function(x){
+df &lt;- all_debates
+  counts &lt;- stri_count_regex(df$message, 
+                            pattern = x,
+                            case_insensitive = TRUE)
+  df$counts &lt;- counts
+  df &lt;- df %&gt;% dplyr::group_by(person) %&gt;%
+                 dplyr::summarise(&quot;mentions&quot; = sum(counts))
+  df &lt;- as.data.frame(df)
+  df &lt;- subset(df, mentions&gt;0)
+  return(df)
+}</code></pre></figure>
+
+<p>Let’s see who likes to talk the most about guns…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># guns 
+w &lt;- c(&quot;gun&quot;,&quot;guns&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmention_guns.png" alt="Top contenders mentioning guns" /></p>
+
+<p>I think we know who is gonna win here…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># mexico
+w &lt;- &quot;mexico&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmention_mexico.png" alt="Top contenders mentioning mexico" /></p>
+
+<p>Republicans are also characteristically strong on military-speak, so let’s see who likes this subject the most…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># isis, military
+w &lt;- c(&quot;isis&quot;,&quot;military&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmention_isis.png" alt="Top contenders mentioning isis" /></p>
+
+<p>On the economic front, a natural contender pops up…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># taxes
+w &lt;- c(&quot;taxes&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmention_taxes.png" alt="Top contenders mentioning taxes" /></p>
+
+<p>And finally… this a surprise!</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># muslim
+w &lt;- &quot;muslim&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmention_muslim.png" alt="Top contenders mentioning muslim" /></p>
+
+<p>I guess it’s worth mentioning a caveat here: this has nothing to do with sentiment, Mr. Bush is arguably much nicer in tone that Trump…</p>
+
+<p>Also, some candidates prefer another term…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">w &lt;- &quot;islamic&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
+
+<p><img src="/images/posts/topmentions_islamic.png" alt="Top contenders mentioning islamic" /></p>
+
+<h2 id="aggregate-stats">Aggregate stats</h2>
+
+<p>Let’s see what the aggregate stats have to say about this new debate…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">candidates &lt;- c(&quot;TRUMP&quot;,&quot;CARSON&quot;,&quot;RUBIO&quot;,
+                &quot;KASICH&quot;,&quot;CRUZ&quot;,&quot;BUSH&quot;,
+                &quot;FIORINA&quot;,&quot;PAUL&quot;,&quot;CHRISTIE&quot;)
+info &lt;- NULL
+info_all &lt;- NULL
+for(i in 1:9){
+info &lt;- UnlistAndExtractInfo(candidates[i])
+info$CANDIDATE &lt;- candidates[i]
+info_all &lt;- rbind(info_all, info)
+}
+
+# i&#39;m going to add a few more columns...
+info_all %&lt;&gt;% mutate(carry_over_p1 = unique_words_repeated_fromfirst/words_unique,
+                     word_repeat = words_total/words_unique)</code></pre></figure>
+
+<p>Using this information to graph…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ggplot(subset(info_all, CANDIDATE != &quot;CHRISTIE&quot; &amp; words_unique&gt;90), 
+       aes(x = words_total, 
+           y = words_unique)) + 
+    geom_point(aes(colour = CANDIDATE), size = 3, shape = 2) +
+    stat_smooth()+
+    theme_eem()+ # uses &quot;eflores89/eem&quot;
+    scale_colour_eem(20) + # uses &quot;eflores89/eem&quot;
+    labs(title = &quot;Words per Debate&quot;,
+         x = &quot;Total Words&quot;, 
+         y = &quot;Unique Words&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/debate6_words.png" alt="unique words vs words by debate" /></p>
+
+<p>I’m not an expert, but I would argue that the longer the debate format, the worst off Trump will likely do. Why?</p>
+
+<p>There seems to be a declining curve once about 3,000 words are spoken. Whereas Ted Cruz can fluently speak about more things (he says more unique words), Trump seems to be struggling to find new words.</p>
+
+<p>Of course, I’m assuming saying the same thing over and over again is bad for your campaign. Perhaps the formula is the other way around.</p>
+
+<p>But again, let’s see this trend more clearly with another graph…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># average times unique word is repeated...
+ggplot(subset(info_all, CANDIDATE != &quot;CHRISTIE&quot; &amp; words_unique&gt;90), 
+       aes(x = factor(CANDIDATE), 
+           y = word_repeat, 
+           fill = eem_colors[1])) +
+  geom_boxplot() +
+  theme_eem()+
+  labs(title = &quot;Average repetition of unique words&quot;,
+       x = &quot;Candidate&quot;, 
+       y = &quot;Repetitions&quot;) + theme(legend.position = &quot;none&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_reps6.png" alt="words per unique word" /></p>
+
+<p>The trend continues. Trump says considerably more times each unique word than the other candidates.</p>
+
+<h2 id="speed-of-intervention">Speed of Intervention</h2>
+
+<p>Like the debate in Las Vegas, South Carolina was similar for Trump in terms of words spoken in each “intervention” (time he was continually speaking). As I said earlier, this can simply be due to the fact that he has to constantly play defense…</p>
+
+<p>Kasich, on the other hand, delivers his remarks and follows the rules: he does not speak when not spoken to (which is most of the debate).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># order the debates...
+info_all$debate &lt;- factor(info_all$debate, 
+                          levels = c(&quot;Ohio&quot;,&quot;California&quot;,
+                                     &quot;Colorado&quot;,&quot;Wisconsin&quot;,
+                                     &quot;Vegas&quot;, &quot;SCarolina&quot;))
+
+# average length of interventions
+ggplot(info_all, 
+       aes(x = debate, 
+           y = average_intervention, 
+           group = CANDIDATE)) + 
+  geom_path(aes(colour = CANDIDATE)) + 
+  theme_eem() + 
+  scale_colour_eem(20) + 
+  labs(x = &quot;Debate&quot;, 
+       y = &quot;Words&quot;, 
+       title = &quot;Average words per intervention&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/words_trend6.png" alt="words by intervention" /></p>
+
+<h2 id="the-data">The Data</h2>
+<p>As usual, I’ve left this data openly available via github, so anyone can play around with it and find a few more insights. <a href="https://github.com/Eflores89/proyectos/tree/master/data/us_debates">Here</a> is the link.</p>
+
+<p>You can also contact me via twitter for any questions: @eflores89 or via an issue in github.</p>
+
+  </div>
+</article>
+
+</body>
+</html>

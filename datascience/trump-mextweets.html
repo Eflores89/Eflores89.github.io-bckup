@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>When Trump visits... tweets from his trip to Mexico | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 26 Sep 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: general, datascience, r-english, política</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/cultura/plagio-epn">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/datascience/whatsapp">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>When Trump visits... tweets from his trip to Mexico</h1>
+    <p>I’m sure many of my fellow Mexicans will remember the historically ill-advised (to say the least) decision by our President to invite Donald Trump for a meeting.</p>
+
+<p>Talking to some fellow colleagues, we couldn’t help but notice that <strong>maybe</strong> in another era this decision would have been good policy. The problem, some concluded, was the influence of social media today. In fact, the Trump debacle did cause outcry among leading politica voices online.</p>
+
+<p>I wanted to investigate this further, and thankfully for me, I’ve been using <strong>R</strong> to collect tweets from a catalog of leading political personalities in Mexico for a <a href="http://numbersmart.mx/">personal business project</a>.</p>
+
+<p>Here is a short descriptive look at what the 65 twitter accounts I’m following tweeted between August 27th and September 5th (the Donald announced his visit on August the 30th). I’m sorry I can’t share the dataset, but you get the idea with the code…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+library(stringr)
+
+# 42 of the 65 accounts tweeted between those dates.
+d %&gt;% 
+  summarise(&quot;n&quot; = n_distinct(NOMBRE))
+#   n
+#  42</code></pre></figure>
+
+<p>We can see how mentions of trump spike just about the time it was announced…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">byhour &lt;- d %&gt;% 
+  mutate(&quot;MONTH&quot; = as.numeric(month(T_CREATED)), 
+         &quot;DAY&quot; = as.numeric(day(T_CREATED)), 
+         &quot;HOUR&quot; = as.numeric(hour(T_CREATED)), 
+         &quot;TRUMP_MENTION&quot; = str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)) %&gt;% 
+  group_by(MONTH, DAY, HOUR) %&gt;% 
+  summarise(&quot;N&quot; = n(), 
+            &quot;TRUMP_MENTIONS&quot; = sum(TRUMP_MENTION)) %&gt;%
+  mutate(&quot;PCT_MENTIONS&quot; = TRUMP_MENTIONS/N*100) %&gt;%
+  arrange(desc(MONTH), desc(DAY), HOUR) %&gt;%
+  mutate(&quot;CHART_DATE&quot; = as.POSIXct(paste0(&quot;2016-&quot;,MONTH,&quot;-&quot;,DAY,&quot; &quot;, HOUR, &quot;:00&quot;)))
+
+library(ggplot2)  
+library(eem)
+ggplot(byhour, 
+       aes(x = CHART_DATE, 
+           y = PCT_MENTIONS)) + 
+        geom_line(colour=eem_colors[1]) + 
+        theme_eem()+
+        labs(x = &quot;Time&quot;, 
+             y = &quot;Trump mentions \n (% of Tweets)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot1.png" alt="Trump tweets by mexican officials, percent" /></p>
+
+<p>The peak of mentions (as a percentage of tweets) was September 1st at 6 am (75%). But it terms of amount of tweets, it is much more obvious the outcry was following the anouncement and later visit of the candidate:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ggplot(byhour, 
+       aes(x = CHART_DATE, 
+           y = TRUMP_MENTIONS)) + 
+        geom_line(colour=eem_colors[1]) + 
+        theme_eem()+
+        labs(x = &quot;Time&quot;, 
+             y = &quot;Trump mentions \n (# of Tweets)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot2.png" alt="Trump tweets by mexican officials, total" /></p>
+
+<p>We can also (sort-of) identify the effect of these influencers tweeting. I’m going to add the followers, which are potential viewers, of each tweet mentioning Trump, by hour.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">byaudience &lt;- d %&gt;% 
+  mutate(&quot;MONTH&quot; = as.numeric(month(T_CREATED)), 
+         &quot;DAY&quot; = as.numeric(day(T_CREATED)), 
+         &quot;HOUR&quot; = as.numeric(hour(T_CREATED)), 
+         &quot;TRUMP_MENTION&quot; = str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)) %&gt;% 
+  filter(TRUMP_MENTION &gt; 0) %&gt;%
+  group_by(MONTH, DAY, HOUR) %&gt;% 
+  summarise(&quot;TWEETS&quot; = n(), 
+            &quot;AUDIENCE&quot; = sum(U_FOLLOWERS)) %&gt;%
+  arrange(desc(MONTH), desc(DAY), HOUR) %&gt;%
+  mutate(&quot;CHART_DATE&quot; = as.POSIXct(paste0(&quot;2016-&quot;,MONTH,&quot;-&quot;,DAY,&quot; &quot;, HOUR, &quot;:00&quot;)))
+
+
+ggplot(byaudience, 
+       aes(x = CHART_DATE, 
+           y = AUDIENCE)) + 
+        geom_line(colour=eem_colors[1]) + 
+        theme_eem()+
+        labs(x = &quot;Time&quot;, 
+             y = &quot;Potential audience \n (# of followers)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot4.png" alt="Total audience of trump tweets" /></p>
+
+<p>So clearly, I’m stating the obvious. People were talking. But how was the conversation being developed? Let’s first see the type of tweets (RT’s vs drafted individually):</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">bytype &lt;- d %&gt;% 
+  mutate(&quot;TRUMP_MENTION&quot; = str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)) %&gt;%
+  # only the tweets that mention trump
+  filter(TRUMP_MENTION&gt;0) %&gt;%
+  group_by(T_ISRT) %&gt;% 
+  summarise(&quot;count&quot; = n())
+kable(bytype)</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">T_ISRT</th>
+      <th style="text-align: right">count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">FALSE</td>
+      <td style="text-align: right">313</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">TRUE</td>
+      <td style="text-align: right">164</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>About 1 in 3 was a RT. Comparing to the overall tweets, (1389 out of 3833) this seems not too much of a difference, so it wasn’t necesarrily an influencer pushing the discourse. In terms of the most mentioned by tweet it was our President on the spotlight:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">bymentionchain &lt;- d %&gt;% 
+  mutate(&quot;TRUMP_MENTION&quot; = str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)) %&gt;%
+  # only the tweets that mention trump
+  group_by(TRUMP_MENTION, MENTION_CHAIN) %&gt;% 
+  summarise(&quot;count&quot; = n()) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(&quot;GROUPED_CHAIN&quot; = ifelse(grepl(pattern = &quot;EPN&quot;, 
+                                        x = MENTION_CHAIN), 
+                                  &quot;EPN&quot;, MENTION_CHAIN)) %&gt;% 
+  mutate(&quot;GROUPED_CHAIN&quot; = ifelse(grepl(pattern = &quot;realDonaldTrump&quot;, 
+                                        x = MENTION_CHAIN), 
+                                  &quot;realDonaldTrump&quot;, GROUPED_CHAIN))
+                                  
+ggplot(order_axis(bymentionchain %&gt;% 
+                    filter(count&gt;10 &amp; GROUPED_CHAIN!=&quot;ND&quot;), 
+                  axis = GROUPED_CHAIN, 
+                  column = count), 
+       aes(x = GROUPED_CHAIN_o, 
+           y = count)) + 
+  geom_bar(stat = &quot;identity&quot;) + 
+  theme_eem() + 
+  labs(x = &quot;Mention chain \n (separated by _|.|_ )&quot;, y = &quot;Tweets&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot3.png" alt="Mentions" /></p>
+
+<p>How about the actual persons who tweeted? It seemed like news anchor Joaquin Lopez-Doriga and security analyst Alejandro Hope were the most vocal about the visit (out of the influencers i’m following).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">bytweetstar &lt;- d %&gt;% 
+  mutate(&quot;TRUMP_MENTION&quot; = ifelse(str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)&lt;1,0,1)) %&gt;%
+  group_by(TRUMP_MENTION, NOMBRE) %&gt;% 
+  summarise(&quot;count&quot; = n_distinct(TXT))
+## plot with ggplot2</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot5.png" alt="Mentions" /></p>
+
+<p>I also grouped each person by his political affiliation and I found it confirms the notion that the conversation on the eve of the visit, at least among this <strong>very small</strong> subset of twitter accounts, was driven by those with no party afiliation or in the “PAN” (opposition party).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">byafiliation &lt;- d %&gt;% 
+  mutate(&quot;MONTH&quot; = as.numeric(month(T_CREATED)), 
+         &quot;DAY&quot; = as.numeric(day(T_CREATED)), 
+         &quot;HOUR&quot; = as.numeric(hour(T_CREATED)), 
+         &quot;TRUMP_MENTION&quot; = ifelse(str_count(TXT, pattern = &quot;Trump|TRUMP|trump&quot;)&gt;0,1,0)) %&gt;% 
+  group_by(MONTH, DAY, HOUR, TRUMP_MENTION, AFILIACION) %&gt;% 
+  summarise(&quot;TWEETS&quot; = n()) %&gt;%
+  arrange(desc(MONTH), desc(DAY), HOUR) %&gt;%
+  mutate(&quot;CHART_DATE&quot; = as.POSIXct(paste0(&quot;2016-&quot;,MONTH,&quot;-&quot;,DAY,&quot; &quot;, HOUR, &quot;:00&quot;)))
+  
+ ggplot(byafiliation, 
+       aes(x = CHART_DATE, 
+           y = TWEETS, 
+           group = AFILIACION, 
+           fill = AFILIACION)) + 
+  geom_bar(stat = &quot;identity&quot;) + 
+  theme_eem() + 
+  scale_fill_eem(20) + 
+  facet_grid(TRUMP_MENTION ~.) +
+  labs(x = &quot;Time&quot;, y = &quot;Tweets \n (By mention of Trump)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/trump_mex_plot6.png" alt="Mentions" /></p>
+
+<p>However, It’s interesting to note how there is a small spike of the accounts afiliated with the PRI (party in power) on the day after his visit (Sept. 1st). Maybe they were trying to drive the conversation to another place?</p>
+
+  </div>
+</article>
+
+</body>
+</html>

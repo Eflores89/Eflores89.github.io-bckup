@@ -71,16 +71,16 @@
 
 <p>La version CRAN (desde Nov-2015):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">install.packages<span class="p">(</span>inegiR<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">install.packages(inegiR)
+library(inegiR)</code></pre></figure>
 
 <p>Usando devtools también se puede obtener la versión de desarrollo más nueva:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#install.packages(&quot;devtools&quot;)</span>
-<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
-install_github<span class="p">(</span><span class="s">&quot;Eflores89/inegiR&quot;</span><span class="p">)</span>
-  <span class="c1">#dependiencies: zoo, XML, plyr, jsonlite</span>
-<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">#install.packages(&quot;devtools&quot;)
+library(devtools)
+install_github(&quot;Eflores89/inegiR&quot;)
+  #dependiencies: zoo, XML, plyr, jsonlite
+library(inegiR)</code></pre></figure>
 
 <h3 id="bajar-datos">Bajar datos</h3>
 
@@ -90,78 +90,78 @@ install_github<span class="p">(</span><span class="s">&quot;Eflores89/inegiR&quo
 
 <p>Guardemos nuestro token imaginario:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">token <span class="o">&lt;-</span> <span class="s">&quot;abc123&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">token &lt;- &quot;abc123&quot;</code></pre></figure>
 
 <p>Obtengamos la tasa de inflación anual. En el caso mexicano, esto es decir la tasa de cambio de la serie INPC.</p>
 
 <p>Este es el URL correspondiente para el INPC:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC <span class="o">&lt;-</span> <span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">urlINPC &lt;- &quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/&quot;</code></pre></figure>
 
 <p>Las URL’s en formato JSON también es aceptado en el paquete, solo evita poner el “?callback” que viene en algunos casos en el sitio oficial.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC2 <span class="o">&lt;-</span> <span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">urlINPC2 &lt;- &quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/&quot;</code></pre></figure>
 
 <p>Obtengamos los datos.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">INPC <span class="o">&lt;-</span> serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">INPC &lt;- serie_inegi(urlINPC, token)
 
-<span class="c1"># veamos</span>
-<span class="kp">tail</span><span class="p">(</span>INPC<span class="p">)</span>
-<span class="c1"># Fechas         Valores</span>
-<span class="c1"># 2014-12-01   116.05900000</span>
-<span class="c1"># 2015-01-01   115.95400000</span>
-<span class="c1"># 2015-02-01   116.17400000</span>
-<span class="c1"># 2015-03-01   116.64700000</span>
-<span class="c1"># 2015-04-01   116.34500000</span>
-<span class="c1"># 2015-05-01   115.76400000</span></code></pre></div>
+# veamos
+tail(INPC)
+# Fechas         Valores
+# 2014-12-01   116.05900000
+# 2015-01-01   115.95400000
+# 2015-02-01   116.17400000
+# 2015-03-01   116.64700000
+# 2015-04-01   116.34500000
+# 2015-05-01   115.76400000</code></pre></figure>
 
 <p>El parametro de “metadata” es opcional y nos permite también bajar los datos de la serie tales como unidades, última actualización, etc.</p>
 
 <p>Cuando este parametro está como “TRUE”, la información se escribe como una lista con dos elementos: en el primero el metadata y en el segundo los datos.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">INPC_Metadata <span class="o">&lt;-</span> serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">,</span> metadata <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-<span class="kp">class</span><span class="p">(</span>INPC_Metadata<span class="p">)</span>
-<span class="c1"># [1] &quot;list&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">INPC_Metadata &lt;- serie_inegi(urlINPC, token, metadata = TRUE)
+class(INPC_Metadata)
+# [1] &quot;list&quot;</code></pre></figure>
 
 <p>Para obtener estos datos, usar como si fuese lista:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># date of last update</span>
-INPC_Metadata<span class="o">$</span>MetaData<span class="o">$</span>UltimaActualizacion
-<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="s">&quot;2015/06/09&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># date of last update
+INPC_Metadata$MetaData$UltimaActualizacion
+[1] &quot;2015/06/09&quot;</code></pre></figure>
 
 <p>Ya que tenemos la serie, tenemos que calcular la tasa de cambio, que es la inflación. Para esto, usamos la función YoY(), que nos permite calcular tasas de cambio por periodos de comparación. El parametro de lapso indica cada cuantos periodos hacer la comparación (para una serie mensual una tasa anual es = 12).</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">Inflacion <span class="o">&lt;-</span> YoY<span class="p">(</span>INPC<span class="o">$</span>Valores<span class="p">,</span> 
-                 lapso <span class="o">=</span> <span class="m">12</span><span class="p">,</span> 
-                 decimal<span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">Inflacion &lt;- YoY(INPC$Valores, 
+                 lapso = 12, 
+                 decimal=FALSE)
 
-<span class="c1"># para ponerlo en un data frame</span>
-Inflacion_df <span class="o">&lt;-</span> <span class="kp">cbind.data.frame</span><span class="p">(</span>Fechas <span class="o">=</span> INPC<span class="o">$</span>Fechas<span class="p">,</span> 
-                                 Inflacion <span class="o">=</span> Inflacion<span class="p">)</span>
+# para ponerlo en un data frame
+Inflacion_df &lt;- cbind.data.frame(Fechas = INPC$Fechas, 
+                                 Inflacion = Inflacion)
 
-<span class="kp">tail</span><span class="p">(</span>Inflacion_df<span class="p">)</span>
-<span class="c1"># Fechas        Inflacion</span>
-<span class="c1"># 2014-12-01    4.081322</span>
-<span class="c1"># 2015-01-01    3.065642</span>
-<span class="c1"># 2015-02-01    3.000266</span>
-<span class="c1"># 2015-03-01    3.137075</span>
-<span class="c1"># 2015-04-01    3.062327</span>
-<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+tail(Inflacion_df)
+# Fechas        Inflacion
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643</code></pre></figure>
 
 <p>Este método funciona para cualquier URL, pero para algunos indicadores más comunes, el paquete ya tiene algunos atajos incluidos.</p>
 
 <p>Obtengamos la misma serie de inflación usando una de estas funciones:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">Inflation_rapido <span class="o">&lt;-</span> inflacion_general<span class="p">(</span>token<span class="p">)</span>
-<span class="kp">tail</span><span class="p">(</span>Inflation_rapido<span class="p">)</span>
-<span class="c1"># Fechas        Inflacion</span>
-<span class="c1"># 2014-12-01    4.081322</span>
-<span class="c1"># 2015-01-01    3.065642</span>
-<span class="c1"># 2015-02-01    3.000266</span>
-<span class="c1"># 2015-03-01    3.137075</span>
-<span class="c1"># 2015-04-01    3.062327</span>
-<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">Inflation_rapido &lt;- inflacion_general(token)
+tail(Inflation_rapido)
+# Fechas        Inflacion
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643</code></pre></figure>
 
 <h2 id="ejemplo-2-bajando-datos-del-denue">Ejemplo 2: bajando datos del DENUE</h2>
 
@@ -169,37 +169,37 @@ Inflacion_df <span class="o">&lt;-</span> <span class="kp">cbind.data.frame</spa
 
 <p>En ese mismo sitio, debemos obtener otro token para usar este servicio. Lo guardamos también en un objeto:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">token_denue <span class="o">&lt;-</span> <span class="s">&quot;abcdef1234&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">token_denue &lt;- &quot;abcdef1234&quot;</code></pre></figure>
 
 <p>Para obtener una lista de negocios en un cierto radio alrededor de unas coordenadas, usamos la función primitiva. Por ejemplo, para la macroplaza en Monterrey, guardamos los datos de coordenadas:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">latitud_macro<span class="o">&lt;-</span><span class="s">&quot;25.669194&quot;</span>
-longitud_macro<span class="o">&lt;-</span><span class="s">&quot;-100.309901&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">latitud_macro&lt;-&quot;25.669194&quot;
+longitud_macro&lt;-&quot;-100.309901&quot;</code></pre></figure>
 
 <p>Ahora, obtenemos un data.frame con una lista de negocios a 250 metros de esas coordenadas:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">NegociosMacro <span class="o">&lt;-</span> denue_inegi<span class="p">(</span>latitud <span class="o">=</span> latitud_macro<span class="p">,</span> 
-                             longitud <span class="o">=</span> longitud_macro<span class="p">,</span> 
-                             token<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">NegociosMacro &lt;- denue_inegi(latitud = latitud_macro, 
+                             longitud = longitud_macro, 
+                             token)</code></pre></figure>
 
 <p>Observemos primeras columnas y filas…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kp">head</span><span class="p">(</span>NegociosMacro<span class="p">)[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
-<span class="c1">#     id                                       Nombre</span>
-<span class="c1"># 2918696                   ESTACIONAMIENTO GRAN PLAZA</span>
-<span class="c1"># 2918698             TEATRO DE LA CIUDAD DE MONTERREY</span>
-<span class="c1"># 2918723                           CONGRESO DE ESTADO</span>
-<span class="c1"># 2918793               SECRETARIA DE SALUD DEL ESTADO</span>
-<span class="c1"># 2974150                           BIBLIOTECA CENTRAL</span>
-<span class="c1"># 2974215      SOTANO RECURSOS HUMANOS Y ADQUISICIONES</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">head(NegociosMacro)[,1:2]
+#     id                                       Nombre
+# 2918696                   ESTACIONAMIENTO GRAN PLAZA
+# 2918698             TEATRO DE LA CIUDAD DE MONTERREY
+# 2918723                           CONGRESO DE ESTADO
+# 2918793               SECRETARIA DE SALUD DEL ESTADO
+# 2974150                           BIBLIOTECA CENTRAL
+# 2974215      SOTANO RECURSOS HUMANOS Y ADQUISICIONES</code></pre></figure>
 
 <p>Se puede especificar tanto la distancia como el tipo de negocio. Por ejemplo, en un radio a 1km y solamente los “Restaurantes”:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">RestaurantesMacro <span class="o">&lt;-</span> denue_inegi<span class="p">(</span>latitud <span class="o">=</span> latitud_macro<span class="p">,</span> 
-                                 longitud <span class="o">=</span> longitud_macro<span class="p">,</span> 
-                                 token<span class="p">,</span> 
-                                 metros <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> 
-                                 keyword <span class="o">=</span> <span class="s">&quot;Restaurante&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">RestaurantesMacro &lt;- denue_inegi(latitud = latitud_macro, 
+                                 longitud = longitud_macro, 
+                                 token, 
+                                 metros = 1000, 
+                                 keyword = &quot;Restaurante&quot;)</code></pre></figure>
 
   </div>
 </article>

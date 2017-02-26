@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Voting clusters in the U.N. | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 27 Jul 2016</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: economics, r-english, datascience, international</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/un-voting-patterns">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/economia/cnte-nomia">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>Voting clusters in the U.N.</h1>
+    <p>After some more digging, and a suggestion by <a href="https://twitter.com/theMexIndian">@theMexIndian</a> I decided to see more in the depth the unvotes database that I <a href="http://enelmargen.org/datascience/un-voting-patterns/">wrote about</a> some weeks ago.</p>
+
+<p>This time, amit suggested I do some hierarchical clustering of the votes. So here goes a <strong>very dirty</strong> first attempt…</p>
+
+<h2 id="data-and-setup">Data and setup</h2>
+
+<p>Nothing too impressive here… (for a discussion of the package, see the original post).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+library(magrittr)
+library(unvotes)
+library(reshape2)
+
+# number of roll-calls
+votes &lt;- un_votes %&gt;%
+  left_join(., un_roll_calls) %&gt;%
+  left_join(., un_roll_call_issues)
+
+length(unique(votes$rcid))
+# [1] 5275 # number of unique roll call votes</code></pre></figure>
+
+<p>There are more than 5k unique roll calls, so if we where to open up dimensionality by each roll call, this is going to be huge, but i’ll go ahead and do it anyways, to test a hypothesis towards the end…</p>
+
+<h2 id="widen-data">‘Widen’ data…</h2>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">wide &lt;- votes %&gt;% 
+  select(rcid, country, vote) %&gt;% 
+  dcast(, formula = rcid+country ~ vote) %&gt;% 
+  dcast(, formula = country~rcid+yes+no+abstain)
+
+str(wide)
+# &#39;data.frame&#39;:	200 obs. of  14352 variables:</code></pre></figure>
+
+<p>Now that we have a very high dimension data set (each variable is the vote in a roll call, for example, abstain_120, yes_120, no_120 would be a count of abstain, yes and no votes in roll call 120). This data set is basically ones and ceros. Now to do some cleaning and get the distance matrix…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">wide[is.na(wide)] &lt;- 0
+d_wide &lt;- as.matrix(wide)
+row.names(d_wide) &lt;- wide$country # to name rows
+d_wide &lt;- dist(d_wide) # distance matrix
+hc_wide &lt;- hclust(d_wide) # hierarchical cluster</code></pre></figure>
+
+<p>Let’s graph this hierarchical clustering using the <code>ggdendro</code> package…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(ggdendro)
+library(eem) # blog colors
+ggdendrogram(hc_wide, 
+  rotate = TRUE) + 
+    theme_eem() + 
+    theme(axis.text.y = element_text(size=6)) + 
+    labs(x = &quot;country&quot;, 
+         y = &quot;&quot;, 
+         title = &quot;Hierarchical clusters of votes \n in U.N.&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/dendo_1.png" alt="Dendogram of UN votes by country" /></p>
+
+<p>I’m going to export these clusters and upload them on <a href="https://github.com/Eflores89/proyectos/tree/master/data">my github</a> for anyone to download.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">hc_c &lt;- cutree(hc_wide, k = 8)
+hc_c &lt;- as.data.frame(hc_c, row.names = names(hc_c))
+hc_c$c &lt;- row.names(hc_c)
+cc &lt;- hc_c %&gt;% arrange(-hc_c)
+
+write.csv(as.data.frame(cc), file = &quot;country_clusters.csv&quot;)</code></pre></figure>
+
+<h2 id="by-issues">By issues</h2>
+
+<p>Now, because the latest data set was very high dimension, i’m going to condense the analysis to just votes on particular issues. The data base has seven core issues, so i’m going to try to group by issue instead of roll call. This might let us see if there are different voting blocs from the earlier set (maybe countries vote the same, except when important issues come up).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># Widen, by issue...
+wide_byissue &lt;- votes %&gt;% 
+  select(issue, country, vote) %&gt;% 
+  dcast(, formula = country ~ vote+issue)
+
+wide_byissue[is.na(wide_byissue)] &lt;- 0
+d_wide_issue &lt;- as.matrix(wide_byissue)
+row.names(d_wide_issue) &lt;- wide_byissue$country
+d_wide_issue &lt;- dist(d_wide_issue)
+hc_wide_issue &lt;- hclust(d_wide_issue)
+
+ggdendrogram(hc_wide_issue, 
+  rotate = TRUE) + 
+    theme_eem() + 
+    theme(axis.text.y = element_text(size=6)) + 
+    labs(x = &quot;country&quot;, 
+         y = &quot;&quot;, 
+         title = &quot;Hierarchical clusters of votes \n in U.N. (issues)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/dendo_2.png" alt="Dendogram of UN votes by country, when grouping by issue" /></p>
+
+<p>I’ll export this too…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">hc_c2 &lt;- cutree(hc_wide_issue, k = 8)
+hc_c2 &lt;- as.data.frame(hc_c2, row.names = names(hc_c2))
+hc_c2$c &lt;- row.names(hc_c2)
+cc2 &lt;- hc_c2 %&gt;% arrange(-hc_c2)
+
+write.csv(as.data.frame(cc2), file = &quot;country_clusters_issue.csv&quot;)</code></pre></figure>
+
+<p>To disprove the earlier hypothesis, i’m going to find Mexico’s neighborhood, and see if there are many countries that repeat themselves in both sets…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># find cluster where Mexico lives ... 
+neighborhood_mx &lt;- hc_c %&gt;% filter(hc_c == 3)
+neighborhood_mx_issue &lt;- hc_c2 %&gt;% filter(hc_c2 == 1)
+
+sum(neighborhood_mx_issue$c %in% neighborhood_mx$c)/length(neighborhood_mx_issue$c)
+# [1] 0.8
+
+# export mexico&#39;s neighborhood
+write.csv(neighborhood_mx_issue, file = &quot;neighborhood_mx_issue.csv&quot;)</code></pre></figure>
+
+<p>So 80% of the country’s are “close” to Mexico whether the vote is by issue or by roll call. This is a rough first attempt (there are probably many slight errors) but there are some interesting things to be found.</p>
+
+<p>In the issues groups, the outliers in a single group are the United States and Israel (the Palestinian conflict probably is the culprit here, as I found earlier, they agree on 77% of the votes).</p>
+
+<p>Then there are countries that seem to be very close culturally, and they show it in the votes…</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># advanced foreign policy
+hc_c2 %&gt;% filter(hc_c2 == &quot;6&quot;)
+# [1] &quot;Austria&quot;     &quot;Denmark&quot;     &quot;Finland&quot;     &quot;Greece&quot;      &quot;Iceland&quot;   
+# [6] &quot;Ireland&quot;     &quot;Japan&quot;       &quot;New Zealand&quot; &quot;Norway&quot;      &quot;Spain&quot;      
+# [11] &quot;Sweden&quot;</code></pre></figure>
+
+<p>Finally, some like-minded countries, like Chile, Colombia, Panama, Paraguay, Peru, etc are in Mexico’s neighborhood (although it’s one of the largest groups).</p>
+
+<p><a href="https://twitter.com/eflores89">Tweet</a> me up if you have any questions with the data!</p>
+
+  </div>
+</article>
+
+</body>
+</html>

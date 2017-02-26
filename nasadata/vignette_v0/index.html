@@ -88,66 +88,66 @@
 
 <p>I’ll start with installing the package:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># install.packages(&quot;devtools&quot;)</span>
-devtools<span class="o">::</span>install_github<span class="p">(</span><span class="s">&quot;Eflores89/nasadata&quot;</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>nasadata<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># install.packages(&quot;devtools&quot;)
+devtools::install_github(&quot;Eflores89/nasadata&quot;)
+library(nasadata)</code></pre></figure>
 
 <p>Now, what <strong>kind</strong> of event do I want? We can query the webservice to find all of the available ones like this:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">categories <span class="o">&lt;-</span> eonet_categories<span class="p">()</span>
-  <span class="c1"># there are a few columns, I&#39;ll only show two...</span>
-<span class="kp">names</span><span class="p">(</span>categories<span class="p">)</span>
-<span class="c1"># [1] &quot;id&quot;          &quot;title&quot;       &quot;link&quot;        &quot;description&quot; &quot;layers&quot; </span>
-categories<span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
-<span class="c1">#   id                title</span>
-<span class="c1">#   6              Drought</span>
-<span class="c1">#   7        Dust and Haze</span>
-<span class="c1">#  16          Earthquakes</span>
-<span class="c1">#   9               Floods</span>
-<span class="c1">#  14           Landslides</span>
-<span class="c1">#  19              Manmade</span>
-<span class="c1">#  15     Sea and Lake Ice</span>
-<span class="c1">#  10        Severe Storms</span>
-<span class="c1">#  17                 Snow</span>
-<span class="c1">#  18 Temperature Extremes</span>
-<span class="c1">#  12            Volcanoes</span>
-<span class="c1">#  13          Water Color</span>
-<span class="c1">#  8            Wildfires</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">categories &lt;- eonet_categories()
+  # there are a few columns, I&#39;ll only show two...
+names(categories)
+# [1] &quot;id&quot;          &quot;title&quot;       &quot;link&quot;        &quot;description&quot; &quot;layers&quot; 
+categories[,1:2]
+#   id                title
+#   6              Drought
+#   7        Dust and Haze
+#  16          Earthquakes
+#   9               Floods
+#  14           Landslides
+#  19              Manmade
+#  15     Sea and Lake Ice
+#  10        Severe Storms
+#  17                 Snow
+#  18 Temperature Extremes
+#  12            Volcanoes
+#  13          Water Color
+#  8            Wildfires</code></pre></figure>
 
 <p>Who is reporting these events is probably also important, so we can see this with a similar function:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">sources <span class="o">&lt;-</span> eonet_sources<span class="p">()</span>
-  <span class="c1"># there are a few columns, I&#39;ll only show two...</span>
-<span class="kp">names</span><span class="p">(</span>sources<span class="p">)</span>
-<span class="c1"># [1] &quot;id&quot;     &quot;title&quot;  &quot;source&quot; &quot;link&quot; </span>
-sources<span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
-<span class="c1">#        id                                                 title</span>
-<span class="c1">#    CALFIRE California Department of Forestry and Fire Protection</span>
-<span class="c1">#       CEMS               Copernicus Emergency Management Service</span>
-<span class="c1">#         EO                                     Earth Observatory</span>
-<span class="c1">#      GDACS         Global Disaster Alert and Coordination System</span>
-<span class="c1">#      GLIDE                      GLobal IDEntifier Number (GLIDE)</span>
-<span class="c1">#    InciWeb                                               InciWeb</span>
-<span class="c1">#        IDC    International Charter on Space and Major Disasters</span>
-<span class="c1">#        MRR                                  LANCE Rapid Response</span>
-<span class="c1">#  NASA_ESRS            NASA Earth Science and Remote Sensing Unit</span>
-<span class="c1">#  ReliefWeb                                             ReliefWeb</span>
-<span class="c1">#  SIVolcano        Smithsonian Institute Global Volcanism Program</span>
-<span class="c1">#     UNISYS                                        Unisys Weather</span>
-<span class="c1">#   USGS_CMT  USGS Emergency Operations Collection Management Tool</span>
-<span class="c1">#       HDDS                 USGS Hazards Data Distribution System</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">sources &lt;- eonet_sources()
+  # there are a few columns, I&#39;ll only show two...
+names(sources)
+# [1] &quot;id&quot;     &quot;title&quot;  &quot;source&quot; &quot;link&quot; 
+sources[,1:2]
+#        id                                                 title
+#    CALFIRE California Department of Forestry and Fire Protection
+#       CEMS               Copernicus Emergency Management Service
+#         EO                                     Earth Observatory
+#      GDACS         Global Disaster Alert and Coordination System
+#      GLIDE                      GLobal IDEntifier Number (GLIDE)
+#    InciWeb                                               InciWeb
+#        IDC    International Charter on Space and Major Disasters
+#        MRR                                  LANCE Rapid Response
+#  NASA_ESRS            NASA Earth Science and Remote Sensing Unit
+#  ReliefWeb                                             ReliefWeb
+#  SIVolcano        Smithsonian Institute Global Volcanism Program
+#     UNISYS                                        Unisys Weather
+#   USGS_CMT  USGS Emergency Operations Collection Management Tool
+#       HDDS                 USGS Hazards Data Distribution System</code></pre></figure>
 
 <p>Now that we got this out of the way, let’s see if we can get an individual event. The <code>earth_event()</code> function does this in an intuitive way. I’m going to bring only the latest event reported by InciWeb:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">an_event <span class="o">&lt;-</span> earth_event<span class="p">(</span>status <span class="o">=</span> <span class="s">&quot;all&quot;</span><span class="p">,</span> 
-                        sources <span class="o">=</span> <span class="s">&quot;InciWeb&quot;</span><span class="p">,</span> 
-                        category_id <span class="o">=</span> <span class="s">&quot;all&quot;</span><span class="p">,</span> 
-                        limit <span class="o">=</span> <span class="m">1</span><span class="p">,</span>
-                        LimitType <span class="o">=</span> <span class="s">&quot;limit&quot;</span><span class="p">)</span>
-<span class="kp">class</span><span class="p">(</span>an_event<span class="p">)</span>
-<span class="c1"># [1] &quot;list&quot;</span>
-<span class="kp">names</span><span class="p">(</span>an_event<span class="p">)</span>
-<span class="c1"># &quot;Events&quot;     &quot;Sources&quot;    &quot;Categories&quot; &quot;Geography&quot;  &quot;Meta&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">an_event &lt;- earth_event(status = &quot;all&quot;, 
+                        sources = &quot;InciWeb&quot;, 
+                        category_id = &quot;all&quot;, 
+                        limit = 1,
+                        LimitType = &quot;limit&quot;)
+class(an_event)
+# [1] &quot;list&quot;
+names(an_event)
+# &quot;Events&quot;     &quot;Sources&quot;    &quot;Categories&quot; &quot;Geography&quot;  &quot;Meta&quot;</code></pre></figure>
 
 <p>The event is a list with a few objects parsed together:</p>
 
@@ -161,20 +161,20 @@ sources<span class="p">[,</span><span class="m">1</span><span class="o">:</span>
 
 <p>In this case, we have a fire in North Carolina…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">an_event<span class="o">$</span>Events<span class="o">$</span>event_id
-<span class="c1"># [1] &quot;EONET_382&quot;</span>
-an_event<span class="o">$</span>Events<span class="o">$</span>event_title
-<span class="c1"># [1] &quot;Silver Mine Fire, North Carolina&quot;</span>
-<span class="c1"># --- We can actually find it here:</span>
-an_event<span class="o">$</span>Sources<span class="o">$</span>source_url
-<span class="c1"># [1] &quot;http://inciweb.nwcg.gov/incident/4706/&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">an_event$Events$event_id
+# [1] &quot;EONET_382&quot;
+an_event$Events$event_title
+# [1] &quot;Silver Mine Fire, North Carolina&quot;
+# --- We can actually find it here:
+an_event$Sources$source_url
+# [1] &quot;http://inciweb.nwcg.gov/incident/4706/&quot;</code></pre></figure>
 
 <p>And this is where it happened…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">an_event<span class="o">$</span>Geography
-<span class="c1">#$EONET_382</span>
-<span class="c1">#                  date  type         coordinates</span>
-<span class="c1">#1 2016-04-21T15:00:00Z Point -82.80806, 35.89028</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">an_event$Geography
+#$EONET_382
+#                  date  type         coordinates
+#1 2016-04-21T15:00:00Z Point -82.80806, 35.89028</code></pre></figure>
 
 <p>The coordinates are of course useful because we plot the events in our favorite <strong>R</strong> package (leaflet or ggmap is really nice) or we can also use it to “feed” into the other API’s in the package. I’ll explain these next…</p>
 
@@ -192,33 +192,33 @@ an_event<span class="o">$</span>Sources<span class="o">$</span>source_url
   <p>Caveat: This API requieres an active key. It’s free and you can get it at api.nasa.gov</p>
 </blockquote>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># coordinates of event</span>
-coord_long <span class="o">&lt;-</span> <span class="p">(</span><span class="m">-82.80806</span><span class="p">)</span>
-coord_lat <span class="o">&lt;-</span> <span class="m">35.89028</span>
-key <span class="o">&lt;-</span> <span class="s">&quot;example1234key&quot;</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># coordinates of event
+coord_long &lt;- (-82.80806)
+coord_lat &lt;- 35.89028
+key &lt;- &quot;example1234key&quot;
 
-<span class="c1"># images available</span>
-images <span class="o">&lt;-</span> earth_asset<span class="p">(</span>key<span class="p">,</span> 
-                      lon <span class="o">=</span> coord_long<span class="p">,</span> 
-                      lat <span class="o">=</span> coord_lat<span class="p">,</span> 
-                      start_date <span class="o">=</span> <span class="s">&quot;2016-03-01&quot;</span><span class="p">,</span> 
-                      end_date <span class="o">=</span> <span class="s">&quot;2016-04-30&quot;</span><span class="p">)</span>
-<span class="kp">names</span><span class="p">(</span>images<span class="p">)</span>
-<span class="c1"># [1] &quot;date&quot;        &quot;id&quot;          &quot;type&quot;        &quot;coordinates&quot;</span>
-images<span class="o">$</span><span class="kp">date</span>
-<span class="c1"># [1] 2016-03-01T16:05:40 </span>
-<span class="c1"># [2] 2016-03-17T16:05:35</span>
-<span class="c1"># [3] 2016-04-02T16:05:26 </span>
-<span class="c1"># [4] 2016-04-18T16:05:20</span></code></pre></div>
+# images available
+images &lt;- earth_asset(key, 
+                      lon = coord_long, 
+                      lat = coord_lat, 
+                      start_date = &quot;2016-03-01&quot;, 
+                      end_date = &quot;2016-04-30&quot;)
+names(images)
+# [1] &quot;date&quot;        &quot;id&quot;          &quot;type&quot;        &quot;coordinates&quot;
+images$date
+# [1] 2016-03-01T16:05:40 
+# [2] 2016-03-17T16:05:35
+# [3] 2016-04-02T16:05:26 
+# [4] 2016-04-18T16:05:20</code></pre></figure>
 
 <p>So, it seems we’re out of luck… The fire ocurred <strong>after</strong> the last picture taken. Nonetheless, let’s see how we can download this last image…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">img <span class="o">&lt;-</span> earth_image<span class="p">(</span>key<span class="p">,</span> 
-                  lon <span class="o">=</span> coord_long<span class="p">,</span> 
-                  lat <span class="o">=</span> coord_lat<span class="p">,</span> 
-                  date <span class="o">=</span> <span class="s">&quot;2016-04-18&quot;</span><span class="p">,</span> plot <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-<span class="kp">class</span><span class="p">(</span>img<span class="p">)</span>
-<span class="c1"># [1] &quot;list&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">img &lt;- earth_image(key, 
+                  lon = coord_long, 
+                  lat = coord_lat, 
+                  date = &quot;2016-04-18&quot;, plot = TRUE)
+class(img)
+# [1] &quot;list&quot;</code></pre></figure>
 
 <p>The <code>img</code> object is a list consisting of two objects:</p>
 

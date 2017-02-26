@@ -72,16 +72,16 @@
 
 <p>To get the CRAN version (as of Nov-2015):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">install.packages<span class="p">(</span>inegiR<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">install.packages(inegiR)
+library(inegiR)</code></pre></figure>
 
 <p>To download dev version on github, using devtools:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#install.packages(&quot;devtools&quot;)</span>
-<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
-install_github<span class="p">(</span><span class="s">&quot;Eflores89/inegiR&quot;</span><span class="p">)</span>
-  <span class="c1">#dependiencies: zoo, XML, plyr, jsonlite</span>
-<span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">#install.packages(&quot;devtools&quot;)
+library(devtools)
+install_github(&quot;Eflores89/inegiR&quot;)
+  #dependiencies: zoo, XML, plyr, jsonlite
+library(inegiR)</code></pre></figure>
 
 <h2 id="download-data">Download data</h2>
 
@@ -91,74 +91,74 @@ install_github<span class="p">(</span><span class="s">&quot;Eflores89/inegiR&quo
 
 <p>Let us save the imaginary token:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">token <span class="o">&lt;-</span> <span class="s">&quot;abc123&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">token &lt;- &quot;abc123&quot;</code></pre></figure>
 
 <p>Now, I wish to find the rate of inflation (which in the case of INEGI is a percent change of the INPC data series).</p>
 
 <p>This is the corresponding URL for INPC data.series:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC <span class="o">&lt;-</span> <span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">urlINPC &lt;- &quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/xml/&quot;</code></pre></figure>
 
 <p>JSON format is also accepted and is interchangeable (do not use the “?callback?” sign provided by INEGI’s documentation):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">urlINPC2 <span class="o">&lt;-</span> <span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">urlINPC2 &lt;- &quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216064/00000/es/false/json/&quot;</code></pre></figure>
 
 <p>Now, we are going to download this data series as a data.frame.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">INPC <span class="o">&lt;-</span> serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">INPC &lt;- serie_inegi(urlINPC, token)
 
-<span class="c1"># take a look</span>
-<span class="kp">tail</span><span class="p">(</span>INPC<span class="p">)</span>
-<span class="c1"># Fechas         Valores</span>
-<span class="c1"># 2014-12-01   116.05900000</span>
-<span class="c1"># 2015-01-01   115.95400000</span>
-<span class="c1"># 2015-02-01   116.17400000</span>
-<span class="c1"># 2015-03-01   116.64700000</span>
-<span class="c1"># 2015-04-01   116.34500000</span>
-<span class="c1"># 2015-05-01   115.76400000</span></code></pre></div>
+# take a look
+tail(INPC)
+# Fechas         Valores
+# 2014-12-01   116.05900000
+# 2015-01-01   115.95400000
+# 2015-02-01   116.17400000
+# 2015-03-01   116.64700000
+# 2015-04-01   116.34500000
+# 2015-05-01   115.76400000</code></pre></figure>
 
 <p>The optional “metadata” parameter in serie_inegi allows us to also download the metadata information from the data series, which includes date of update, units, frequency, etc.</p>
 
 <p>If “metadata” is set to TRUE, the information is parsed as a list of two elements: the metadata and the data frame.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">INPC_Metadata <span class="o">&lt;-</span> serie_inegi<span class="p">(</span>urlINPC<span class="p">,</span> token<span class="p">,</span> metadata <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-<span class="kp">class</span><span class="p">(</span>INPC_Metadata<span class="p">)</span>
-<span class="c1"># [1] &quot;list&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">INPC_Metadata &lt;- serie_inegi(urlINPC, token, metadata = TRUE)
+class(INPC_Metadata)
+# [1] &quot;list&quot;</code></pre></figure>
 
 <p>To access any of these elements, simply use as a list:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># date of last update</span>
-INPC_Metadata<span class="o">$</span>MetaData<span class="o">$</span>UltimaActualizacion
-<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="s">&quot;2015/06/09&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># date of last update
+INPC_Metadata$MetaData$UltimaActualizacion
+[1] &quot;2015/06/09&quot;</code></pre></figure>
 
 <p>Now that we have the INPC data series, we must apply a year-over-year change. For this we use the handy <code>YoY()</code> function, which let’s us choose the amount of periods to compare over (12 if you want year over year for a monthly series):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">Inflation <span class="o">&lt;-</span> YoY<span class="p">(</span>INPC<span class="o">$</span>Valores<span class="p">,</span> 
-                 lapso <span class="o">=</span> <span class="m">12</span><span class="p">,</span> 
-                 decimal<span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">Inflation &lt;- YoY(INPC$Valores, 
+                 lapso = 12, 
+                 decimal=FALSE)
 
-<span class="c1"># if we want a dataframe, we simply build like this</span>
-Inflation_df <span class="o">&lt;-</span> <span class="kp">cbind.data.frame</span><span class="p">(</span>Fechas <span class="o">=</span> INPC<span class="o">$</span>Fechas<span class="p">,</span> 
-                                 Inflation <span class="o">=</span> Inflation<span class="p">)</span>
+# if we want a dataframe, we simply build like this
+Inflation_df &lt;- cbind.data.frame(Fechas = INPC$Fechas, 
+                                 Inflation = Inflation)
 
-<span class="kp">tail</span><span class="p">(</span>Inflation_df<span class="p">)</span>
-<span class="c1"># Fechas        Inflation</span>
-<span class="c1"># 2014-12-01    4.081322</span>
-<span class="c1"># 2015-01-01    3.065642</span>
-<span class="c1"># 2015-02-01    3.000266</span>
-<span class="c1"># 2015-03-01    3.137075</span>
-<span class="c1"># 2015-04-01    3.062327</span>
-<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+tail(Inflation_df)
+# Fechas        Inflation
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643</code></pre></figure>
 
 <p>If we want to graph, we could simply:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(ggplot2)
 
-ggplot<span class="p">(</span>Inflation_df<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> Fechas<span class="p">,</span> y <span class="o">=</span> Inflation<span class="p">))</span><span class="o">+</span>
-  geom_line<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Historical Inflation Rate for Mexico&quot;</span><span class="p">,</span> 
-       x <span class="o">=</span> <span class="s">&quot;Date&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Rate&quot;</span><span class="p">)</span></code></pre></div>
+ggplot(Inflation_df, 
+       aes(x = Fechas, y = Inflation))+
+  geom_line()+
+  labs(title = &quot;Historical Inflation Rate for Mexico&quot;, 
+       x = &quot;Date&quot;, y = &quot;Rate&quot;)</code></pre></figure>
 
 <p>Which could be seen here:</p>
 
@@ -168,11 +168,11 @@ ggplot<span class="p">(</span>Inflation_df<span class="p">,</span>
 
 <p>For example, if we wanted to graph only the last 24 months:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">ggplot<span class="p">(</span>ultimos<span class="p">(</span>Inflation_df<span class="p">,</span> n <span class="o">=</span> <span class="m">24</span><span class="p">),</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> Fechas<span class="p">,</span> y <span class="o">=</span> Inflation<span class="p">))</span><span class="o">+</span>
-  geom_line<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Inflation Rate for Mexico (24 months)&quot;</span><span class="p">,</span> 
-       x <span class="o">=</span> <span class="s">&quot;Date&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Rate&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ggplot(ultimos(Inflation_df, n = 24), 
+       aes(x = Fechas, y = Inflation))+
+  geom_line()+
+  labs(title = &quot;Inflation Rate for Mexico (24 months)&quot;, 
+       x = &quot;Date&quot;, y = &quot;Rate&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/mexico_inflation24.png" alt="inflation2" /></p>
 
@@ -180,15 +180,15 @@ ggplot<span class="p">(</span>Inflation_df<span class="p">,</span>
 
 <p>Let us obtain the same data series (inflation) via one of these specified shortcut functions:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">Inflation_fast <span class="o">&lt;-</span> inflacion_general<span class="p">(</span>token<span class="p">)</span>
-<span class="kp">tail</span><span class="p">(</span>Inflation_fast<span class="p">)</span>
-<span class="c1"># Fechas        Inflacion</span>
-<span class="c1"># 2014-12-01    4.081322</span>
-<span class="c1"># 2015-01-01    3.065642</span>
-<span class="c1"># 2015-02-01    3.000266</span>
-<span class="c1"># 2015-03-01    3.137075</span>
-<span class="c1"># 2015-04-01    3.062327</span>
-<span class="c1"># 2015-05-01    2.876643</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">Inflation_fast &lt;- inflacion_general(token)
+tail(Inflation_fast)
+# Fechas        Inflacion
+# 2014-12-01    4.081322
+# 2015-01-01    3.065642
+# 2015-02-01    3.000266
+# 2015-03-01    3.137075
+# 2015-04-01    3.062327
+# 2015-05-01    2.876643</code></pre></figure>
 
 <p>As you can see, the function basically does all the transformations in one step.</p>
 
@@ -196,38 +196,38 @@ ggplot<span class="p">(</span>Inflation_df<span class="p">,</span>
 
 <p>To access the DENUE, it is necesary to look at another API <a href="http://www.inegi.org.mx/desarrolladores/denue/apidenue.aspx">here</a> and obtain a different token for these queries.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># new token</span>
-token_denue <span class="o">&lt;-</span> <span class="s">&quot;abcdef1234&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># new token
+token_denue &lt;- &quot;abcdef1234&quot;</code></pre></figure>
 
 <p>To download the businesses in a certain radius, we need a few coordinates. Let’s use the ones around Monterrey, Mexico’s main square:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">latitud_macro<span class="o">&lt;-</span><span class="s">&quot;25.669194&quot;</span>
-longitud_macro<span class="o">&lt;-</span><span class="s">&quot;-100.309901&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">latitud_macro&lt;-&quot;25.669194&quot;
+longitud_macro&lt;-&quot;-100.309901&quot;</code></pre></figure>
 
 <p>Now, we download into a data.frame the list of businesses in a 250 meter radius.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">NegociosMacro <span class="o">&lt;-</span> denue_inegi<span class="p">(</span>latitud <span class="o">=</span> latitud_macro<span class="p">,</span> 
-                             longitud <span class="o">=</span> longitud_macro<span class="p">,</span> 
-                             token_denue<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">NegociosMacro &lt;- denue_inegi(latitud = latitud_macro, 
+                             longitud = longitud_macro, 
+                             token_denue)</code></pre></figure>
 
 <p>Let’s see only the first rows and columns…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kp">head</span><span class="p">(</span>NegociosMacro<span class="p">)[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
-<span class="c1">#     id                                       Nombre</span>
-<span class="c1"># 2918696                   ESTACIONAMIENTO GRAN PLAZA</span>
-<span class="c1"># 2918698             TEATRO DE LA CIUDAD DE MONTERREY</span>
-<span class="c1"># 2918723                           CONGRESO DE ESTADO</span>
-<span class="c1"># 2918793               SECRETARIA DE SALUD DEL ESTADO</span>
-<span class="c1"># 2974150                           BIBLIOTECA CENTRAL</span>
-<span class="c1"># 2974215      SOTANO RECURSOS HUMANOS Y ADQUISICIONES</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">head(NegociosMacro)[,1:2]
+#     id                                       Nombre
+# 2918696                   ESTACIONAMIENTO GRAN PLAZA
+# 2918698             TEATRO DE LA CIUDAD DE MONTERREY
+# 2918723                           CONGRESO DE ESTADO
+# 2918793               SECRETARIA DE SALUD DEL ESTADO
+# 2974150                           BIBLIOTECA CENTRAL
+# 2974215      SOTANO RECURSOS HUMANOS Y ADQUISICIONES</code></pre></figure>
 
 <p>If you would like to change some parameters, this is accepted. For example a 1km radius and only businesses with “Restaurante” in the description.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">RestaurantsMacro <span class="o">&lt;-</span> denue_inegi<span class="p">(</span>latitud <span class="o">=</span> latitud_macro<span class="p">,</span> 
-                                longitud <span class="o">=</span> longitud_macro<span class="p">,</span> 
-                                token_denue<span class="p">,</span> 
-                                metros <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> 
-                                keyword <span class="o">=</span> <span class="s">&quot;Restaurante&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">RestaurantsMacro &lt;- denue_inegi(latitud = latitud_macro, 
+                                longitud = longitud_macro, 
+                                token_denue, 
+                                metros = 1000, 
+                                keyword = &quot;Restaurante&quot;)</code></pre></figure>
 
 <p>I really hope this is useful and streamlines the process of getting INEGI data into R and finally into models, which is what I will be using it for!</p>
 

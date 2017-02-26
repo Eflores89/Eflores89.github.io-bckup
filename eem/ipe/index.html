@@ -78,7 +78,7 @@
 
 <p>La muestra para elaborar los ponderadores fue de una encuesta elaborada en línea y presencial a 384 personas en el Campus Monterrey del Tec de Monterrey. Esto implica que obviamente no se trata de un indicador generalizable a todo el país ni todos los estratos socioeconomicos. El indicador tampoco pretende reflejar a ciencia cierta la inflación observada por estos estudiantes, puesto que sus hábitos de compra pueden estar muy diferentes a los capturados por los indicadores de precios por rubro del INEGI.</p>
 
-<h2 id="implementacin-en-inegir">Implementación en “inegiR”</h2>
+<h2 id="implementación-en-inegir">Implementación en “inegiR”</h2>
 
 <p>A partir de la versión 1.0.2 del paquete de <strong>R</strong>, “inegiR”, la inflación de estudiante (no el costo) se cálcula con la función <code>inflacion_estudiantes()</code>. Los ponderadores para cada sub-serie no concuerdan exactamente con los obtenidos previamente, por que los productos han cambiado dentro de los estratos del INEGI desde entonces. Las ponderaciones son las siguientes:</p>
 
@@ -95,51 +95,51 @@
 
 <p>El código es el siguiente:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">inflacion_estudiantes <span class="o">&lt;-</span> <span class="kr">function</span> <span class="p">(</span>token<span class="p">){</span>
-  <span class="c1">#Series de INPC</span>
-  s1 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216065/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s1<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s1&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s2 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216066/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s2<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s2&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s3 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216067/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s3<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s3&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s4 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216068/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s4<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s4&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s5 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216069/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s5<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s5&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s6 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216070/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s6<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s6&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s7 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216071/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s7<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s7&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
-  s8 <span class="o">&lt;-</span> inegiR<span class="o">::</span>serie_inegi<span class="p">(</span><span class="s">&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216072/00000/es/false/xml/&quot;</span><span class="p">,</span>
-                            token<span class="p">)</span>
-  <span class="kp">names</span><span class="p">(</span>s8<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;s8&quot;</span><span class="p">,</span><span class="s">&quot;Fechas&quot;</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">inflacion_estudiantes &lt;- function (token){
+  #Series de INPC
+  s1 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216065/00000/es/false/xml/&quot;,
+                            token)
+  names(s1) &lt;- c(&quot;s1&quot;,&quot;Fechas&quot;)
+  s2 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216066/00000/es/false/xml/&quot;,
+                            token)
+  names(s2) &lt;- c(&quot;s2&quot;,&quot;Fechas&quot;)
+  s3 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216067/00000/es/false/xml/&quot;,
+                            token)
+  names(s3) &lt;- c(&quot;s3&quot;,&quot;Fechas&quot;)
+  s4 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216068/00000/es/false/xml/&quot;,
+                            token)
+  names(s4) &lt;- c(&quot;s4&quot;,&quot;Fechas&quot;)
+  s5 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216069/00000/es/false/xml/&quot;,
+                            token)
+  names(s5) &lt;- c(&quot;s5&quot;,&quot;Fechas&quot;)
+  s6 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216070/00000/es/false/xml/&quot;,
+                            token)
+  names(s6) &lt;- c(&quot;s6&quot;,&quot;Fechas&quot;)
+  s7 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216071/00000/es/false/xml/&quot;,
+                            token)
+  names(s7) &lt;- c(&quot;s7&quot;,&quot;Fechas&quot;)
+  s8 &lt;- inegiR::serie_inegi(&quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/216072/00000/es/false/xml/&quot;,
+                            token)
+  names(s8) &lt;- c(&quot;s8&quot;,&quot;Fechas&quot;)
   
-  df <span class="o">&lt;-</span> <span class="kp">Reduce</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="kc">...</span><span class="p">)</span> <span class="kp">merge</span><span class="p">(</span><span class="kc">...</span><span class="p">,</span>all<span class="o">=</span><span class="bp">T</span><span class="p">),</span> 
-               <span class="kt">list</span><span class="p">(</span>s1<span class="p">,</span>s2<span class="p">,</span>s3<span class="p">,</span>s4<span class="p">,</span>s5<span class="p">,</span>s6<span class="p">,</span>s7<span class="p">,</span>s8<span class="p">))</span>
-  df<span class="o">$</span>ipe <span class="o">&lt;-</span> <span class="p">(</span>df<span class="o">$</span>s1<span class="o">*</span><span class="m">0.331417</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s2<span class="o">*</span><span class="m">0.032764</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s3<span class="o">*</span><span class="m">0.077735</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s4<span class="o">*</span><span class="m">0.00378</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s5<span class="o">*</span><span class="m">0.028353177</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s6<span class="o">*</span><span class="m">0.199190</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s7<span class="o">*</span><span class="m">0.0606992</span><span class="p">)</span><span class="o">+</span>
-            <span class="p">(</span>df<span class="o">$</span>s8<span class="o">*</span><span class="m">0.266067</span><span class="p">)</span>
+  df &lt;- Reduce(function(...) merge(...,all=T), 
+               list(s1,s2,s3,s4,s5,s6,s7,s8))
+  df$ipe &lt;- (df$s1*0.331417)+
+            (df$s2*0.032764)+
+            (df$s3*0.077735)+
+            (df$s4*0.00378)+
+            (df$s5*0.028353177)+
+            (df$s6*0.199190)+
+            (df$s7*0.0606992)+
+            (df$s8*0.266067)
   
-  st <span class="o">&lt;-</span> inegiR<span class="o">::</span>YoY<span class="p">(</span>serie <span class="o">=</span> df<span class="o">$</span>ipe<span class="p">,</span> 
-                    lapso <span class="o">=</span> <span class="m">12</span><span class="p">,</span> 
-                    decimal <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
-  d <span class="o">&lt;-</span> <span class="kp">cbind.data.frame</span><span class="p">(</span>Fechas <span class="o">=</span> df<span class="o">$</span>Fechas<span class="p">,</span> 
-                        Valores <span class="o">=</span> st<span class="p">)</span>
-  <span class="kr">return</span><span class="p">(</span>d<span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+  st &lt;- inegiR::YoY(serie = df$ipe, 
+                    lapso = 12, 
+                    decimal = FALSE)
+  d &lt;- cbind.data.frame(Fechas = df$Fechas, 
+                        Valores = st)
+  return(d)
+}</code></pre></figure>
 
 
   </div>
