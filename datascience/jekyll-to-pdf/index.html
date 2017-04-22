@@ -43,14 +43,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/economia/que-pasa-baja-inflacion">
+          <a href="/economia/que-pasa-baja-inflacion/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/negocios/sobrevivir-b-players">
+        <a href="/negocios/sobrevivir-b-players/">
           Next
         </a>
       </li>
@@ -80,21 +80,21 @@
 
 <p>Para definir un CSS personal, primero tenemos que decirle a nuestra plantilla html (<code>default.html</code>) que si encuentra un CSS personal, lo use (esto va hasta abajo de todos los CSS, para que se sobre-escriba cualquier <code>dependency</code>):</p>
 
-<div class="highlight"><pre><code class="language-liquid" data-lang="liquid"><span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nv">page</span><span class="p">.</span><span class="nv">custom_css</span><span class="w"> </span><span class="p">%}</span>
-  &lt;link rel=&quot;stylesheet&quot; href=&quot;<span class="p">{{</span><span class="w"> </span><span class="nv">site</span><span class="p">.</span><span class="nv">baseurl</span><span class="w"> </span><span class="p">}}</span>/css/<span class="p">{{</span><span class="nv">page</span><span class="p">.</span><span class="nv">custom_css</span><span class="p">}}</span>.css&quot;&gt;
-<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-liquid" data-lang="liquid">{% if page.custom_css %}
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ site.baseurl }}/css/{{page.custom_css}}.css&quot;&gt;
+{% endif %}</code></pre></figure>
 
 <p>Después guardamos nuestro CSS personal en la carpeta que dice la ruta (en mi caso <code>css/</code>). Aquí obviamente puedes poner cualquier estilo que quieras.</p>
 
 <p>Finalmente, en cada post o página estática que va generar el sitio, agregamos en el YAML el css personal así:</p>
 
-<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
-<span class="l-Scalar-Plain">title</span><span class="p-Indicator">:</span> <span class="s">&quot;Post</span><span class="nv"> </span><span class="s">1&quot;</span>
-<span class="l-Scalar-Plain">date</span><span class="p-Indicator">:</span> <span class="s">&#39;2015-11-10&#39;</span>
-<span class="l-Scalar-Plain">featured_image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/images/cover.jpg</span>
-<span class="l-Scalar-Plain">layout</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">post</span>
-<span class="l-Scalar-Plain">custom_css</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mycss</span>
-<span class="nn">---</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml">---
+title: &quot;Post 1&quot;
+date: &#39;2015-11-10&#39;
+featured_image: /images/cover.jpg
+layout: post
+custom_css: mycss
+---</code></pre></figure>
 
 <p>Pequeño caveat, este plugin es un caso de:</p>
 
@@ -114,20 +114,20 @@
 
 <p>La solución está en comentar los problemáticos webkits, por ejemplo:</p>
 
-<div class="highlight"><pre><code class="language-css" data-lang="css"><span class="nt">table</span> <span class="nt">td</span> <span class="p">{</span>
-  <span class="k">padding</span><span class="o">:</span><span class="m">5px</span><span class="p">;</span>
-	<span class="k">border-top</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#ffffff</span><span class="p">;</span>
-	<span class="k">border-bottom</span><span class="o">:</span><span class="m">1px</span> <span class="k">solid</span> <span class="m">#e0e0e0</span><span class="p">;</span>
-	<span class="k">border-left</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#e0e0e0</span><span class="p">;</span>
-	<span class="k">background</span><span class="o">:</span> <span class="m">#ffffff</span><span class="p">;</span>
-<span class="c">/*</span>
-<span class="c">background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa)); </span>
-<span class="c">*/</span>
+<figure class="highlight"><pre><code class="language-css" data-lang="css">table td {
+  padding:5px;
+	border-top: 1px solid #ffffff;
+	border-bottom:1px solid #e0e0e0;
+	border-left: 1px solid #e0e0e0;
+	background: #ffffff;
+/*
+background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa)); 
+*/
 
-<span class="c">/*</span>
-<span class="c">  background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);</span>
-<span class="c">*/</span>
-<span class="p">}</span></code></pre></div>
+/*
+  background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);
+*/
+}</code></pre></figure>
 
 <p>Lo óptimo es guardar un formato que funcione mejor para un pdf en otro CSS. Aquí puedes jugar con el tamaño de la letra, el espaciado, el color y demás.</p>
 
@@ -143,7 +143,7 @@
 
 <p>Ya que tengas todo instalado, simplemente abre una sessión en la terminal y escribe el comando del programa seguido por el sitio web a “transformar” y el nombre del archivo (debe tener el <code>.pdf</code>):</p>
 
-<div class="highlight"><pre><code class="language-console" data-lang="console"><span class="go">wkhtmltopdf www.sitio.com/imprimir/post1.html mipost.pdf</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-console" data-lang="console">wkhtmltopdf www.sitio.com/imprimir/post1.html mipost.pdf</code></pre></figure>
 
 <p>Recuerda verificar con <code>ls</code> antes o después en que parte de tu computadora estas, porque ahí se va guardar el pdf!</p>
 

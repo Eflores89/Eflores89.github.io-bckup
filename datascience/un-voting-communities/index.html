@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/un-voting-patterns">
+          <a href="/datascience/un-voting-patterns/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/economia/cnte-nomia">
+        <a href="/economia/cnte-nomia/">
           Next
         </a>
       </li>
@@ -70,107 +70,107 @@
 
 <p>Nothing too impressive here… (for a discussion of the package, see the original post).</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>magrittr<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>unvotes<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>reshape2<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+library(magrittr)
+library(unvotes)
+library(reshape2)
 
-<span class="c1"># number of roll-calls</span>
-votes <span class="o">&lt;-</span> un_votes <span class="o">%&gt;%</span>
-  left_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> un_roll_calls<span class="p">)</span> <span class="o">%&gt;%</span>
-  left_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> un_roll_call_issues<span class="p">)</span>
+# number of roll-calls
+votes &lt;- un_votes %&gt;%
+  left_join(., un_roll_calls) %&gt;%
+  left_join(., un_roll_call_issues)
 
-<span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>votes<span class="o">$</span>rcid<span class="p">))</span>
-<span class="c1"># [1] 5275 # number of unique roll call votes</span></code></pre></div>
+length(unique(votes$rcid))
+# [1] 5275 # number of unique roll call votes</code></pre></figure>
 
 <p>There are more than 5k unique roll calls, so if we where to open up dimensionality by each roll call, this is going to be huge, but i’ll go ahead and do it anyways, to test a hypothesis towards the end…</p>
 
 <h2 id="widen-data">‘Widen’ data…</h2>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">wide <span class="o">&lt;-</span> votes <span class="o">%&gt;%</span> 
-  select<span class="p">(</span>rcid<span class="p">,</span> country<span class="p">,</span> vote<span class="p">)</span> <span class="o">%&gt;%</span> 
-  dcast<span class="p">(,</span> formula <span class="o">=</span> rcid<span class="o">+</span>country <span class="o">~</span> vote<span class="p">)</span> <span class="o">%&gt;%</span> 
-  dcast<span class="p">(,</span> formula <span class="o">=</span> country<span class="o">~</span>rcid<span class="o">+</span>yes<span class="o">+</span>no<span class="o">+</span>abstain<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">wide &lt;- votes %&gt;% 
+  select(rcid, country, vote) %&gt;% 
+  dcast(, formula = rcid+country ~ vote) %&gt;% 
+  dcast(, formula = country~rcid+yes+no+abstain)
 
-str<span class="p">(</span>wide<span class="p">)</span>
-<span class="c1"># &#39;data.frame&#39;:	200 obs. of  14352 variables:</span></code></pre></div>
+str(wide)
+# &#39;data.frame&#39;:	200 obs. of  14352 variables:</code></pre></figure>
 
 <p>Now that we have a very high dimension data set (each variable is the vote in a roll call, for example, abstain_120, yes_120, no_120 would be a count of abstain, yes and no votes in roll call 120). This data set is basically ones and ceros. Now to do some cleaning and get the distance matrix…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">wide<span class="p">[</span><span class="kp">is.na</span><span class="p">(</span>wide<span class="p">)]</span> <span class="o">&lt;-</span> <span class="m">0</span>
-d_wide <span class="o">&lt;-</span> <span class="kp">as.matrix</span><span class="p">(</span>wide<span class="p">)</span>
-<span class="kp">row.names</span><span class="p">(</span>d_wide<span class="p">)</span> <span class="o">&lt;-</span> wide<span class="o">$</span>country <span class="c1"># to name rows</span>
-d_wide <span class="o">&lt;-</span> dist<span class="p">(</span>d_wide<span class="p">)</span> <span class="c1"># distance matrix</span>
-hc_wide <span class="o">&lt;-</span> hclust<span class="p">(</span>d_wide<span class="p">)</span> <span class="c1"># hierarchical cluster</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">wide[is.na(wide)] &lt;- 0
+d_wide &lt;- as.matrix(wide)
+row.names(d_wide) &lt;- wide$country # to name rows
+d_wide &lt;- dist(d_wide) # distance matrix
+hc_wide &lt;- hclust(d_wide) # hierarchical cluster</code></pre></figure>
 
 <p>Let’s graph this hierarchical clustering using the <code>ggdendro</code> package…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggdendro<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span> <span class="c1"># blog colors</span>
-ggdendrogram<span class="p">(</span>hc_wide<span class="p">,</span> 
-  rotate <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="o">+</span> 
-    theme_eem<span class="p">()</span> <span class="o">+</span> 
-    theme<span class="p">(</span>axis.text.y <span class="o">=</span> element_text<span class="p">(</span>size<span class="o">=</span><span class="m">6</span><span class="p">))</span> <span class="o">+</span> 
-    labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;country&quot;</span><span class="p">,</span> 
-         y <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> 
-         title <span class="o">=</span> <span class="s">&quot;Hierarchical clusters of votes \n in U.N.&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(ggdendro)
+library(eem) # blog colors
+ggdendrogram(hc_wide, 
+  rotate = TRUE) + 
+    theme_eem() + 
+    theme(axis.text.y = element_text(size=6)) + 
+    labs(x = &quot;country&quot;, 
+         y = &quot;&quot;, 
+         title = &quot;Hierarchical clusters of votes \n in U.N.&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/dendo_1.png" alt="Dendogram of UN votes by country" /></p>
 
 <p>I’m going to export these clusters and upload them on <a href="https://github.com/Eflores89/proyectos/tree/master/data">my github</a> for anyone to download.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">hc_c <span class="o">&lt;-</span> cutree<span class="p">(</span>hc_wide<span class="p">,</span> k <span class="o">=</span> <span class="m">8</span><span class="p">)</span>
-hc_c <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>hc_c<span class="p">,</span> row.names <span class="o">=</span> <span class="kp">names</span><span class="p">(</span>hc_c<span class="p">))</span>
-hc_c<span class="o">$</span><span class="kt">c</span> <span class="o">&lt;-</span> <span class="kp">row.names</span><span class="p">(</span>hc_c<span class="p">)</span>
-cc <span class="o">&lt;-</span> hc_c <span class="o">%&gt;%</span> arrange<span class="p">(</span><span class="o">-</span>hc_c<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">hc_c &lt;- cutree(hc_wide, k = 8)
+hc_c &lt;- as.data.frame(hc_c, row.names = names(hc_c))
+hc_c$c &lt;- row.names(hc_c)
+cc &lt;- hc_c %&gt;% arrange(-hc_c)
 
-write.csv<span class="p">(</span><span class="kp">as.data.frame</span><span class="p">(</span>cc<span class="p">),</span> file <span class="o">=</span> <span class="s">&quot;country_clusters.csv&quot;</span><span class="p">)</span></code></pre></div>
+write.csv(as.data.frame(cc), file = &quot;country_clusters.csv&quot;)</code></pre></figure>
 
 <h2 id="by-issues">By issues</h2>
 
 <p>Now, because the latest data set was very high dimension, i’m going to condense the analysis to just votes on particular issues. The data base has seven core issues, so i’m going to try to group by issue instead of roll call. This might let us see if there are different voting blocs from the earlier set (maybe countries vote the same, except when important issues come up).</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Widen, by issue...</span>
-wide_byissue <span class="o">&lt;-</span> votes <span class="o">%&gt;%</span> 
-  select<span class="p">(</span>issue<span class="p">,</span> country<span class="p">,</span> vote<span class="p">)</span> <span class="o">%&gt;%</span> 
-  dcast<span class="p">(,</span> formula <span class="o">=</span> country <span class="o">~</span> vote<span class="o">+</span>issue<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># Widen, by issue...
+wide_byissue &lt;- votes %&gt;% 
+  select(issue, country, vote) %&gt;% 
+  dcast(, formula = country ~ vote+issue)
 
-wide_byissue<span class="p">[</span><span class="kp">is.na</span><span class="p">(</span>wide_byissue<span class="p">)]</span> <span class="o">&lt;-</span> <span class="m">0</span>
-d_wide_issue <span class="o">&lt;-</span> <span class="kp">as.matrix</span><span class="p">(</span>wide_byissue<span class="p">)</span>
-<span class="kp">row.names</span><span class="p">(</span>d_wide_issue<span class="p">)</span> <span class="o">&lt;-</span> wide_byissue<span class="o">$</span>country
-d_wide_issue <span class="o">&lt;-</span> dist<span class="p">(</span>d_wide_issue<span class="p">)</span>
-hc_wide_issue <span class="o">&lt;-</span> hclust<span class="p">(</span>d_wide_issue<span class="p">)</span>
+wide_byissue[is.na(wide_byissue)] &lt;- 0
+d_wide_issue &lt;- as.matrix(wide_byissue)
+row.names(d_wide_issue) &lt;- wide_byissue$country
+d_wide_issue &lt;- dist(d_wide_issue)
+hc_wide_issue &lt;- hclust(d_wide_issue)
 
-ggdendrogram<span class="p">(</span>hc_wide_issue<span class="p">,</span> 
-  rotate <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="o">+</span> 
-    theme_eem<span class="p">()</span> <span class="o">+</span> 
-    theme<span class="p">(</span>axis.text.y <span class="o">=</span> element_text<span class="p">(</span>size<span class="o">=</span><span class="m">6</span><span class="p">))</span> <span class="o">+</span> 
-    labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;country&quot;</span><span class="p">,</span> 
-         y <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> 
-         title <span class="o">=</span> <span class="s">&quot;Hierarchical clusters of votes \n in U.N. (issues)&quot;</span><span class="p">)</span></code></pre></div>
+ggdendrogram(hc_wide_issue, 
+  rotate = TRUE) + 
+    theme_eem() + 
+    theme(axis.text.y = element_text(size=6)) + 
+    labs(x = &quot;country&quot;, 
+         y = &quot;&quot;, 
+         title = &quot;Hierarchical clusters of votes \n in U.N. (issues)&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/dendo_2.png" alt="Dendogram of UN votes by country, when grouping by issue" /></p>
 
 <p>I’ll export this too…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">hc_c2 <span class="o">&lt;-</span> cutree<span class="p">(</span>hc_wide_issue<span class="p">,</span> k <span class="o">=</span> <span class="m">8</span><span class="p">)</span>
-hc_c2 <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>hc_c2<span class="p">,</span> row.names <span class="o">=</span> <span class="kp">names</span><span class="p">(</span>hc_c2<span class="p">))</span>
-hc_c2<span class="o">$</span><span class="kt">c</span> <span class="o">&lt;-</span> <span class="kp">row.names</span><span class="p">(</span>hc_c2<span class="p">)</span>
-cc2 <span class="o">&lt;-</span> hc_c2 <span class="o">%&gt;%</span> arrange<span class="p">(</span><span class="o">-</span>hc_c2<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">hc_c2 &lt;- cutree(hc_wide_issue, k = 8)
+hc_c2 &lt;- as.data.frame(hc_c2, row.names = names(hc_c2))
+hc_c2$c &lt;- row.names(hc_c2)
+cc2 &lt;- hc_c2 %&gt;% arrange(-hc_c2)
 
-write.csv<span class="p">(</span><span class="kp">as.data.frame</span><span class="p">(</span>cc2<span class="p">),</span> file <span class="o">=</span> <span class="s">&quot;country_clusters_issue.csv&quot;</span><span class="p">)</span></code></pre></div>
+write.csv(as.data.frame(cc2), file = &quot;country_clusters_issue.csv&quot;)</code></pre></figure>
 
 <p>To disprove the earlier hypothesis, i’m going to find Mexico’s neighborhood, and see if there are many countries that repeat themselves in both sets…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># find cluster where Mexico lives ... </span>
-neighborhood_mx <span class="o">&lt;-</span> hc_c <span class="o">%&gt;%</span> filter<span class="p">(</span>hc_c <span class="o">==</span> <span class="m">3</span><span class="p">)</span>
-neighborhood_mx_issue <span class="o">&lt;-</span> hc_c2 <span class="o">%&gt;%</span> filter<span class="p">(</span>hc_c2 <span class="o">==</span> <span class="m">1</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># find cluster where Mexico lives ... 
+neighborhood_mx &lt;- hc_c %&gt;% filter(hc_c == 3)
+neighborhood_mx_issue &lt;- hc_c2 %&gt;% filter(hc_c2 == 1)
 
-<span class="kp">sum</span><span class="p">(</span>neighborhood_mx_issue<span class="o">$</span><span class="kt">c</span> <span class="o">%in%</span> neighborhood_mx<span class="o">$</span><span class="kt">c</span><span class="p">)</span><span class="o">/</span><span class="kp">length</span><span class="p">(</span>neighborhood_mx_issue<span class="o">$</span><span class="kt">c</span><span class="p">)</span>
-<span class="c1"># [1] 0.8</span>
+sum(neighborhood_mx_issue$c %in% neighborhood_mx$c)/length(neighborhood_mx_issue$c)
+# [1] 0.8
 
-<span class="c1"># export mexico&#39;s neighborhood</span>
-write.csv<span class="p">(</span>neighborhood_mx_issue<span class="p">,</span> file <span class="o">=</span> <span class="s">&quot;neighborhood_mx_issue.csv&quot;</span><span class="p">)</span></code></pre></div>
+# export mexico&#39;s neighborhood
+write.csv(neighborhood_mx_issue, file = &quot;neighborhood_mx_issue.csv&quot;)</code></pre></figure>
 
 <p>So 80% of the country’s are “close” to Mexico whether the vote is by issue or by roll call. This is a rough first attempt (there are probably many slight errors) but there are some interesting things to be found.</p>
 
@@ -178,11 +178,11 @@ write.csv<span class="p">(</span>neighborhood_mx_issue<span class="p">,</span> f
 
 <p>Then there are countries that seem to be very close culturally, and they show it in the votes…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># advanced foreign policy</span>
-hc_c2 <span class="o">%&gt;%</span> filter<span class="p">(</span>hc_c2 <span class="o">==</span> <span class="s">&quot;6&quot;</span><span class="p">)</span>
-<span class="c1"># [1] &quot;Austria&quot;     &quot;Denmark&quot;     &quot;Finland&quot;     &quot;Greece&quot;      &quot;Iceland&quot;   </span>
-<span class="c1"># [6] &quot;Ireland&quot;     &quot;Japan&quot;       &quot;New Zealand&quot; &quot;Norway&quot;      &quot;Spain&quot;      </span>
-<span class="c1"># [11] &quot;Sweden&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># advanced foreign policy
+hc_c2 %&gt;% filter(hc_c2 == &quot;6&quot;)
+# [1] &quot;Austria&quot;     &quot;Denmark&quot;     &quot;Finland&quot;     &quot;Greece&quot;      &quot;Iceland&quot;   
+# [6] &quot;Ireland&quot;     &quot;Japan&quot;       &quot;New Zealand&quot; &quot;Norway&quot;      &quot;Spain&quot;      
+# [11] &quot;Sweden&quot;</code></pre></figure>
 
 <p>Finally, some like-minded countries, like Chile, Colombia, Panama, Paraguay, Peru, etc are in Mexico’s neighborhood (although it’s one of the largest groups).</p>
 

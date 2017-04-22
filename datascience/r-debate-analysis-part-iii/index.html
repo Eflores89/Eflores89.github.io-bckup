@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/r-debate-analysis-part-ii">
+          <a href="/datascience/r-debate-analysis-part-ii/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/arte/The-Big-Short-Review">
+        <a href="/arte/The-Big-Short-Review/">
           Next
         </a>
       </li>
@@ -73,7 +73,7 @@
 
 <p>For those <a href="http://enelmargen.org/datascience/r-debate-analysis-part-ii/">following along</a>, this is the new url ending:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">south_carolina <span class="o">&lt;-</span> <span class="s">&quot;111395&quot;</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">south_carolina &lt;- &quot;111395&quot;</code></pre></figure>
 
 <p>To save some precious real estate, i’ve done the work previously explained in the last posts, and built the data.frame with the debate. (You can see the <em>rough</em> scripts <a href="https://github.com/Eflores89/proyectos/tree/master/scripts">here</a>)</p>
 
@@ -95,16 +95,16 @@
 
 <p>As for the entire debate, the most frequent words were “people” (intuitively makes sense) and “president”.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># all debates</span>
-scarolina <span class="o">&lt;-</span> <span class="kp">apply</span><span class="p">(</span><span class="kp">subset</span><span class="p">(</span>all_debates<span class="p">,</span> debate <span class="o">==</span> <span class="s">&quot;SouthCarolina&quot;</span><span class="p">)[</span><span class="s">&#39;message&#39;</span><span class="p">],</span>
-                    <span class="m">1</span><span class="p">,</span>
-                    <span class="kp">paste</span><span class="p">)</span>
-debate_cloud <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</span>scarolina<span class="p">,</span> 
-    <span class="s">&quot;text&quot;</span><span class="p">,</span> 
-    max.words <span class="o">=</span> <span class="m">300</span><span class="p">,</span>
-    excludeWords <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;going&quot;</span><span class="p">,</span><span class="s">&quot;and&quot;</span><span class="p">,</span>
-                    <span class="s">&quot;applause&quot;</span><span class="p">,</span><span class="s">&quot;get&quot;</span><span class="p">,</span>
-                    <span class="s">&quot;got&quot;</span><span class="p">,</span><span class="s">&quot;let&quot;</span><span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># all debates
+scarolina &lt;- apply(subset(all_debates, debate == &quot;SouthCarolina&quot;)[&#39;message&#39;],
+                    1,
+                    paste)
+debate_cloud &lt;- rquery.wordcloud(scarolina, 
+    &quot;text&quot;, 
+    max.words = 300,
+    excludeWords = c(&quot;going&quot;,&quot;and&quot;,
+                    &quot;applause&quot;,&quot;get&quot;,
+                    &quot;got&quot;,&quot;let&quot;))</code></pre></figure>
 
 <p><img src="/images/posts/all_scarolina_wc.png" alt="Republican debate in South Carolina word cloud" /></p>
 
@@ -114,101 +114,101 @@ debate_cloud <span class="o">&lt;-</span> rquery.wordcloud<span class="p">(</spa
 
 <p>First, a small function to give me the counts of words…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">TopMentions <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">){</span>
-df <span class="o">&lt;-</span> all_debates
-  counts <span class="o">&lt;-</span> stri_count_regex<span class="p">(</span>df<span class="o">$</span><span class="kp">message</span><span class="p">,</span> 
-                            pattern <span class="o">=</span> x<span class="p">,</span>
-                            case_insensitive <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-  df<span class="o">$</span>counts <span class="o">&lt;-</span> counts
-  df <span class="o">&lt;-</span> df <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>person<span class="p">)</span> <span class="o">%&gt;%</span>
-                 dplyr<span class="o">::</span>summarise<span class="p">(</span><span class="s">&quot;mentions&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>counts<span class="p">))</span>
-  df <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>df<span class="p">)</span>
-  df <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>df<span class="p">,</span> mentions<span class="o">&gt;</span><span class="m">0</span><span class="p">)</span>
-  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">TopMentions &lt;- function(x){
+df &lt;- all_debates
+  counts &lt;- stri_count_regex(df$message, 
+                            pattern = x,
+                            case_insensitive = TRUE)
+  df$counts &lt;- counts
+  df &lt;- df %&gt;% dplyr::group_by(person) %&gt;%
+                 dplyr::summarise(&quot;mentions&quot; = sum(counts))
+  df &lt;- as.data.frame(df)
+  df &lt;- subset(df, mentions&gt;0)
+  return(df)
+}</code></pre></figure>
 
 <p>Let’s see who likes to talk the most about guns…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># guns </span>
-w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;gun&quot;</span><span class="p">,</span><span class="s">&quot;guns&quot;</span><span class="p">)</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># guns 
+w &lt;- c(&quot;gun&quot;,&quot;guns&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmention_guns.png" alt="Top contenders mentioning guns" /></p>
 
 <p>I think we know who is gonna win here…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># mexico</span>
-w <span class="o">&lt;-</span> <span class="s">&quot;mexico&quot;</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># mexico
+w &lt;- &quot;mexico&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmention_mexico.png" alt="Top contenders mentioning mexico" /></p>
 
 <p>Republicans are also characteristically strong on military-speak, so let’s see who likes this subject the most…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># isis, military</span>
-w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;isis&quot;</span><span class="p">,</span><span class="s">&quot;military&quot;</span><span class="p">)</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># isis, military
+w &lt;- c(&quot;isis&quot;,&quot;military&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmention_isis.png" alt="Top contenders mentioning isis" /></p>
 
 <p>On the economic front, a natural contender pops up…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># taxes</span>
-w <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;taxes&quot;</span><span class="p">)</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># taxes
+w &lt;- c(&quot;taxes&quot;)
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmention_taxes.png" alt="Top contenders mentioning taxes" /></p>
 
 <p>And finally… this a surprise!</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># muslim</span>
-w <span class="o">&lt;-</span> <span class="s">&quot;muslim&quot;</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># muslim
+w &lt;- &quot;muslim&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmention_muslim.png" alt="Top contenders mentioning muslim" /></p>
 
@@ -216,17 +216,17 @@ ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class
 
 <p>Also, some candidates prefer another term…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">w <span class="o">&lt;-</span> <span class="s">&quot;islamic&quot;</span>
-ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class="o">=</span> TopMentions<span class="p">(</span>w<span class="p">),</span>
-                  axis <span class="o">=</span> person<span class="p">,</span> 
-                  column <span class="o">=</span> mentions<span class="p">),</span> 
-        aes<span class="p">(</span>x <span class="o">=</span> person_o<span class="p">,</span> 
-            y <span class="o">=</span> mentions<span class="p">))</span> <span class="o">+</span> 
-        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-                 fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span>
-        theme_eem<span class="p">()</span> <span class="o">+</span>
-        labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Person&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Mentions&quot;</span><span class="p">,</span> 
-        title <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Top mentions of &quot;</span><span class="p">,</span>w<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">w &lt;- &quot;islamic&quot;
+ggplot(order_axis(data = TopMentions(w),
+                  axis = person, 
+                  column = mentions), 
+        aes(x = person_o, 
+            y = mentions)) + 
+        geom_bar(stat = &quot;identity&quot;, 
+                 fill = eem_colors[1]) +
+        theme_eem() +
+        labs(x = &quot;Person&quot;, y = &quot;Mentions&quot;, 
+        title = paste0(&quot;Top mentions of &quot;,w))</code></pre></figure>
 
 <p><img src="/images/posts/topmentions_islamic.png" alt="Top contenders mentioning islamic" /></p>
 
@@ -234,33 +234,33 @@ ggplot<span class="p">(</span>order_axis<span class="p">(</span>data <span class
 
 <p>Let’s see what the aggregate stats have to say about this new debate…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">candidates <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;TRUMP&quot;</span><span class="p">,</span><span class="s">&quot;CARSON&quot;</span><span class="p">,</span><span class="s">&quot;RUBIO&quot;</span><span class="p">,</span>
-                <span class="s">&quot;KASICH&quot;</span><span class="p">,</span><span class="s">&quot;CRUZ&quot;</span><span class="p">,</span><span class="s">&quot;BUSH&quot;</span><span class="p">,</span>
-                <span class="s">&quot;FIORINA&quot;</span><span class="p">,</span><span class="s">&quot;PAUL&quot;</span><span class="p">,</span><span class="s">&quot;CHRISTIE&quot;</span><span class="p">)</span>
-info <span class="o">&lt;-</span> <span class="kc">NULL</span>
-info_all <span class="o">&lt;-</span> <span class="kc">NULL</span>
-<span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">9</span><span class="p">){</span>
-info <span class="o">&lt;-</span> UnlistAndExtractInfo<span class="p">(</span>candidates<span class="p">[</span>i<span class="p">])</span>
-info<span class="o">$</span>CANDIDATE <span class="o">&lt;-</span> candidates<span class="p">[</span>i<span class="p">]</span>
-info_all <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>info_all<span class="p">,</span> info<span class="p">)</span>
-<span class="p">}</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">candidates &lt;- c(&quot;TRUMP&quot;,&quot;CARSON&quot;,&quot;RUBIO&quot;,
+                &quot;KASICH&quot;,&quot;CRUZ&quot;,&quot;BUSH&quot;,
+                &quot;FIORINA&quot;,&quot;PAUL&quot;,&quot;CHRISTIE&quot;)
+info &lt;- NULL
+info_all &lt;- NULL
+for(i in 1:9){
+info &lt;- UnlistAndExtractInfo(candidates[i])
+info$CANDIDATE &lt;- candidates[i]
+info_all &lt;- rbind(info_all, info)
+}
 
-<span class="c1"># i&#39;m going to add a few more columns...</span>
-info_all <span class="o">%&lt;&gt;%</span> mutate<span class="p">(</span>carry_over_p1 <span class="o">=</span> unique_words_repeated_fromfirst<span class="o">/</span>words_unique<span class="p">,</span>
-                     word_repeat <span class="o">=</span> words_total<span class="o">/</span>words_unique<span class="p">)</span></code></pre></div>
+# i&#39;m going to add a few more columns...
+info_all %&lt;&gt;% mutate(carry_over_p1 = unique_words_repeated_fromfirst/words_unique,
+                     word_repeat = words_total/words_unique)</code></pre></figure>
 
 <p>Using this information to graph…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</span>info_all<span class="p">,</span> CANDIDATE <span class="o">!=</span> <span class="s">&quot;CHRISTIE&quot;</span> <span class="o">&amp;</span> words_unique<span class="o">&gt;</span><span class="m">90</span><span class="p">),</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> words_total<span class="p">,</span> 
-           y <span class="o">=</span> words_unique<span class="p">))</span> <span class="o">+</span> 
-    geom_point<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">),</span> size <span class="o">=</span> <span class="m">3</span><span class="p">,</span> shape <span class="o">=</span> <span class="m">2</span><span class="p">)</span> <span class="o">+</span>
-    stat_smooth<span class="p">()</span><span class="o">+</span>
-    theme_eem<span class="p">()</span><span class="o">+</span> <span class="c1"># uses &quot;eflores89/eem&quot;</span>
-    scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># uses &quot;eflores89/eem&quot;</span>
-    labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Words per Debate&quot;</span><span class="p">,</span>
-         x <span class="o">=</span> <span class="s">&quot;Total Words&quot;</span><span class="p">,</span> 
-         y <span class="o">=</span> <span class="s">&quot;Unique Words&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ggplot(subset(info_all, CANDIDATE != &quot;CHRISTIE&quot; &amp; words_unique&gt;90), 
+       aes(x = words_total, 
+           y = words_unique)) + 
+    geom_point(aes(colour = CANDIDATE), size = 3, shape = 2) +
+    stat_smooth()+
+    theme_eem()+ # uses &quot;eflores89/eem&quot;
+    scale_colour_eem(20) + # uses &quot;eflores89/eem&quot;
+    labs(title = &quot;Words per Debate&quot;,
+         x = &quot;Total Words&quot;, 
+         y = &quot;Unique Words&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/debate6_words.png" alt="unique words vs words by debate" /></p>
 
@@ -272,16 +272,16 @@ info_all <span class="o">%&lt;&gt;%</span> mutate<span class="p">(</span>carry_o
 
 <p>But again, let’s see this trend more clearly with another graph…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># average times unique word is repeated...</span>
-ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</span>info_all<span class="p">,</span> CANDIDATE <span class="o">!=</span> <span class="s">&quot;CHRISTIE&quot;</span> <span class="o">&amp;</span> words_unique<span class="o">&gt;</span><span class="m">90</span><span class="p">),</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">factor</span><span class="p">(</span>CANDIDATE<span class="p">),</span> 
-           y <span class="o">=</span> word_repeat<span class="p">,</span> 
-           fill <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">]))</span> <span class="o">+</span>
-  geom_boxplot<span class="p">()</span> <span class="o">+</span>
-  theme_eem<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Average repetition of unique words&quot;</span><span class="p">,</span>
-       x <span class="o">=</span> <span class="s">&quot;Candidate&quot;</span><span class="p">,</span> 
-       y <span class="o">=</span> <span class="s">&quot;Repetitions&quot;</span><span class="p">)</span> <span class="o">+</span> theme<span class="p">(</span>legend.position <span class="o">=</span> <span class="s">&quot;none&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># average times unique word is repeated...
+ggplot(subset(info_all, CANDIDATE != &quot;CHRISTIE&quot; &amp; words_unique&gt;90), 
+       aes(x = factor(CANDIDATE), 
+           y = word_repeat, 
+           fill = eem_colors[1])) +
+  geom_boxplot() +
+  theme_eem()+
+  labs(title = &quot;Average repetition of unique words&quot;,
+       x = &quot;Candidate&quot;, 
+       y = &quot;Repetitions&quot;) + theme(legend.position = &quot;none&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/trump_reps6.png" alt="words per unique word" /></p>
 
@@ -293,23 +293,23 @@ ggplot<span class="p">(</span><span class="kp">subset</span><span class="p">(</s
 
 <p>Kasich, on the other hand, delivers his remarks and follows the rules: he does not speak when not spoken to (which is most of the debate).</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># order the debates...</span>
-info_all<span class="o">$</span>debate <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>info_all<span class="o">$</span>debate<span class="p">,</span> 
-                          levels <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ohio&quot;</span><span class="p">,</span><span class="s">&quot;California&quot;</span><span class="p">,</span>
-                                     <span class="s">&quot;Colorado&quot;</span><span class="p">,</span><span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span>
-                                     <span class="s">&quot;Vegas&quot;</span><span class="p">,</span> <span class="s">&quot;SCarolina&quot;</span><span class="p">))</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># order the debates...
+info_all$debate &lt;- factor(info_all$debate, 
+                          levels = c(&quot;Ohio&quot;,&quot;California&quot;,
+                                     &quot;Colorado&quot;,&quot;Wisconsin&quot;,
+                                     &quot;Vegas&quot;, &quot;SCarolina&quot;))
 
-<span class="c1"># average length of interventions</span>
-ggplot<span class="p">(</span>info_all<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> debate<span class="p">,</span> 
-           y <span class="o">=</span> average_intervention<span class="p">,</span> 
-           group <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
-  geom_path<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> CANDIDATE<span class="p">))</span> <span class="o">+</span> 
-  theme_eem<span class="p">()</span> <span class="o">+</span> 
-  scale_colour_eem<span class="p">(</span><span class="m">20</span><span class="p">)</span> <span class="o">+</span> 
-  labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Debate&quot;</span><span class="p">,</span> 
-       y <span class="o">=</span> <span class="s">&quot;Words&quot;</span><span class="p">,</span> 
-       title <span class="o">=</span> <span class="s">&quot;Average words per intervention&quot;</span><span class="p">)</span></code></pre></div>
+# average length of interventions
+ggplot(info_all, 
+       aes(x = debate, 
+           y = average_intervention, 
+           group = CANDIDATE)) + 
+  geom_path(aes(colour = CANDIDATE)) + 
+  theme_eem() + 
+  scale_colour_eem(20) + 
+  labs(x = &quot;Debate&quot;, 
+       y = &quot;Words&quot;, 
+       title = &quot;Average words per intervention&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/words_trend6.png" alt="words by intervention" /></p>
 

@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/cultura/power-ideas">
+          <a href="/cultura/power-ideas/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/cultura/plagio-epn">
+        <a href="/cultura/plagio-epn/">
           Next
         </a>
       </li>
@@ -81,86 +81,86 @@
 
 <p>Then you can find some id’s…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>banxicoR<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
-data<span class="p">(</span><span class="s">&quot;BanxicoCatalog&quot;</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(banxicoR)
+library(dplyr)
+data(&quot;BanxicoCatalog&quot;)
 
-<span class="c1"># To see how many id&#39;s by parent subject </span>
-BanxicoCatalog <span class="o">%&gt;%</span> 
-  group_by<span class="p">(</span>PARENT<span class="p">)</span> <span class="o">%&gt;%</span> 
-  summarise<span class="p">(</span><span class="s">&quot;Id&#39;s&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+# To see how many id&#39;s by parent subject 
+BanxicoCatalog %&gt;% 
+  group_by(PARENT) %&gt;% 
+  summarise(&quot;Id&#39;s&quot; = n())
 
-<span class="c1"># Source: local data frame [4 x 2]</span>
+# Source: local data frame [4 x 2]
 
-<span class="c1">#                       PARENT     Id&#39;s</span>
-<span class="c1">#                       (chr)     (int)</span>
-<span class="c1">#  1          Billetes y Monedas    45</span>
-<span class="c1">#  2 Intermediarios Financierios    37</span>
-<span class="c1">#  3            Sistemas de Pago    49</span>
-<span class="c1">#  4              Tipo de Cambio     2</span>
+#                       PARENT     Id&#39;s
+#                       (chr)     (int)
+#  1          Billetes y Monedas    45
+#  2 Intermediarios Financierios    37
+#  3            Sistemas de Pago    49
+#  4              Tipo de Cambio     2
 
-<span class="c1"># to bring the specific id of the average duration of 200 peso bills...</span>
-BanxicoCatalog <span class="o">%&gt;%</span> 
-  filter<span class="p">(</span>PARENT <span class="o">==</span> <span class="s">&quot;Billetes y Monedas&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  filter<span class="p">(</span>LEVEL_1 <span class="o">==</span> <span class="s">&quot;Duración promedio del billete&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  filter<span class="p">(</span>LEVEL_2 <span class="o">==</span> <span class="s">&quot;200 pesos&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  select<span class="p">(</span>ID<span class="p">)</span>
+# to bring the specific id of the average duration of 200 peso bills...
+BanxicoCatalog %&gt;% 
+  filter(PARENT == &quot;Billetes y Monedas&quot;) %&gt;% 
+  filter(LEVEL_1 == &quot;Duración promedio del billete&quot;) %&gt;% 
+  filter(LEVEL_2 == &quot;200 pesos&quot;) %&gt;% 
+  select(ID)
 
-<span class="c1"># Source: local data frame [1 x 1]</span>
+# Source: local data frame [1 x 1]
 
-<span class="c1">#      ID</span>
-<span class="c1">#    (chr)</span>
-<span class="c1">#1    SM32</span></code></pre></div>
+#      ID
+#    (chr)
+#1    SM32</code></pre></figure>
 
 <h3 id="usage">Usage</h3>
 <p>Now that you have some id’s to download, we can use the <code>banxico_series</code> function…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># Download the Bank of Mexico international reserves</span>
-rsv <span class="o">&lt;-</span> banxico_series<span class="p">(</span>series <span class="o">=</span> <span class="s">&quot;SF110168&quot;</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># Download the Bank of Mexico international reserves
+rsv &lt;- banxico_series(series = &quot;SF110168&quot;)
 
-<span class="kp">tail</span><span class="p">(</span>rsv<span class="p">)</span>
-<span class="c1">#          DATE SF110168</span>
-<span class="c1">#    2016-01-01 176321.4</span>
-<span class="c1">#    2016-02-01 178408.8</span>
-<span class="c1">#    2016-03-01 179708.0</span>
-<span class="c1">#    2016-04-01 182118.8</span>
-<span class="c1">#    2016-05-01 179351.0</span>
-<span class="c1">#    2016-06-01 178829.9</span></code></pre></div>
+tail(rsv)
+#          DATE SF110168
+#    2016-01-01 176321.4
+#    2016-02-01 178408.8
+#    2016-03-01 179708.0
+#    2016-04-01 182118.8
+#    2016-05-01 179351.0
+#    2016-06-01 178829.9</code></pre></figure>
 
 <p>If you want some other fancy things, you can use the options…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">rsv <span class="o">&lt;-</span> banxico_series<span class="p">(</span>series <span class="o">=</span> <span class="s">&quot;SF110168&quot;</span><span class="p">,</span> 
-                      metadata <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> 
-                      verbose <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-<span class="c1"># [1] &quot;Data series: SF110168 downloaded&quot;</span>
-<span class="c1"># [1] &quot;Data series in monthly frequency&quot;</span>
-<span class="c1"># [1] &quot;Parsing data with 198 rows&quot;</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">rsv &lt;- banxico_series(series = &quot;SF110168&quot;, 
+                      metadata = TRUE, 
+                      verbose = TRUE)
+# [1] &quot;Data series: SF110168 downloaded&quot;
+# [1] &quot;Data series in monthly frequency&quot;
+# [1] &quot;Parsing data with 198 rows&quot;
 
-str<span class="p">(</span>rsv<span class="p">)</span>
-<span class="c1">#List of 2</span>
-<span class="c1"># $ MetaData:List of 6</span>
-<span class="c1">#  ..$ IndicatorName: chr &quot;I. Official Reserve Assets And Other Foreign Currency Assets - A. Official Reserve Assets&quot;</span>
-<span class="c1">#  ..$ IndicatorId  : chr &quot;SF110168&quot;</span>
-<span class="c1">#  ..$ Units        : chr &quot;millions of u.s. dollar&quot;</span>
-<span class="c1">#  ..$ DataType     : chr &quot;market value/price&quot;</span>
-<span class="c1">#  ..$ Period       : chr &quot;jan 2000 - jun 2016&quot;</span>
-<span class="c1">#  ..$ Frequency    : chr &quot;monthly&quot;</span>
-<span class="c1"># $ Data    :&#39;data.frame&#39;:	198 obs. of  2 variables:</span>
-<span class="c1">#  ..$ Dates   : Date[1:198], format: &quot;2000-01-01&quot; ...</span>
-<span class="c1">#  ..$ SF110168: num [1:198] 33689 33382 36435 34749 33624 ...</span></code></pre></div>
+str(rsv)
+#List of 2
+# $ MetaData:List of 6
+#  ..$ IndicatorName: chr &quot;I. Official Reserve Assets And Other Foreign Currency Assets - A. Official Reserve Assets&quot;
+#  ..$ IndicatorId  : chr &quot;SF110168&quot;
+#  ..$ Units        : chr &quot;millions of u.s. dollar&quot;
+#  ..$ DataType     : chr &quot;market value/price&quot;
+#  ..$ Period       : chr &quot;jan 2000 - jun 2016&quot;
+#  ..$ Frequency    : chr &quot;monthly&quot;
+# $ Data    :&#39;data.frame&#39;:	198 obs. of  2 variables:
+#  ..$ Dates   : Date[1:198], format: &quot;2000-01-01&quot; ...
+#  ..$ SF110168: num [1:198] 33689 33382 36435 34749 33624 ...</code></pre></figure>
 
 <p>Finally, we can graph this…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span> <span class="c1"># theme from: https://github.com/Eflores89/eem</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(ggplot2)
+library(eem) # theme from: https://github.com/Eflores89/eem
 
-ggplot<span class="p">(</span>rsv<span class="o">$</span>Data<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> Dates<span class="p">,</span> y <span class="o">=</span> SF110168<span class="p">))</span><span class="o">+</span>
-       geom_path<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
-       theme_eem<span class="p">()</span><span class="o">+</span>
-       labs<span class="p">(</span>x <span class="o">=</span> <span class="s">&quot;Dates&quot;</span><span class="p">,</span> 
-            y <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Reserves in U.S. Dollars \n (&quot;</span><span class="p">,</span> rsv<span class="o">$</span>MetaData<span class="o">$</span>Units<span class="p">,</span> <span class="s">&quot;)&quot;</span><span class="p">),</span> 
-            title <span class="o">=</span> <span class="s">&quot;Bank of Mexico International Reserves&quot;</span><span class="p">)</span></code></pre></div>
+ggplot(rsv$Data, 
+       aes(x = Dates, y = SF110168))+
+       geom_path(colour = eem_colors[1])+
+       theme_eem()+
+       labs(x = &quot;Dates&quot;, 
+            y = paste0(&quot;Reserves in U.S. Dollars \n (&quot;, rsv$MetaData$Units, &quot;)&quot;), 
+            title = &quot;Bank of Mexico International Reserves&quot;)</code></pre></figure>
 
 <p><img src="http://enelmargen.org/banxicoR/imgs/banxicoR_1.png" alt="bank of mexico reserves" /></p>
 
