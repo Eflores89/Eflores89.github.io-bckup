@@ -11,24 +11,6 @@
   </url>
   
   <url>
-    <loc>http://localhost:4000/cultura/lemonade/</loc>
-    
-    <lastmod>2017-02-27T04:00:30-06:00</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
-    <loc>http://localhost:4000/cultura/split/</loc>
-    
-    <lastmod>2017-02-27T04:00:30-06:00</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <url>
     <loc>http://localhost:4000/datascience/jekyllsetup/</loc>
     
     <lastmod>2017-02-27T04:00:30-06:00</lastmod>
