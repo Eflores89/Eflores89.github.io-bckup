@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/un-voting-communities">
+          <a href="/datascience/un-voting-communities/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/cultura/power-ideas">
+        <a href="/cultura/power-ideas/">
           Next
         </a>
       </li>
@@ -114,14 +114,14 @@
 
 <p>La tabla nos muestra que las ciudades con huelgas de la CNTE tienen desde entonces un promedio de inflación más alto. ¿Será significativo? Una simple (<strong>muy simple, lo sé</strong>) prueba “t”, nos arroja que las medias sopresivamente si:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># data:  inf_CNTE$value and inf_noCNTE$value</span>
-<span class="c1"># t = 3.72, df = 221.78, p-value = 0.0002524</span>
-<span class="c1"># alternative hypothesis: true difference in means is not equal to 0</span>
-<span class="c1"># 95 percent confidence interval:</span>
-<span class="c1">#  0.1850243 0.6019065</span>
-<span class="c1"># sample estimates:</span>
-<span class="c1"># mean of x mean of y </span>
-<span class="c1">#  3.617527  3.224062</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># data:  inf_CNTE$value and inf_noCNTE$value
+# t = 3.72, df = 221.78, p-value = 0.0002524
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#  0.1850243 0.6019065
+# sample estimates:
+# mean of x mean of y 
+#  3.617527  3.224062</code></pre></figure>
 
 <p>Es decir, entre 18 y 60 puntos base de diferencia entre la tasa de inflación promedio.</p>
 

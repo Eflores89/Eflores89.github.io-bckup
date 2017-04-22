@@ -43,14 +43,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/revisar-r-downloads">
+          <a href="/datascience/revisar-r-downloads/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/datascience/jekyll-to-pdf">
+        <a href="/datascience/jekyll-to-pdf/">
           Next
         </a>
       </li>
@@ -68,7 +68,7 @@
 
 <p>En septiembre y octubre, el INEGI reportó las cifras más bajas de los últimos 3 años, como se puede ver en la gráfica:</p>
 
-<h2 id="qu-pasa">¿Qué pasa?</h2>
+<h2 id="qué-pasa">¿Qué pasa?</h2>
 
 <p><img src="/images/posts/infmex.png" alt="inflacionagos" /></p>
 
@@ -84,32 +84,32 @@
 
 <p><img src="/images/posts/totoct.png" alt="tot" /></p>
 
-<h4 id="aqu-les-dej-el-cdigo-para-reproducir-las-grficas">Aquí les dejó el código para reproducir las gráficas</h4>
+<h4 id="aquí-les-dejó-el-código-para-reproducir-las-gráficas">Aquí les dejó el código para reproducir las gráficas</h4>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span>
-  <span class="c1"># install_github(&quot;eflores89/eem&quot;)</span>
-<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
-token <span class="o">&lt;-</span> <span class="s">&quot;tokendelinegi&quot;</span>
-inf_mex <span class="o">&lt;-</span> inflacion_general<span class="p">(</span>token<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(inegiR)
+  # install_github(&quot;eflores89/eem&quot;)
+library(eem)
+token &lt;- &quot;tokendelinegi&quot;
+inf_mex &lt;- inflacion_general(token)
 
-ggplot<span class="p">(</span>ultimos<span class="p">(</span>inf_mex<span class="p">,</span> n <span class="o">=</span> <span class="m">36</span><span class="p">),</span> 
-              aes<span class="p">(</span>x<span class="o">=</span> Fechas<span class="p">,</span> 
-                  y <span class="o">=</span> Valores<span class="p">))</span> <span class="o">+</span> 
-      geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span> 
-      theme_eem<span class="p">()</span> <span class="o">+</span> 
-      geom_smooth<span class="p">()</span> <span class="o">+</span> 
-      labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Inflación en México, últimos 36 meses&quot;</span><span class="p">,</span> 
-      x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;tasa&quot;</span><span class="p">)</span>
+ggplot(ultimos(inf_mex, n = 36), 
+              aes(x= Fechas, 
+                  y = Valores)) + 
+      geom_line(colour = eem_colors[1]) + 
+      theme_eem() + 
+      geom_smooth() + 
+      labs(title = &quot;Inflación en México, últimos 36 meses&quot;, 
+      x = &quot;Fecha&quot;, y = &quot;tasa&quot;)
 
-inf_tot <span class="o">&lt;-</span> inflacion_tot<span class="p">(</span>token<span class="p">)</span>
-ggplot<span class="p">(</span>ultimos<span class="p">(</span>inf_tot<span class="p">,</span> n <span class="o">=</span> <span class="m">36</span><span class="p">),</span> 
-              aes<span class="p">(</span>x<span class="o">=</span> Fechas<span class="p">,</span> 
-                  y <span class="o">=</span> Valores<span class="p">))</span> <span class="o">+</span> 
-      geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span> <span class="o">+</span> 
-      theme_eem<span class="p">()</span> <span class="o">+</span> 
-      geom_smooth<span class="p">()</span> <span class="o">+</span> 
-      labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Términos de Intercambio \n últimos 36 meses&quot;</span><span class="p">,</span> 
-      x <span class="o">=</span> <span class="s">&quot;Fecha&quot;</span><span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;Razón&quot;</span><span class="p">)</span></code></pre></div>
+inf_tot &lt;- inflacion_tot(token)
+ggplot(ultimos(inf_tot, n = 36), 
+              aes(x= Fechas, 
+                  y = Valores)) + 
+      geom_line(colour = eem_colors[1]) + 
+      theme_eem() + 
+      geom_smooth() + 
+      labs(title = &quot;Términos de Intercambio \n últimos 36 meses&quot;, 
+      x = &quot;Fecha&quot;, y = &quot;Razón&quot;)</code></pre></figure>
 
 
   </div>
