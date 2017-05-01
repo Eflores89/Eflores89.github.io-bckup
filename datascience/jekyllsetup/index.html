@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Jekyll set-up in Windows 10 | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="How to get through errors and difficulties encountered in Windows 10 when setting up a jekyll site to host in github" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 27 Feb 2017</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: datascience, jekyll</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/economia/automatizacion/">
+            Previous
+          </a>
+        </li>
+      
+      
+      <li class="next">
+        <a href="/economia/aerolineas-2017/">
+          Next
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>Jekyll set-up in Windows 10</h1>
+    <p>I recently left my macbook (unvoluntarily) and started using the Windows computer I use at work. When I wanted to use Jekyll for this blog I ran into some issues, so I thought I’d give a short rundown of how to fix them (for future reference).</p>
+
+<p>The tutorial here: http://jekyll-windows.juthilo.com/ is by far the most comprehensive, explaining step by step the process to set-up my blog.</p>
+
+<h2 id="ruby">Ruby</h2>
+
+<p>First hurdle: installing ruby devkit was an issue without being logged in the administration user. Fixed it by running <code>cmd</code> as an admin. I found the solution <a href="https://www.howtogeek.com/194041/how-to-open-the-command-prompt-as-administrator-in-windows-8.1/">here</a>.</p>
+
+<h2 id="encoding">Encoding</h2>
+<p>After installing Python and trying to <code>jekyll build</code> I ran into another issue:</p>
+
+<blockquote>
+  <p>incompatible encoding regexp match (UTF-8 regexp with CP850 string)</p>
+</blockquote>
+
+<p>It seems like it’s something to do with the fact I wrote previous posts in UTF-8 and for some strange reason Windows 10 didn’t understand. I tried to place explicit encoding in the files and <code>config.yaml</code> file, but what finally worked was detailed <a href="http://bendetat.com/utf-issue-when-running-jekyll-on-windows.html">here</a>.</p>
+
+<p>Specifically, the update is what worked: running <code>chcp 65001</code> before the build.</p>
+
+<h2 id="syntax">Syntax</h2>
+
+<p>Another hurdle I ran into was the <code>pygment</code> highlighting. I followed instructions <a href="http://jekyll-windows.juthilo.com/3-syntax-highlighting/">here</a> and finally got <code>pip</code> to work.</p>
+
+<p>By installing via: <code>python -m pip install Pygments</code> it seemed to correct the issue. However, a strange <em>missing pygment</em> kept coming up when building.</p>
+
+<p>So, I finally found the issue. Apparently, because of some windows-specific thing (it always is), I had to change the <code>highlighter</code> parameter inside the <code>_config.yaml</code> file to <code>pygmentize</code>, and voila.</p>
+
+<p>Hope this helps to anyone running into the same issues.</p>
+
+  </div>
+</article>
+
+</body>
+</html>

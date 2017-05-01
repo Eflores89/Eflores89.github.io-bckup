@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/trump-mextweets">
+          <a href="/datascience/trump-mextweets/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/datascience/mba-shiny">
+        <a href="/datascience/mba-shiny/">
           Next
         </a>
       </li>
@@ -68,24 +68,24 @@
 
 <p>Primero, un poco sobre los datos. Hagamos la importación de la conversación:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">d <span class="o">&lt;-</span> read.table<span class="p">(</span>file <span class="o">=</span> <span class="s">&quot;venados.txt&quot;</span><span class="p">,</span> 
-                stringsAsFactors <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> 
-                sep <span class="o">=</span> <span class="s">&quot;\n&quot;</span><span class="p">,</span> encoding <span class="o">=</span> <span class="s">&quot;UTF-8&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">d &lt;- read.table(file = &quot;venados.txt&quot;, 
+                stringsAsFactors = FALSE, 
+                sep = &quot;\n&quot;, encoding = &quot;UTF-8&quot;)</code></pre></figure>
 
 <p>Hay algunos mensajes que empiezan con un “enter”, por ejemplo cuando se escribe en dos líneas <em>dentro del mismo mensaje</em>. Estos los tengo que quitar, para limpiar un poco la información. Si es la misma persona, pero manda el mensaje con enter, <em>si</em> aparece como dos mensajes (tú sabes quien eres).</p>
 
 <p>En proporción, los mensajes que voy a quitar son pocos, solo 556 mensajes (3.1% del total):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>magrittr<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>knitr<span class="p">)</span>
-d <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;Correcto&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>
-    <span class="kp">grepl</span><span class="p">(</span>x <span class="o">=</span> V1<span class="p">,</span> 
-          pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;</span><span class="p">),</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
-  group_by<span class="p">(</span>Correcto<span class="p">)</span> <span class="o">%&gt;%</span> 
-  summarise<span class="p">(</span><span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
-  kable<span class="p">()</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+library(magrittr)
+library(knitr)
+d %&gt;% 
+  mutate(&quot;Correcto&quot; = ifelse(
+    grepl(x = V1, 
+          pattern = &quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;), 1, 0)) %&gt;% 
+  group_by(Correcto) %&gt;% 
+  summarise(&quot;Mensajes&quot; = n()) %&gt;% 
+  kable()</code></pre></figure>
 
 <table>
   <thead>
@@ -111,84 +111,84 @@ d <span class="o">%&gt;%</span>
 
 <p>Ahora, para analizar bien el texto, hice la siguiente función que me parsea la hora, fecha, minuto, persona y mensaje en diferentes columas.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">DividirTexto <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>s<span class="p">){</span>
-  <span class="kn">require</span><span class="p">(</span>stringr<span class="p">)</span>
-  <span class="c1"># patrones</span>
-  tiempo <span class="o">&lt;-</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-&quot;</span>
-  p <span class="o">&lt;-</span> <span class="s">&quot;^[^\\:]+&quot;</span>
-  b <span class="o">&lt;-</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\- [^\\:]+&quot;</span>
-  k <span class="o">&lt;-</span> <span class="m">2</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">DividirTexto &lt;- function(s){
+  require(stringr)
+  # patrones
+  tiempo &lt;- &quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-&quot;
+  p &lt;- &quot;^[^\\:]+&quot;
+  b &lt;- &quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\, [0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\- [^\\:]+&quot;
+  k &lt;- 2
   
-  <span class="c1"># Tiempo, Fecha y Hora</span>
-  TimeStamp <span class="o">&lt;-</span> <span class="kp">unlist</span><span class="p">(</span>
-    str_extract_all<span class="p">(</span>string <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> tiempo<span class="p">))</span>
-    <span class="c1"># Fecha</span>
-  Fecha <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>
-    str_extract<span class="p">(</span>string <span class="o">=</span> TimeStamp<span class="p">,</span>
-                pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}&quot;</span><span class="p">),</span> 
-    format <span class="o">=</span> <span class="s">&quot;%m/%d/%y&quot;</span><span class="p">)</span>
+  # Tiempo, Fecha y Hora
+  TimeStamp &lt;- unlist(
+    str_extract_all(string = s, pattern = tiempo))
+    # Fecha
+  Fecha &lt;- as.Date(
+    str_extract(string = TimeStamp,
+                pattern = &quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}&quot;), 
+    format = &quot;%m/%d/%y&quot;)
   
-  Hora <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>
-    <span class="kp">gsub</span><span class="p">(</span>x <span class="o">=</span> str_extract<span class="p">(</span>
-      string <span class="o">=</span> str_extract<span class="p">(</span>
-        string <span class="o">=</span> TimeStamp<span class="p">,</span> 
-        pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
-      pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\:&quot;</span><span class="p">),</span> 
-      pattern <span class="o">=</span> <span class="s">&quot;\\:&quot;</span><span class="p">,</span> 
-      replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="c1"># eliminar el :</span>
-    <span class="p">)</span> <span class="c1"># fin de hora</span>
+  Hora &lt;- as.numeric(
+    gsub(x = str_extract(
+      string = str_extract(
+        string = TimeStamp, 
+        pattern = &quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;), 
+      pattern = &quot;^[0-9]{1,2}\\:&quot;), 
+      pattern = &quot;\\:&quot;, 
+      replacement = &quot;&quot;) # eliminar el :
+    ) # fin de hora
   
-  Minutos <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>
-    <span class="kp">gsub</span><span class="p">(</span>x <span class="o">=</span> str_extract<span class="p">(</span>
-      string <span class="o">=</span> str_extract<span class="p">(</span>
-        string <span class="o">=</span> TimeStamp<span class="p">,</span> 
-        pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
-      pattern <span class="o">=</span> <span class="s">&quot;\\:[0-9]{2,}&quot;</span><span class="p">),</span> <span class="c1"># solo dos digitos despues de... </span>
-      pattern <span class="o">=</span> <span class="s">&quot;\\:&quot;</span><span class="p">,</span> 
-      replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="c1"># eliminar el :</span>
-  <span class="p">)</span>
+  Minutos &lt;- as.numeric(
+    gsub(x = str_extract(
+      string = str_extract(
+        string = TimeStamp, 
+        pattern = &quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;), 
+      pattern = &quot;\\:[0-9]{2,}&quot;), # solo dos digitos despues de... 
+      pattern = &quot;\\:&quot;, 
+      replacement = &quot;&quot;) # eliminar el :
+  )
     
-  MitadDia <span class="o">&lt;-</span> str_extract<span class="p">(</span>
-    string <span class="o">=</span> str_extract<span class="p">(</span>
-      string <span class="o">=</span> TimeStamp<span class="p">,</span> 
-      pattern <span class="o">=</span> <span class="s">&quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;</span><span class="p">),</span> 
-    pattern <span class="o">=</span> <span class="s">&quot;[A|P]&quot;</span><span class="p">)</span>
+  MitadDia &lt;- str_extract(
+    string = str_extract(
+      string = TimeStamp, 
+      pattern = &quot;[0-9]{1,2}\\:[0-9]{2} [AM|PM]{2} \\-$&quot;), 
+    pattern = &quot;[A|P]&quot;)
     
   
-  Persona <span class="o">&lt;-</span> stri_split_regex<span class="p">(</span>str <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> tiempo<span class="p">)</span>
-  Persona <span class="o">&lt;-</span> <span class="kp">unlist</span><span class="p">(</span>str_extract_all<span class="p">(</span>pattern <span class="o">=</span> p<span class="p">,</span> string <span class="o">=</span> <span class="kp">unlist</span><span class="p">(</span>Persona<span class="p">)[</span>k<span class="p">]))</span>
+  Persona &lt;- stri_split_regex(str = s, pattern = tiempo)
+  Persona &lt;- unlist(str_extract_all(pattern = p, string = unlist(Persona)[k]))
   
-  msj <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;^:&quot;</span><span class="p">,</span>
-              x <span class="o">=</span> <span class="kp">unlist</span><span class="p">(</span>str_split<span class="p">(</span>string <span class="o">=</span> s<span class="p">,</span> pattern <span class="o">=</span> b<span class="p">))[</span><span class="m">2</span><span class="p">],</span> 
-              replacement <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+  msj &lt;- gsub(pattern = &quot;^:&quot;,
+              x = unlist(str_split(string = s, pattern = b))[2], 
+              replacement = &quot;&quot;)
   
-  df <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;TiempoWA&quot;</span> <span class="o">=</span> TimeStamp<span class="p">,</span> 
-                   <span class="s">&quot;Fecha&quot;</span> <span class="o">=</span> Fecha<span class="p">,</span> 
-                   <span class="s">&quot;Hora&quot;</span> <span class="o">=</span> Hora<span class="p">,</span> 
-                   <span class="s">&quot;Minutos&quot;</span> <span class="o">=</span> Minutos<span class="p">,</span> 
-                   <span class="s">&quot;MitadDia&quot;</span> <span class="o">=</span> MitadDia<span class="p">,</span> 
-                   <span class="s">&quot;Persona&quot;</span> <span class="o">=</span> Persona<span class="p">,</span> 
-                   <span class="s">&quot;Mensaje&quot;</span> <span class="o">=</span> msj<span class="p">)</span>
-  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+  df &lt;- data.frame(&quot;TiempoWA&quot; = TimeStamp, 
+                   &quot;Fecha&quot; = Fecha, 
+                   &quot;Hora&quot; = Hora, 
+                   &quot;Minutos&quot; = Minutos, 
+                   &quot;MitadDia&quot; = MitadDia, 
+                   &quot;Persona&quot; = Persona, 
+                   &quot;Mensaje&quot; = msj)
+  return(df)
+}</code></pre></figure>
 
 <p>Entonces, pasemos los datos por esta función, para tener columnas que nos sirven para analizar…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># quitando los datos &quot;malos&quot;</span>
-d <span class="o">%&lt;&gt;%</span>
-  mutate<span class="p">(</span><span class="s">&quot;Correcto&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span>
-         <span class="p">(</span><span class="kp">grepl</span><span class="p">(</span>x <span class="o">=</span> V1<span class="p">,</span> 
-                pattern <span class="o">=</span> <span class="s">&quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;</span><span class="p">),</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  filter<span class="p">(</span>Correcto <span class="o">==</span> <span class="m">1</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  select<span class="p">(</span><span class="o">-</span>Correcto<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># quitando los datos &quot;malos&quot;
+d %&lt;&gt;%
+  mutate(&quot;Correcto&quot; = ifelse
+         (grepl(x = V1, 
+                pattern = &quot;^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{2}\\,&quot;), 1, 0)) %&gt;%
+  filter(Correcto == 1) %&gt;%
+  select(-Correcto)
   
-<span class="c1"># dividiendo columnas</span>
-<span class="kn">library</span><span class="p">(</span>stringi<span class="p">)</span>
-d_limpio <span class="o">&lt;-</span> <span class="kp">lapply</span><span class="p">(</span>d<span class="o">$</span>V1<span class="p">,</span> DividirTexto<span class="p">)</span></code></pre></div>
+# dividiendo columnas
+library(stringi)
+d_limpio &lt;- lapply(d$V1, DividirTexto)</code></pre></figure>
 
 <p>Tenemos una lista así (estoy escondiendo el nombre real):</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span>d_limpio<span class="p">[[</span><span class="m">7110</span><span class="p">]])</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">kable(d_limpio[[7110]])</code></pre></figure>
 
 <table>
   <thead>
@@ -221,17 +221,17 @@ d_limpio <span class="o">&lt;-</span> <span class="kp">lapply</span><span class=
 
 <h2 id="mensajes-por-miembros">Mensajes por miembros</h2>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">a1 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;Palabras_Total&quot;</span> <span class="o">=</span> str_count<span class="p">(</span>Mensaje<span class="p">,</span> 
-                                      pattern <span class="o">=</span> <span class="s">&quot;\\S+&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  group_by<span class="p">(</span>Ciudad<span class="p">)</span> <span class="o">%&gt;%</span> 
-  summarise<span class="p">(</span><span class="s">&quot;PalabraxMsj&quot;</span> <span class="o">=</span> <span class="kp">round</span><span class="p">(</span><span class="kp">mean</span><span class="p">(</span>Palabras_Total<span class="p">),</span><span class="m">2</span><span class="p">),</span> 
-            <span class="s">&quot;Palabras&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>Palabras_Total<span class="p">),</span> 
-            <span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;(% Msj)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Mensajes<span class="o">/</span><span class="m">17415</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">),</span>
-         <span class="s">&quot;(% Palabras)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Palabras<span class="o">/</span><span class="m">90579</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">1</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  arrange<span class="p">(</span>desc<span class="p">(</span>Palabras<span class="p">))</span>
-kable<span class="p">(</span>a1<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">a1 &lt;- d_limpio %&gt;% 
+  mutate(&quot;Palabras_Total&quot; = str_count(Mensaje, 
+                                      pattern = &quot;\\S+&quot;)) %&gt;%
+  group_by(Ciudad) %&gt;% 
+  summarise(&quot;PalabraxMsj&quot; = round(mean(Palabras_Total),2), 
+            &quot;Palabras&quot; = sum(Palabras_Total), 
+            &quot;Mensajes&quot; = n()) %&gt;% 
+  mutate(&quot;(% Msj)&quot; = paste0(round(Mensajes/17415*100,1),&quot;%&quot;),
+         &quot;(% Palabras)&quot; = paste0(round(Palabras/90579*100,1),&quot;%&quot;)) %&gt;%
+  arrange(desc(Palabras))
+kable(a1)</code></pre></figure>
 
 <table>
   <thead>
@@ -422,16 +422,16 @@ kable<span class="p">(</span>a1<span class="p">)</span></code></pre></div>
 
 <p>Desde la tabla pasada, se puede ver un poco esto, pero hagamos una gráfica sencilla para ilustrar…</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
-ggplot<span class="p">(</span>data <span class="o">=</span> a1<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> Mensajes<span class="p">,</span> 
-           y <span class="o">=</span> PalabraxMsj<span class="p">))</span><span class="o">+</span>
-  geom_point<span class="p">(</span>colour<span class="o">=</span>eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
-  theme_eem<span class="p">()</span><span class="o">+</span>
-  ggrepel<span class="o">::</span>geom_label_repel<span class="p">(</span>aes<span class="p">(</span>label <span class="o">=</span> Ciudad<span class="p">))</span><span class="o">+</span>
-  labs<span class="p">(</span>x<span class="o">=</span><span class="s">&quot;Mensajes&quot;</span><span class="p">,</span> y <span class="o">=</span><span class="s">&quot;Palabras por Mensaje&quot;</span><span class="p">,</span> 
-       title <span class="o">=</span> <span class="s">&quot;Distribución de Mensajes en Grupo&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(ggplot2)
+library(eem)
+ggplot(data = a1, 
+       aes(x = Mensajes, 
+           y = PalabraxMsj))+
+  geom_point(colour=eem_colors[1])+
+  theme_eem()+
+  ggrepel::geom_label_repel(aes(label = Ciudad))+
+  labs(x=&quot;Mensajes&quot;, y =&quot;Palabras por Mensaje&quot;, 
+       title = &quot;Distribución de Mensajes en Grupo&quot;)</code></pre></figure>
 
 <p><img src="/images/posts/wa_1.png" alt="Distribución de Mensajes en Grupo de Whatsapp" /></p>
 
@@ -441,15 +441,15 @@ ggplot<span class="p">(</span>data <span class="o">=</span> a1<span class="p">,<
 
 <p>Para probar esta hipótesis, extraemos un indicador por mensaje que nos dice si contiene multimedia. Ojo que Whatsapp no exporta el tipo de media, sino solamente una leyenda que dice “<media ommitted="">", por lo que pueden ser también voicenotes o fotos.</media></p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">a2 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;Media&quot;</span> <span class="o">=</span> stri_count_regex<span class="p">(</span>str <span class="o">=</span> Mensaje<span class="p">,</span> 
-                                    pattern <span class="o">=</span> <span class="s">&quot;&lt;Media omitted&gt;&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  group_by<span class="p">(</span>Ciudad<span class="p">)</span> <span class="o">%&gt;%</span>
-  summarise<span class="p">(</span><span class="s">&quot;Media&quot;</span> <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>Media<span class="p">),</span> <span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span>
-  mutate<span class="p">(</span><span class="s">&quot;Msj/Media&quot;</span> <span class="o">=</span> Mensajes<span class="o">/</span>Media<span class="p">)</span> <span class="o">%&gt;%</span>
-  mutate<span class="p">(</span><span class="s">&quot;(% Media)&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>Media<span class="o">/</span><span class="m">1200</span><span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">2</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  arrange<span class="p">(</span>desc<span class="p">(</span>Media<span class="p">))</span>
-kable<span class="p">(</span>a2<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">a2 &lt;- d_limpio %&gt;% 
+  mutate(&quot;Media&quot; = stri_count_regex(str = Mensaje, 
+                                    pattern = &quot;&lt;Media omitted&gt;&quot;)) %&gt;%
+  group_by(Ciudad) %&gt;%
+  summarise(&quot;Media&quot; = sum(Media), &quot;Mensajes&quot; = n()) %&gt;%
+  mutate(&quot;Msj/Media&quot; = Mensajes/Media) %&gt;%
+  mutate(&quot;(% Media)&quot; = paste0(round(Media/1200*100,2),&quot;%&quot;)) %&gt;%
+  arrange(desc(Media))
+kable(a2)</code></pre></figure>
 
 <table>
   <thead>
@@ -616,16 +616,16 @@ kable<span class="p">(</span>a2<span class="p">)</span></code></pre></div>
 
 <p>Dado esto, y la cantidad de mensajes que llegan al día, podemos calcular la probabilidad de manera muy arbitraria que un día cualquiera nos llegue multimedia por cada persona:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># mensajes por día</span>
-msj_x_dia <span class="o">&lt;-</span> <span class="kp">nrow</span><span class="p">(</span>d_limpio<span class="p">)</span><span class="o">/</span><span class="kp">length</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>d_limpio<span class="o">$</span>Fecha<span class="p">))</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># mensajes por día
+msj_x_dia &lt;- nrow(d_limpio)/length(unique(d_limpio$Fecha))
 
-a3 <span class="o">&lt;-</span> a2 <span class="o">%&gt;%</span> 
-  inner_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> a1<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Ciudad&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  mutate<span class="p">(</span><span class="s">&quot;ProbabilidadMedia&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span>
-    <span class="p">((</span>Mensajes.y<span class="o">/</span><span class="m">17415</span><span class="p">)</span><span class="o">*</span><span class="sb">`Msj/Media`</span><span class="p">)</span><span class="o">/</span>msj_x_dia<span class="o">*</span><span class="m">100</span><span class="p">,</span><span class="m">2</span><span class="p">),</span><span class="s">&quot;%&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  arrange<span class="p">(</span>desc<span class="p">(</span>ProbabilidadMedia<span class="p">))</span> <span class="o">%&gt;%</span>
-  select<span class="p">(</span><span class="kt">c</span><span class="p">(</span>Ciudad<span class="p">,</span> ProbabilidadMedia<span class="p">))</span> 
-kable<span class="p">(</span>a3<span class="p">)</span></code></pre></div>
+a3 &lt;- a2 %&gt;% 
+  inner_join(., a1, by = c(&quot;Ciudad&quot;)) %&gt;%
+  mutate(&quot;ProbabilidadMedia&quot; = paste0(round(
+    ((Mensajes.y/17415)*`Msj/Media`)/msj_x_dia*100,2),&quot;%&quot;)) %&gt;%
+  arrange(desc(ProbabilidadMedia)) %&gt;%
+  select(c(Ciudad, ProbabilidadMedia)) 
+kable(a3)</code></pre></figure>
 
 <table>
   <thead>
@@ -722,39 +722,39 @@ kable<span class="p">(</span>a3<span class="p">)</span></code></pre></div>
   </tbody>
 </table>
 
-<h2 id="variacin-de-horas-por-persona">Variación de horas por persona</h2>
+<h2 id="variación-de-horas-por-persona">Variación de horas por persona</h2>
 
 <p>En este caso, parece que no hay tendencia muy establecida por persona, aunque en total es obvio que hay diferencias por hora. Un cuarto de los mensajes (23.9%) se mandan en las horas de trabajo (10 y 11 am) o a las 5 pm. Aquí les va una gráfica:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">a4 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
-  group_by<span class="p">(</span>Ciudad<span class="p">,</span> Hora<span class="p">,</span> MitadDia<span class="p">)</span> <span class="o">%&gt;%</span> 
-  summarise<span class="p">(</span><span class="s">&quot;Mensajes&quot;</span> <span class="o">=</span> n<span class="p">())</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">a4 &lt;- d_limpio %&gt;% 
+  group_by(Ciudad, Hora, MitadDia) %&gt;% 
+  summarise(&quot;Mensajes&quot; = n())
 
-ggplot<span class="p">(</span>a4<span class="p">,</span> 
-       aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">as.factor</span><span class="p">(</span>Hora<span class="p">),</span> 
-           y <span class="o">=</span> Mensajes<span class="p">))</span> <span class="o">+</span> 
-  geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> 
-           aes<span class="p">(</span>fill<span class="o">=</span> Ciudad<span class="p">))</span> <span class="o">+</span> 
-  facet_wrap<span class="p">(</span> <span class="o">~</span> MitadDia<span class="p">)</span> <span class="o">+</span> 
-  theme_eem<span class="p">()</span> <span class="o">+</span> 
-  scale_fill_manual<span class="p">(</span><span class="kt">c</span><span class="p">(</span>eem_colors<span class="p">,</span><span class="s">&quot;#B0034F&quot;</span><span class="p">,</span> <span class="s">&quot;e72712&quot;</span><span class="p">))</span></code></pre></div>
+ggplot(a4, 
+       aes(x = as.factor(Hora), 
+           y = Mensajes)) + 
+  geom_bar(stat = &quot;identity&quot;, 
+           aes(fill= Ciudad)) + 
+  facet_wrap( ~ MitadDia) + 
+  theme_eem() + 
+  scale_fill_manual(c(eem_colors,&quot;#B0034F&quot;, &quot;e72712&quot;))</code></pre></figure>
 
 <p><img src="/images/posts/wa_2.png" alt="Mensajes por hora" /></p>
 
 <h2 id="conversacion-entre-personas">Conversacion entre personas</h2>
 <p>Finalmente, estaría interesante ver quienes son los que más se responden entre sí. Obviamente lo más común es un mensaje de <em>Madrid</em> seguido por otro de <em>Madrid</em>, pero aquí filtraré los mensajes que son de la misma persona. Es decir, son combinaciones de mensaje-respuesta entre dos participantes del grupo.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">a5 <span class="o">&lt;-</span> d_limpio <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;Respuesta&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span>Ciudad<span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span>lag<span class="p">(</span>Ciudad<span class="p">)),</span> 
-         <span class="s">&quot;Igual&quot;</span> <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>Ciudad<span class="o">==</span>lag<span class="p">(</span>Ciudad<span class="p">),</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">))</span> <span class="o">%&gt;%</span> 
-  filter<span class="p">(</span>Igual<span class="o">&lt;</span><span class="m">1</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  group_by<span class="p">(</span>Respuesta<span class="p">)</span> <span class="o">%&gt;%</span> 
-  summarise<span class="p">(</span><span class="s">&quot;Conteo&quot;</span> <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> 
-  arrange<span class="p">(</span>desc<span class="p">(</span>Conteo<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">a5 &lt;- d_limpio %&gt;% 
+  mutate(&quot;Respuesta&quot; = paste0(Ciudad,&quot;-&quot;,lag(Ciudad)), 
+         &quot;Igual&quot; = ifelse(Ciudad==lag(Ciudad),1,0)) %&gt;% 
+  filter(Igual&lt;1) %&gt;% 
+  group_by(Respuesta) %&gt;% 
+  summarise(&quot;Conteo&quot; = n()) %&gt;% 
+  arrange(desc(Conteo))</code></pre></figure>
 
 <p>Aquí está en top 10 de combinaciones:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span>a5 <span class="o">%&gt;%</span> <span class="kp">head</span><span class="p">(</span><span class="m">.</span><span class="p">,</span> n <span class="o">=</span> <span class="m">10</span><span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">kable(a5 %&gt;% head(., n = 10))</code></pre></figure>
 
 <table>
   <thead>
@@ -811,41 +811,41 @@ ggplot<span class="p">(</span>a4<span class="p">,</span>
 
 <p>Esto se reduce a simplemente a seguir el teorema de Bayes: P(A|B) = P(A)P(B) y comparar contra lo observado (la hipótesis nula es que no son independientes). Hagamos una función para esto.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">ObtenerIndependiente <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>d<span class="p">,</span> p<span class="p">){</span>
-  tm <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>d<span class="o">$</span>Mensaje<span class="p">)</span>
-  a <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
-    filter<span class="p">(</span>Ciudad <span class="o">==</span> p<span class="p">)</span>
-  pa <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>a<span class="o">$</span>Mensaje<span class="p">)</span>
-  pa <span class="o">&lt;-</span> pa<span class="o">/</span>tm
+<figure class="highlight"><pre><code class="language-r" data-lang="r">ObtenerIndependiente &lt;- function(d, p){
+  tm &lt;- length(d$Mensaje)
+  a &lt;- d %&gt;% 
+    filter(Ciudad == p)
+  pa &lt;- length(a$Mensaje)
+  pa &lt;- pa/tm
   
-  n <span class="o">&lt;-</span> <span class="kp">unique</span><span class="p">(</span>d<span class="o">$</span>Ciudad<span class="p">)</span>
-  v <span class="o">&lt;-</span> <span class="kc">NULL</span>
-  k <span class="o">&lt;-</span> <span class="kc">NULL</span>
-  <span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>n<span class="p">)){</span>
-    b <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> 
-      filter<span class="p">(</span>Ciudad <span class="o">==</span> <span class="kp">as.character</span><span class="p">(</span>n<span class="p">[</span>i<span class="p">]))</span>
-    pb <span class="o">&lt;-</span> <span class="kp">length</span><span class="p">(</span>b<span class="o">$</span>Mensaje<span class="p">)</span>
-    pb <span class="o">&lt;-</span> pb<span class="o">/</span>tm
-    v<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="p">(</span>pa<span class="o">*</span>pb<span class="o">*</span>tm<span class="p">)</span>
-    k<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>n<span class="p">[</span>i<span class="p">])</span>
-  <span class="p">}</span>
-  df <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Ciudad&quot;</span> <span class="o">=</span> <span class="kp">rep</span><span class="p">(</span>p<span class="p">,</span> times <span class="o">=</span> <span class="kp">length</span><span class="p">(</span>n<span class="p">)),</span>
-                   <span class="s">&quot;Ciudad2&quot;</span> <span class="o">=</span> k<span class="p">,</span> 
-                   <span class="s">&quot;P_Independiente&quot;</span> <span class="o">=</span> v<span class="p">)</span>
-  <span class="kr">return</span><span class="p">(</span>df<span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+  n &lt;- unique(d$Ciudad)
+  v &lt;- NULL
+  k &lt;- NULL
+  for(i in 1:length(n)){
+    b &lt;- d %&gt;% 
+      filter(Ciudad == as.character(n[i]))
+    pb &lt;- length(b$Mensaje)
+    pb &lt;- pb/tm
+    v[i] &lt;- (pa*pb*tm)
+    k[i] &lt;- as.character(n[i])
+  }
+  df &lt;- data.frame(&quot;Ciudad&quot; = rep(p, times = length(n)),
+                   &quot;Ciudad2&quot; = k, 
+                   &quot;P_Independiente&quot; = v)
+  return(df)
+}</code></pre></figure>
 
 <p>Ahora voy a generar indicadores para cada “país”:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">associacion <span class="o">&lt;-</span> <span class="kc">NULL</span>
-<span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">21</span><span class="p">){</span>
-  tmp <span class="o">&lt;-</span> ObtenerIndependiente<span class="p">(</span>d_limpio<span class="p">,</span> <span class="kp">unique</span><span class="p">(</span>d_limpio<span class="o">$</span>Ciudad<span class="p">)[</span>i<span class="p">])</span>
-  associacion <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>associacion<span class="p">,</span> tmp<span class="p">)</span>
-<span class="p">}</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">associacion &lt;- NULL
+for(i in 1:21){
+  tmp &lt;- ObtenerIndependiente(d_limpio, unique(d_limpio$Ciudad)[i])
+  associacion &lt;- rbind.data.frame(associacion, tmp)
+}</code></pre></figure>
 
 <p>Obtenemos un data.frame así:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">kable<span class="p">(</span><span class="kp">head</span><span class="p">(</span>associacion<span class="p">))</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">kable(head(associacion))</code></pre></figure>
 
 <table>
   <thead>
@@ -895,15 +895,15 @@ ggplot<span class="p">(</span>a4<span class="p">,</span>
 
 <p>Finalmente, comparamos contra lo observado.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">a6 <span class="o">&lt;-</span> associacion <span class="o">%&gt;%</span> 
-  mutate<span class="p">(</span><span class="s">&quot;Combinacion&quot;</span> <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span>Ciudad<span class="p">,</span> <span class="s">&quot;-&quot;</span><span class="p">,</span> Ciudad2<span class="p">),</span> 
-         <span class="s">&quot;P_Independiente&quot;</span> <span class="o">=</span> P_Independiente<span class="o">/</span><span class="m">2</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  inner_join<span class="p">(</span><span class="m">.</span><span class="p">,</span> a5<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Combinacion&quot;</span> <span class="o">=</span> <span class="s">&quot;Respuesta&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
-  mutate<span class="p">(</span><span class="s">&quot;Asociacion&quot;</span> <span class="o">=</span> Conteo<span class="o">/</span>P_Independiente<span class="p">)</span> <span class="o">%&gt;%</span>
-  arrange<span class="p">(</span>desc<span class="p">(</span>Asociacion<span class="p">))</span> <span class="o">%&gt;%</span>
-  <span class="kp">head</span><span class="p">(</span><span class="m">.</span><span class="p">,</span> n <span class="o">=</span> <span class="m">20</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  select<span class="p">(</span><span class="kt">c</span><span class="p">(</span>Combinacion<span class="p">,</span> Asociacion<span class="p">))</span>
-kable<span class="p">(</span>a6<span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">a6 &lt;- associacion %&gt;% 
+  mutate(&quot;Combinacion&quot; = paste0(Ciudad, &quot;-&quot;, Ciudad2), 
+         &quot;P_Independiente&quot; = P_Independiente/2) %&gt;%
+  inner_join(., a5, by = c(&quot;Combinacion&quot; = &quot;Respuesta&quot;)) %&gt;%
+  mutate(&quot;Asociacion&quot; = Conteo/P_Independiente) %&gt;%
+  arrange(desc(Asociacion)) %&gt;%
+  head(., n = 20) %&gt;%
+  select(c(Combinacion, Asociacion))
+kable(a6)</code></pre></figure>
 
 <table>
   <thead>

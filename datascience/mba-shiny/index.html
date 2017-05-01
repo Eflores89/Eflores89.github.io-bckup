@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/datascience/whatsapp">
+          <a href="/datascience/whatsapp/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/politica/inter-hiper-democracia">
+        <a href="/politica/inter-hiper-democracia/">
           Next
         </a>
       </li>
@@ -78,165 +78,165 @@
 
 <p>Change it as you wish. There is a timer, that will indicate when time is running more the standard the interview suggests.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>shiny<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>readxl<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>shinyjs<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
-d <span class="o">&lt;-</span> read_excel<span class="p">(</span><span class="s">&quot;qs.xlsx&quot;</span><span class="p">)</span>
-jsResetCode <span class="o">&lt;-</span> <span class="s">&quot;shinyjs.reset = function() {history.go(0)}&quot;</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(shiny)
+library(readxl)
+library(shinyjs)
+library(dplyr)
+d &lt;- read_excel(&quot;qs.xlsx&quot;)
+jsResetCode &lt;- &quot;shinyjs.reset = function() {history.go(0)}&quot;
 
-shinyServer<span class="p">(</span><span class="kr">function</span><span class="p">(</span>input<span class="p">,</span> output<span class="p">,</span> session<span class="p">)</span> <span class="p">{</span>
-  EventTime <span class="o">&lt;-</span> <span class="kp">Sys.time</span><span class="p">()</span>
+shinyServer(function(input, output, session) {
+  EventTime &lt;- Sys.time()
   
-  qqt <span class="o">&lt;-</span> reactive<span class="p">({</span>
-    <span class="kr">if</span><span class="p">(</span>input<span class="o">$</span>response<span class="o">==</span><span class="s">&quot;To interviewer&quot;</span><span class="p">){</span>
-      d <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> filter<span class="p">(</span>RESPONSE<span class="o">==</span><span class="s">&quot;To Interviewer&quot;</span><span class="p">)</span>
-    <span class="p">}</span><span class="kp">else</span><span class="p">{</span>
-      d <span class="o">&lt;-</span> d <span class="o">%&gt;%</span> filter<span class="p">(</span>RESPONSE<span class="o">==</span><span class="s">&quot;To applicant&quot;</span><span class="p">)</span>
-    <span class="p">}</span>
+  qqt &lt;- reactive({
+    if(input$response==&quot;To interviewer&quot;){
+      d &lt;- d %&gt;% filter(RESPONSE==&quot;To Interviewer&quot;)
+    }else{
+      d &lt;- d %&gt;% filter(RESPONSE==&quot;To applicant&quot;)
+    }
     
-    qs <span class="o">&lt;-</span> d<span class="o">$</span>Q
-    qn <span class="o">&lt;-</span> <span class="kp">sample</span><span class="p">(</span><span class="kp">row.names</span><span class="p">(</span>d<span class="p">),</span><span class="m">1</span><span class="p">)</span>
-    qr <span class="o">&lt;-</span> qs<span class="p">[</span><span class="kp">as.numeric</span><span class="p">(</span>qn<span class="p">)]</span>
-    <span class="kr">if</span><span class="p">(</span><span class="kp">grepl</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;(\\[SCHOOL\\])&quot;</span><span class="p">,</span> x <span class="o">=</span> <span class="kp">qr</span><span class="p">)){</span>
-      qr <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;(\\[SCHOOL\\])&quot;</span><span class="p">,</span> replacement <span class="o">=</span> input<span class="o">$</span>school<span class="p">,</span> x <span class="o">=</span> <span class="kp">qr</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="kp">as.character</span><span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Q&quot;</span><span class="p">,</span>qn<span class="p">,</span><span class="s">&quot;: &quot;</span><span class="p">,</span><span class="kp">qr</span><span class="p">))</span>
-  <span class="p">})</span>
+    qs &lt;- d$Q
+    qn &lt;- sample(row.names(d),1)
+    qr &lt;- qs[as.numeric(qn)]
+    if(grepl(pattern = &quot;(\\[SCHOOL\\])&quot;, x = qr)){
+      qr &lt;- gsub(pattern = &quot;(\\[SCHOOL\\])&quot;, replacement = input$school, x = qr)
+    }
+    as.character(paste0(&quot;Q&quot;,qn,&quot;: &quot;,qr))
+  })
   
-  output<span class="o">$</span>qqt2 <span class="o">&lt;-</span> renderText<span class="p">({</span> 
-    txt <span class="o">&lt;-</span> qqt<span class="p">()</span>
+  output$qqt2 &lt;- renderText({ 
+    txt &lt;- qqt()
     txt 
-    <span class="p">})</span>
+    })
  
-  output<span class="o">$</span>eventTimeRemaining <span class="o">&lt;-</span> renderUI<span class="p">({</span>
-    invalidateLater<span class="p">(</span><span class="m">1000</span><span class="p">,</span> session<span class="p">)</span>
-    tm <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span><span class="kp">difftime</span><span class="p">(</span>
-      <span class="kp">Sys.time</span><span class="p">(),</span> EventTime<span class="p">,</span> units <span class="o">=</span> <span class="s">&#39;secs&#39;</span><span class="p">)))</span>
+  output$eventTimeRemaining &lt;- renderUI({
+    invalidateLater(1000, session)
+    tm &lt;- as.numeric(round(difftime(
+      Sys.time(), EventTime, units = &#39;secs&#39;)))
     
-    <span class="kr">if</span><span class="p">(</span>tm<span class="o">&lt;</span>input<span class="o">$</span>NormalTime<span class="o">*</span><span class="m">60</span><span class="p">){</span>
-    HTML<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Elapsed time: &quot;</span><span class="p">,</span> <span class="kp">ifelse</span><span class="p">(</span>tm<span class="o">&lt;</span><span class="m">60</span><span class="p">,</span> <span class="kp">paste0</span><span class="p">(</span>tm<span class="p">,</span> <span class="s">&quot; seconds.&quot;</span><span class="p">),</span> 
-                                    <span class="kp">paste0</span><span class="p">(</span>tm<span class="o">%/%</span><span class="m">60</span><span class="p">,</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> tm<span class="o">%%</span><span class="m">60</span><span class="p">,</span> <span class="s">&quot; mins.&quot;</span><span class="p">))))</span>
-    <span class="p">}</span><span class="kp">else</span><span class="p">{</span>
-      HTML<span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&#39;&lt;p style=&quot;color:#9f1317;&quot;&gt;&lt;strong&gt;&#39;</span><span class="p">,</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Time-up!! (&quot;</span><span class="p">,</span> <span class="kp">ifelse</span><span class="p">(</span>tm<span class="o">&lt;</span><span class="m">60</span><span class="p">,</span> <span class="kp">paste0</span><span class="p">(</span>tm<span class="p">,</span> <span class="s">&quot; seconds).&quot;</span><span class="p">),</span> 
-                                      <span class="kp">paste0</span><span class="p">(</span>tm<span class="o">%/%</span><span class="m">60</span><span class="p">,</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> tm<span class="o">%%</span><span class="m">60</span><span class="p">,</span> <span class="s">&quot; mins).&quot;</span><span class="p">)))),</span><span class="s">&#39;&lt;/strong&gt;&lt;/p&gt;&#39;</span><span class="p">)</span>
-    <span class="p">}</span>
-  <span class="p">})</span>
+    if(tm&lt;input$NormalTime*60){
+    HTML(paste0(&quot;Elapsed time: &quot;, ifelse(tm&lt;60, paste0(tm, &quot; seconds.&quot;), 
+                                    paste0(tm%/%60, &quot;:&quot;, tm%%60, &quot; mins.&quot;))))
+    }else{
+      HTML(paste0(&#39;&lt;p style=&quot;color:#9f1317;&quot;&gt;&lt;strong&gt;&#39;,paste0(&quot;Time-up!! (&quot;, ifelse(tm&lt;60, paste0(tm, &quot; seconds).&quot;), 
+                                      paste0(tm%/%60, &quot;:&quot;, tm%%60, &quot; mins).&quot;)))),&#39;&lt;/strong&gt;&lt;/p&gt;&#39;)
+    }
+  })
   
-  observeEvent<span class="p">(</span>input<span class="o">$</span>reset<span class="p">,</span> <span class="p">{</span>
-    shinyjs<span class="o">::</span>reset<span class="p">(</span><span class="s">&quot;qqt&quot;</span><span class="p">)</span>
-  <span class="p">})</span>
+  observeEvent(input$reset, {
+    shinyjs::reset(&quot;qqt&quot;)
+  })
   
-  observeEvent<span class="p">(</span>input<span class="o">$</span>reset_button<span class="p">,</span> <span class="p">{</span>js<span class="o">$</span>reset<span class="p">()})</span>  
+  observeEvent(input$reset_button, {js$reset()})  
   
-  observeEvent<span class="p">(</span>input<span class="o">$</span>submit<span class="p">,</span> <span class="p">{</span>
-    tm <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">round</span><span class="p">(</span><span class="kp">difftime</span><span class="p">(</span>
-      <span class="kp">Sys.time</span><span class="p">(),</span> EventTime<span class="p">,</span> units <span class="o">=</span> <span class="s">&#39;secs&#39;</span><span class="p">)))</span>
+  observeEvent(input$submit, {
+    tm &lt;- as.numeric(round(difftime(
+      Sys.time(), EventTime, units = &#39;secs&#39;)))
     
-    nq <span class="o">&lt;-</span> <span class="kp">substr</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>qqt<span class="p">()),</span> start <span class="o">=</span> <span class="m">1</span><span class="p">,</span> 
-           stop <span class="o">=</span> <span class="kp">gregexpr</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> qqt<span class="p">())[[</span><span class="m">1</span><span class="p">]][</span><span class="m">1</span><span class="p">]</span><span class="m">-1</span><span class="p">)</span>
+    nq &lt;- substr(as.character(qqt()), start = 1, 
+           stop = gregexpr(pattern = &quot;:&quot;, qqt())[[1]][1]-1)
     
-    dtm <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;School&quot;</span> <span class="o">=</span> input<span class="o">$</span>school<span class="p">,</span> 
-                       <span class="s">&quot;Seconds&quot;</span> <span class="o">=</span> tm<span class="p">,</span>
-                       <span class="s">&quot;Question&quot;</span> <span class="o">=</span> qqt<span class="p">(),</span>
-                       <span class="s">&quot;Number&quot;</span> <span class="o">=</span> nq<span class="p">,</span>
-                       <span class="s">&quot;Fluid&quot;</span> <span class="o">=</span> input<span class="o">$</span>score1<span class="p">,</span> 
-                       <span class="s">&quot;Content&quot;</span> <span class="o">=</span> input<span class="o">$</span>score2<span class="p">,</span>
-                      <span class="s">&quot;Hour&quot;</span> <span class="o">=</span> <span class="kp">Sys.time</span><span class="p">(),</span>
-                      <span class="s">&quot;Date&quot;</span> <span class="o">=</span> <span class="kp">Sys.Date</span><span class="p">(),</span>
-                      <span class="s">&quot;Type&quot;</span> <span class="o">=</span> <span class="s">&quot;New&quot;</span><span class="p">)</span>
+    dtm &lt;- data.frame(&quot;School&quot; = input$school, 
+                       &quot;Seconds&quot; = tm,
+                       &quot;Question&quot; = qqt(),
+                       &quot;Number&quot; = nq,
+                       &quot;Fluid&quot; = input$score1, 
+                       &quot;Content&quot; = input$score2,
+                      &quot;Hour&quot; = Sys.time(),
+                      &quot;Date&quot; = Sys.Date(),
+                      &quot;Type&quot; = &quot;New&quot;)
     
-    nm <span class="o">&lt;-</span> <span class="kp">paste0</span><span class="p">(</span><span class="kp">Sys.Date</span><span class="p">(),</span>
-                 <span class="kp">gsub</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&quot;:&quot;</span><span class="p">,</span>
-                      replacement <span class="o">=</span> <span class="s">&quot;_&quot;</span><span class="p">,</span>
-                      x <span class="o">=</span> <span class="kp">substr</span><span class="p">(</span><span class="kp">Sys.time</span><span class="p">(),</span><span class="m">12</span><span class="p">,</span><span class="m">19</span><span class="p">)))</span>
+    nm &lt;- paste0(Sys.Date(),
+                 gsub(pattern = &quot;:&quot;,
+                      replacement = &quot;_&quot;,
+                      x = substr(Sys.time(),12,19)))
     
-    write.table<span class="p">(</span>dtm<span class="p">,</span> file <span class="o">=</span> <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Interviews_&quot;</span><span class="p">,</span> nm<span class="p">,</span> <span class="s">&quot;.txt&quot;</span><span class="p">),</span> 
-                sep <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">,</span> row.names <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
-  <span class="p">})</span>
+    write.table(dtm, file = paste0(&quot;Interviews_&quot;, nm, &quot;.txt&quot;), 
+                sep = &quot;|&quot;, row.names = FALSE)
+  })
   
-<span class="p">})</span></code></pre></div>
+})</code></pre></figure>
 
 <h2 id="uir">ui.R</h2>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>shiny<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>shinyjs<span class="p">)</span>
-jsResetCode <span class="o">&lt;-</span> <span class="s">&quot;shinyjs.reset = function() {history.go(0)}&quot;</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(shiny)
+library(shinyjs)
+jsResetCode &lt;- &quot;shinyjs.reset = function() {history.go(0)}&quot;
 
-shinyUI<span class="p">(</span>fluidPage<span class="p">(</span>
-  useShinyjs<span class="p">(),</span>
-  <span class="c1"># Application title</span>
-  titlePanel<span class="p">(</span><span class="s">&quot;MBA Interview Questions&quot;</span><span class="p">),</span>
+shinyUI(fluidPage(
+  useShinyjs(),
+  # Application title
+  titlePanel(&quot;MBA Interview Questions&quot;),
 
-  <span class="c1"># Sidebar with a slider input for number of bins</span>
-  sidebarLayout<span class="p">(</span>
-    sidebarPanel<span class="p">(</span>
-      sliderInput<span class="p">(</span><span class="s">&quot;NormalTime&quot;</span><span class="p">,</span> <span class="s">&quot;Minutes per response:&quot;</span><span class="p">,</span>
-                  min <span class="o">=</span> <span class="m">0</span><span class="p">,</span> max <span class="o">=</span> <span class="m">60</span><span class="p">,</span> value <span class="o">=</span> <span class="m">2</span>
-      <span class="p">),</span>
-      selectInput<span class="p">(</span><span class="s">&quot;response&quot;</span><span class="p">,</span> <span class="s">&quot;Question type:&quot;</span><span class="p">,</span>
-                  <span class="kt">c</span><span class="p">(</span><span class="s">&quot;To applicant&quot;</span><span class="p">,</span><span class="s">&quot;To interviewer&quot;</span><span class="p">)),</span>
-          <span class="c1"># you can select which schools here...        </span>
-      selectInput<span class="p">(</span><span class="s">&quot;school&quot;</span><span class="p">,</span> <span class="s">&quot;School:&quot;</span><span class="p">,</span>
-                  <span class="kt">c</span><span class="p">(</span><span class="s">&quot;School 1&quot;</span><span class="p">,</span><span class="s">&quot;School 2&quot;</span><span class="p">)),</span>
-      HTML<span class="p">(</span><span class="s">&#39;&lt;h4&gt; Typical Methods for Behavioural Questions &lt;/h4&gt; &lt;br/&gt;</span>
-<span class="s">           &lt;h4&gt; &lt;strong&gt; STAR: &lt;/strong&gt;&lt;h4&gt; &lt;br/&gt;</span>
-<span class="s">          &lt;strong&gt;S&lt;/strong&gt;ituation: indentify the situation &lt;br/&gt;</span>
-<span class="s">          &lt;strong&gt;T&lt;/strong&gt;ask: identify task or project &lt;br/&gt;</span>
-<span class="s">          &lt;strong&gt;A&lt;/strong&gt;ction: describe what you did &lt;br/&gt;</span>
-<span class="s">          &lt;strong&gt;R&lt;/strong&gt;esult: summarize the results &lt;br/&gt;</span>
-<span class="s">          &lt;h4&gt; &lt;strong&gt; CAR: &lt;/strong&gt;&lt;h4&gt; &lt;/ br&gt;</span>
-<span class="s">          &lt;strong&gt;C&lt;/strong&gt;ontext: describe the context &lt;br/&gt;</span>
-<span class="s">           &lt;strong&gt;A&lt;/strong&gt;ction: describe what you did &lt;br/&gt;</span>
-<span class="s">           &lt;strong&gt;R&lt;/strong&gt;esult: summarize the results &lt;br/&gt;</span>
-<span class="s">           &#39;</span><span class="p">)</span>
-    <span class="p">),</span>
-    mainPanel<span class="p">(</span>
-      HTML<span class="p">(</span><span class="s">&#39;&lt;h1&gt; Question &lt;/h1&gt;&#39;</span><span class="p">),</span>
-      hr<span class="p">(),</span>
-      h2<span class="p">(</span>textOutput<span class="p">(</span><span class="s">&#39;qqt2&#39;</span><span class="p">)),</span>
-      uiOutput<span class="p">(</span><span class="s">&#39;eventTimeRemaining&#39;</span><span class="p">),</span>
-      hr<span class="p">(),</span>
-      sliderInput<span class="p">(</span><span class="s">&quot;score1&quot;</span><span class="p">,</span> <span class="s">&quot;Fluidity and Security:&quot;</span><span class="p">,</span>
-                  min <span class="o">=</span> <span class="m">0</span><span class="p">,</span> max <span class="o">=</span> <span class="m">10</span><span class="p">,</span> value <span class="o">=</span> <span class="m">5</span>
-      <span class="p">),</span>
-      sliderInput<span class="p">(</span><span class="s">&quot;score2&quot;</span><span class="p">,</span> <span class="s">&quot;Content:&quot;</span><span class="p">,</span>
-                  min <span class="o">=</span> <span class="m">0</span><span class="p">,</span> max <span class="o">=</span> <span class="m">10</span><span class="p">,</span> value <span class="o">=</span> <span class="m">5</span>
-      <span class="p">),</span>
-      extendShinyjs<span class="p">(</span>text <span class="o">=</span> jsResetCode<span class="p">),</span>
-      actionButton<span class="p">(</span><span class="s">&quot;reset_button&quot;</span><span class="p">,</span> <span class="s">&quot;New Question&quot;</span><span class="p">),</span>
-      actionButton<span class="p">(</span><span class="s">&quot;submit&quot;</span><span class="p">,</span> <span class="s">&quot;Score&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-  <span class="p">)</span>
-<span class="p">))</span></code></pre></div>
+  # Sidebar with a slider input for number of bins
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput(&quot;NormalTime&quot;, &quot;Minutes per response:&quot;,
+                  min = 0, max = 60, value = 2
+      ),
+      selectInput(&quot;response&quot;, &quot;Question type:&quot;,
+                  c(&quot;To applicant&quot;,&quot;To interviewer&quot;)),
+          # you can select which schools here...        
+      selectInput(&quot;school&quot;, &quot;School:&quot;,
+                  c(&quot;School 1&quot;,&quot;School 2&quot;)),
+      HTML(&#39;&lt;h4&gt; Typical Methods for Behavioural Questions &lt;/h4&gt; &lt;br/&gt;
+           &lt;h4&gt; &lt;strong&gt; STAR: &lt;/strong&gt;&lt;h4&gt; &lt;br/&gt;
+          &lt;strong&gt;S&lt;/strong&gt;ituation: indentify the situation &lt;br/&gt;
+          &lt;strong&gt;T&lt;/strong&gt;ask: identify task or project &lt;br/&gt;
+          &lt;strong&gt;A&lt;/strong&gt;ction: describe what you did &lt;br/&gt;
+          &lt;strong&gt;R&lt;/strong&gt;esult: summarize the results &lt;br/&gt;
+          &lt;h4&gt; &lt;strong&gt; CAR: &lt;/strong&gt;&lt;h4&gt; &lt;/ br&gt;
+          &lt;strong&gt;C&lt;/strong&gt;ontext: describe the context &lt;br/&gt;
+           &lt;strong&gt;A&lt;/strong&gt;ction: describe what you did &lt;br/&gt;
+           &lt;strong&gt;R&lt;/strong&gt;esult: summarize the results &lt;br/&gt;
+           &#39;)
+    ),
+    mainPanel(
+      HTML(&#39;&lt;h1&gt; Question &lt;/h1&gt;&#39;),
+      hr(),
+      h2(textOutput(&#39;qqt2&#39;)),
+      uiOutput(&#39;eventTimeRemaining&#39;),
+      hr(),
+      sliderInput(&quot;score1&quot;, &quot;Fluidity and Security:&quot;,
+                  min = 0, max = 10, value = 5
+      ),
+      sliderInput(&quot;score2&quot;, &quot;Content:&quot;,
+                  min = 0, max = 10, value = 5
+      ),
+      extendShinyjs(text = jsResetCode),
+      actionButton(&quot;reset_button&quot;, &quot;New Question&quot;),
+      actionButton(&quot;submit&quot;, &quot;Score&quot;)
+    )
+  )
+))</code></pre></figure>
 
 <h2 id="import-to-analyze">Import to analyze</h2>
 
 <p>This is the code used to import all of the files starting with “Interviews” from the folder.</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r">LoadManyTxt <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>regex<span class="p">,</span> separator <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">){</span>
-  a <span class="o">&lt;-</span> <span class="kp">list.files</span><span class="p">()[</span><span class="kp">grepl</span><span class="p">(</span>pattern <span class="o">=</span> regex<span class="p">,</span>
-                          <span class="kp">list.files</span><span class="p">())]</span>
-  datos <span class="o">&lt;-</span> <span class="kc">NULL</span>
-  <span class="c1">#import</span>
-  <span class="kr">for</span><span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>a<span class="p">)){</span>
-    temp <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>read.delim<span class="p">(</span>
-      a<span class="p">[</span>i<span class="p">],</span> sep <span class="o">=</span> separator<span class="p">,</span>
-      stringsAsFactors <span class="o">=</span> <span class="kc">FALSE</span><span class="p">))</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">LoadManyTxt &lt;- function(regex, separator = &quot;|&quot;){
+  a &lt;- list.files()[grepl(pattern = regex,
+                          list.files())]
+  datos &lt;- NULL
+  #import
+  for(i in 1:length(a)){
+    temp &lt;- as.data.frame(read.delim(
+      a[i], sep = separator,
+      stringsAsFactors = FALSE))
     
-    <span class="kp">print</span><span class="p">(</span><span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;Importing... &quot;</span><span class="p">,</span> a<span class="p">[</span>i<span class="p">]))</span>
-    <span class="kr">if</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>temp<span class="p">)</span><span class="o">==</span><span class="m">6</span><span class="p">){</span>
-      temp<span class="o">$</span>Hora <span class="o">&lt;-</span> <span class="kc">NA</span>
-      temp<span class="o">$</span>Fecha <span class="o">&lt;-</span> <span class="kc">NA</span>
-      temp<span class="o">$</span>Tipo <span class="o">&lt;-</span> <span class="s">&quot;Previous&quot;</span>
-    <span class="p">}</span>
-    datos <span class="o">&lt;-</span> <span class="kp">rbind.data.frame</span><span class="p">(</span>datos<span class="p">,</span> temp<span class="p">)</span>
-    <span class="kp">print</span><span class="p">(</span><span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Data: &quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>datos<span class="p">[,</span><span class="m">1</span><span class="p">]),</span><span class="s">&quot; rows&quot;</span><span class="p">))</span>
-  <span class="p">}</span>
-  <span class="kr">return</span><span class="p">(</span>datos<span class="p">)</span>
-<span class="p">}</span>
-<span class="c1"># when in the folder, just do...</span>
-d <span class="o">&lt;-</span> LoadManyTxt<span class="p">(</span><span class="s">&quot;Interviews_&quot;</span><span class="p">)</span></code></pre></div>
+    print(paste0(&quot;Importing... &quot;, a[i]))
+    if(length(temp)==6){
+      temp$Hora &lt;- NA
+      temp$Fecha &lt;- NA
+      temp$Tipo &lt;- &quot;Previous&quot;
+    }
+    datos &lt;- rbind.data.frame(datos, temp)
+    print(paste(&quot;Data: &quot;, length(datos[,1]),&quot; rows&quot;))
+  }
+  return(datos)
+}
+# when in the folder, just do...
+d &lt;- LoadManyTxt(&quot;Interviews_&quot;)</code></pre></figure>
 
 <p>It might seem intense, but this definitely saved me a few hours. As for the outcome of the interviews, I was invited to join two of my school choices, so it all worked out! Although, having gone through the experience, I think the old mantra: “be yourself” is probably better advice than using this app, so use at your own risk!</p>
 

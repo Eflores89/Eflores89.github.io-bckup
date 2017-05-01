@@ -41,14 +41,14 @@
     <ul class="pagination">
       
         <li class="previous">
-          <a href="/arte/The-Revenant-Review">
+          <a href="/arte/The-Revenant-Review/">
             Previous
           </a>
         </li>
       
       
       <li class="next">
-        <a href="/politica/Problema-no-es-Trump">
+        <a href="/politica/Problema-no-es-Trump/">
           Next
         </a>
       </li>
@@ -96,17 +96,17 @@
 
 <p>I feed the upper right hand and lower left hand coordinates to the function, and voila:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>inegiR<span class="p">)</span>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(inegiR)
 
-upper_lat <span class="o">=</span> <span class="m">25.686917</span>
-upper_long <span class="o">=</span> <span class="m">-100.429398</span>
-lower_lat <span class="o">=</span> <span class="m">25.612030</span>
-lower_long <span class="o">=</span> <span class="m">-100.333032</span>
-token_denue <span class="o">&lt;-</span> <span class="s">&quot;mytoken&quot;</span>
+upper_lat = 25.686917
+upper_long = -100.429398
+lower_lat = 25.612030
+lower_long = -100.333032
+token_denue &lt;- &quot;mytoken&quot;
 
-sanpedro <span class="o">&lt;-</span> denue_grid<span class="p">(</span>upper_lat<span class="p">,</span> lower_lat<span class="p">,</span> 
-                       upper_long<span class="p">,</span> lower_long<span class="p">,</span> 
-                       token <span class="o">=</span> token_denue<span class="p">)</span></code></pre></div>
+sanpedro &lt;- denue_grid(upper_lat, lower_lat, 
+                       upper_long, lower_long, 
+                       token = token_denue)</code></pre></figure>
 
 <p>Simple as that!</p>
 
@@ -118,28 +118,28 @@ sanpedro <span class="o">&lt;-</span> denue_grid<span class="p">(</span>upper_la
 
 <p>We can simply get a time series by the doing the following:</p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="kn">library</span><span class="p">(</span>eem<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
-<span class="c1"># ts for Manufacturing in state of Nuevo León:</span>
-token <span class="o">&lt;-</span> <span class="s">&quot;mytoken&quot;</span>
-pm <span class="o">&lt;-</span> series_productividad_man<span class="p">(</span>token<span class="p">)</span>
-nl <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Productivity&quot;</span> <span class="o">=</span> pm<span class="o">$</span>NL<span class="p">,</span> <span class="s">&quot;Date&quot;</span> <span class="o">=</span> <span class="kp">as.Date</span><span class="p">(</span>pm<span class="o">$</span>Fechas<span class="p">))</span>
-ggplot<span class="p">(</span>nl<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> Date<span class="p">,</span> y <span class="o">=</span> Productivity<span class="p">))</span><span class="o">+</span>
-  geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
-  theme_eem<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Productivity in Manufacturing \n State of Nuevo León&quot;</span><span class="p">,</span> 
-        y <span class="o">=</span> <span class="s">&quot;Thousands of pesos x person&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(eem)
+library(ggplot2)
+# ts for Manufacturing in state of Nuevo León:
+token &lt;- &quot;mytoken&quot;
+pm &lt;- series_productividad_man(token)
+nl &lt;- data.frame(&quot;Productivity&quot; = pm$NL, &quot;Date&quot; = as.Date(pm$Fechas))
+ggplot(nl, aes(x = Date, y = Productivity))+
+  geom_line(colour = eem_colors[1])+
+  theme_eem()+
+  labs(title = &quot;Productivity in Manufacturing \n State of Nuevo León&quot;, 
+        y = &quot;Thousands of pesos x person&quot;)</code></pre></figure>
 
 <p><img src="/inegiR/imgs/manprod_nl.png" alt="productividad manufacturera en nuevo león" /></p>
 
-<div class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1"># ts for Construction in state of Nuevo León:</span>
-pc <span class="o">&lt;-</span> series_productividad_const<span class="p">(</span>token<span class="p">)</span>
-nl <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Productivity&quot;</span> <span class="o">=</span> pc<span class="o">$</span>NL<span class="p">,</span> <span class="s">&quot;Date&quot;</span> <span class="o">=</span> <span class="kp">as.Date</span><span class="p">(</span>pc<span class="o">$</span>Fechas<span class="p">))</span>
-ggplot<span class="p">(</span>nl<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> Date<span class="p">,</span> y <span class="o">=</span> Productivity<span class="p">))</span><span class="o">+</span>
-  geom_line<span class="p">(</span>colour <span class="o">=</span> eem_colors<span class="p">[</span><span class="m">1</span><span class="p">])</span><span class="o">+</span>
-  theme_eem<span class="p">()</span><span class="o">+</span>
-  labs<span class="p">(</span>title <span class="o">=</span> <span class="s">&quot;Productivity in Construction \n State of Nuevo León&quot;</span><span class="p">,</span> 
-        y <span class="o">=</span> <span class="s">&quot;Thousands of pesos x person&quot;</span><span class="p">)</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># ts for Construction in state of Nuevo León:
+pc &lt;- series_productividad_const(token)
+nl &lt;- data.frame(&quot;Productivity&quot; = pc$NL, &quot;Date&quot; = as.Date(pc$Fechas))
+ggplot(nl, aes(x = Date, y = Productivity))+
+  geom_line(colour = eem_colors[1])+
+  theme_eem()+
+  labs(title = &quot;Productivity in Construction \n State of Nuevo León&quot;, 
+        y = &quot;Thousands of pesos x person&quot;)</code></pre></figure>
 
 <p><img src="/inegiR/imgs/prodcons_nl.png" alt="productividad construcción en nuevo león" /></p>
 
