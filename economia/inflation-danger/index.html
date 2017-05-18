@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>A Dangerous New Normal | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="Mexico's run-away inflation rate seems dangerously broad" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 18 May 2017</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: Economics, Inflation, Mexico</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/economia/deficit-talk/">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>A Dangerous New Normal</h1>
+    <p>Markets on Thursday were suprised to discover Bank of Mexico increasing its key interest rate again.</p>
+
+<p>The consensus in the market was a hold on the rise, but it seems Banxico probably thinks there is still a lot to do. The worrying bit is that the rise in inflation seems broad and sustained. In many cities, the average rate of inflation in the first four months of 2017 is higher than even any outliers in the same months dating back to 2013.</p>
+
+<p>This is the case in 5 of 10 of the largest cities with inflation data (Monterrey, Ciudad Juarez, Leon, Torreon and Queretaro).</p>
+
+<p><img src="/images/posts/mex-city-inflation-1.png" alt="Largest cities" /></p>
+
+<p>If we see the larger picture and add the rest of the smaller cities with inflation data, the trend is also worrying.</p>
+
+<p><img src="/images/posts/mex-city-inflation-2.png" alt="smaller cities" /></p>
+
+<p>The dangers with this generalized new “normal” is that it essentially feeds on itself, creating a hard-to-contain upward spiral.</p>
+
+<p>Basically, Banxico is right to worry.</p>
+
+<h2 id="code">Code</h2>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(inegiR)
+library(eem)
+library(dplyr)
+library(reshape2)
+library(ggplot2)
+library(lubridate)
+
+# download
+token &lt;- &quot;****&quot;
+d &lt;- inflacion_ciudades(token)
+
+dd &lt;- melt(d, 
+          id.vars = &quot;Fechas&quot;)
+          
+dd$m &lt;- month(dd$Fechas)
+dd$period &lt;- ifelse(dd$Fechas&gt;&#39;2016-12-12&#39;, &quot;2017&quot;, &quot;2013-2016&quot;)
+
+large &lt;- c(&quot;Puebla&quot;, &quot;SanLuisPotosi&quot;, &quot;Monterrey&quot;, &quot;DF&quot;, 
+           &quot;CdJuarez&quot;, &quot;Guadalajara&quot;, &quot;Leon&quot;, &quot;Queretaro&quot;, 
+           &quot;Veracruz&quot;, &quot;Torreon&quot;)
+
+dlarge &lt;- dd %&gt;%
+  dplyr::filter(Fechas&gt;&#39;2012-12-12&#39;) %&gt;%
+  dplyr::filter(m %in% c(1,2,3,4)) %&gt;%
+  dplyr::filter(variable %in% large)
+
+
+dsmall &lt;- dd %&gt;%
+  dplyr::filter(Fechas&gt;&#39;2012-12-12&#39;) %&gt;%
+  dplyr::filter(m %in% c(1,2,3,4)) %&gt;%
+  dplyr::filter(!(variable %in% large))
+  
+ggplot(dlarge, 
+         aes(x = variable, y = value))+
+    geom_boxplot(color = eem_colors[8], 
+                  aes( fill = period)) + 
+                  scale_fill_eem(4)+
+    theme_eem() + 
+    labs(x = &quot;City&quot;, y = &quot;Rate of Inflation&quot;, 
+    title = &quot;Comparing Rates of inflation&quot;, subtitle =&quot;First 4 months of the year&quot;)
+
+# repeat with other object...</code></pre></figure>
+
+
+  </div>
+</article>
+
+</body>
+</html>
