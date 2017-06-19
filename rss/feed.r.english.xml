@@ -30,7 +30,7 @@
 
 &lt;p&gt;This release is a first and &lt;em&gt;fast&lt;/em&gt; dive into the data, so I would be happy to listen to improvements to the tool, including some new indicators I haven’t added. &lt;em&gt;FYI, I tried to build the export matrixes at a 4-level granularity, but highcharts couldn’t handle it, any suggestions on how to do it would be welcome.&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;You can contact me via &lt;a href=&quot;&quot;&gt;twitter&lt;/a&gt; or at my blog’s &lt;a href=&quot;&quot;&gt;issue&lt;/a&gt; page.&lt;/p&gt;
+&lt;p&gt;You can contact me via &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;twitter&lt;/a&gt; or at my blog’s &lt;a href=&quot;https://github.com/Eflores89/Eflores89.github.io/issues&quot;&gt;issue&lt;/a&gt; page.&lt;/p&gt;
 
 &lt;h2 id=&quot;dashboards&quot;&gt;Dashboards&lt;/h2&gt;
 
@@ -44,7 +44,7 @@
 
 &lt;p&gt;The code used to build the dashboard consists of two files: a &lt;strong&gt;functions.R&lt;/strong&gt; file that contains some functions for downloading and cleaning the data and a &lt;strong&gt;db.Rmd&lt;/strong&gt; file that builds the dashboard using the &lt;em&gt;knitr/flexdashboard&lt;/em&gt; process in RStudio.&lt;/p&gt;
 
-&lt;p&gt;Both of these files can be found &lt;a href=&quot;/tradewatch/functions.R&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;/tradewatch/db.Rmd&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Both of these files can be found &lt;a href=&quot;http://enelmargen.org/tradewatch/functions.R&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;http://enelmargen.org/tradewatch/db.Rmd&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;FYI, I borrowed heavily from &lt;a href=&quot;https://comtrade.un.org/data/Doc/api/ex/r&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/guillgall/3b979b59e8905ef7f244&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 </description>
