@@ -9,13 +9,20 @@ library(quantmod)
 library(dplyr)
 library(treemap)
 library(tidyquant)
-# css: eem-tradewatch-css.css
+
+# dates
+d1 <- "201610"
+d2 <- "201511"
+
+d2_real <- "2016-11-01"
+
 #### ----------------------- Loading some functions, to download data! 
 source("functions.R")
 token_inegi <- "502ae69d-a835-8bd5-0e73-2173cc35c83d"
+
 ### Dowloading data!
 options(timeout = 500)
-dld <- getComtradeData(months = c("201611", "201511"))
+dld <- getComtradeData(months = c(d1, d2))
 ndata <- dld$data
 
 # level 2 category names
@@ -37,10 +44,12 @@ exports <- inegiR::series_exportaciones_pais(token = token_inegi)
 
 mxn_exp_usa <- exports[, 1:2]
 names(mxn_exp_usa) <- c("Dates", "Exports")
+mxn_exp_usa <- mxn_exp_usa %>% dplyr::filter(Dates<d2_real)
 mxn_exp_usa <- as_xts(mxn_exp_usa, date_col = Dates)
 
 mxn_exp_can <- exports[, c(1,3)]
 names(mxn_exp_can) <- c("Dates", "Exports")
+mxn_exp_can <- mxn_exp_can %>% dplyr::filter(Dates<d2_real)
 mxn_exp_can <- as_xts(mxn_exp_can, date_col = Dates)
 
 can_imports <- inegiR::serie_inegi(serie = "http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/133428/00000/es/false/xml/", 
