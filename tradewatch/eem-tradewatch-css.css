@@ -1,0 +1,68 @@
+body {
+  padding-top: 61px;
+}
+
+.section.sidebar {
+  top: 52px;
+  background-color: rgba(68, 110, 155, 0.1);
+}
+
+.value-box {
+  color: inherit;
+}
+
+.bg-primary {
+  background-color: rgba(68, 110, 155, 0.25);
+}
+
+.storyboard-nav .sbframelist ul li.active {
+   background-color: rgba(68, 110, 155, 0.7);
+}
+
+.nav-tabs-custom > .nav-tabs > li.active {
+  border-top-color: rgba(68, 110, 155, 0.7);
+}
+
+.navbar-inverse {
+/* Color de navbar (barra arriba)  */
+  
+  background-color: #F2F0E8;
+  border-color: #F2F0E8;
+}
+
+.navbar-inverse .navbar-brand {
+/* color de titulo "tradewatch nafta"! */
+
+  color: #B21020;
+}
+
+.navbar-inverse .navbar-nav > li > a,
+.navbar .navbar-brand {
+  text-decoration: none;
+}
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+  /* cuando das clic a una parte del menu en el navbar*/
+  
+  color: #46ca3b;
+  background-color: #46ca3b;
+}
+
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+  
+  /* Menu activo (seleccionado) del nav.bar*/
+  color: #b0a88b;
+  background-color: #F2F0E8;
+}
+
+.chart-title {
+  /* titulos de cada chart, que se ponen con ### */
+  border-bottom: 1px solid #d7d7d7;
+  color: #922020;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 7px 10px 4px;
+}

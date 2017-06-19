@@ -7,6 +7,51 @@
 		<atom:link href="http://localhost:4000/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>NAFTA trade dashboard</title>
+					<description>&lt;p&gt;&lt;strong&gt;Tradewatch&lt;/strong&gt; is a dashboard, written in &lt;strong&gt;R&lt;/strong&gt; using the &lt;a href=&quot;http://rmarkdown.rstudio.com/flexdashboard/&quot;&gt;flexdashboard&lt;/a&gt; framework. Visualizations are made possible thanks to  &lt;a href=&quot;http://jkunst.com/highcharter/index.html&quot;&gt;highcharter&lt;/a&gt; and other packages.&lt;/p&gt;
+
+&lt;p&gt;The main purpose of the dashboard is to monitor trade, mostly from the Mexican perspective, of goods and commodities with countries that are in NAFTA.&lt;/p&gt;
+
+&lt;p&gt;In the age of fake news and policy-by-twitter, hopefully this tool will help guide more informed debate (and decisions) with respect to trade between these three countries.&lt;/p&gt;
+
+&lt;h2 id=&quot;notes-and-methodology&quot;&gt;Notes and methodology&lt;/h2&gt;
+
+&lt;p&gt;The dashboard consists of basically three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Bilateral Trade&lt;/strong&gt;: These contain two, side-by-side comparisons, of exports and imports of products at a 2-level HS code depth. The color denotes year-over-year growth rate, while the size is related to the dollar value (in the newest month) of exports. The average growth rate for 2 digit codes is a weighted-mean of each 4-digit classification.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;US Share-shift:&lt;/strong&gt; A visualization that describes the shift in share in the U.S. market of Mexican goods relative to Canadian goods. When the shift is lower than 0, Mexican imports lost share (vs. Canada last year) in the United States, and vice-versa. &lt;em&gt;Important caveat: the share is calculated only for goods from Mexico or Canada (Because they are not collectively exhaustive, it is perfectly posible that &lt;strong&gt;both&lt;/strong&gt; lost share against a third competitor)&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Terms of Trade &amp;amp; Fx:&lt;/strong&gt; Prices are important. This section aims to gauge the impact of prices in the trade dynamic. To obtain exchange rates, I use the &lt;a href=&quot;https://cran.r-project.org/web/packages/tidyquant/index.html&quot;&gt;tidyquant package&lt;/a&gt;. The other indexes refer to the price index of products imported from each of those countries.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;The names of HS Codes have been abbreviated manually, they can be found &lt;a href=&quot;&quot;&gt;here&lt;/a&gt;, however the code is still in between parenthesis. Should you want to look it up further, I recommend the UN Comtrade website&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;suggestions&quot;&gt;Suggestions&lt;/h2&gt;
+
+&lt;p&gt;This release is a first and &lt;em&gt;fast&lt;/em&gt; dive into the data, so I would be happy to listen to improvements to the tool, including some new indicators I haven’t added. &lt;em&gt;FYI, I tried to build the export matrixes at a 4-level granularity, but highcharts couldn’t handle it, any suggestions on how to do it would be welcome.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;dashboards&quot;&gt;Dashboards&lt;/h2&gt;
+
+&lt;p&gt;The newest I could build is from november 2016, which is the month all three countries have statistics ready.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/tradewatch/tw201611.html&quot;&gt;November 2016&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;code&quot;&gt;Code&lt;/h2&gt;
+
+&lt;p&gt;The code used to build the dashboard consists of two files: a &lt;strong&gt;functions.R&lt;/strong&gt; file that contains some functions for downloading and cleaning the data and a &lt;strong&gt;db.Rmd&lt;/strong&gt; file that builds the dashboard using the &lt;em&gt;knitr/flexdashboard&lt;/em&gt; process in RStudio.&lt;/p&gt;
+
+&lt;p&gt;Both of these files can be found &lt;a href=&quot;/tradewatch/functions.R&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;/tradewatch/db.Rmd&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;FYI, I borrowed heavily from &lt;a href=&quot;https://comtrade.un.org/data/Doc/api/ex/r&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/guillgall/3b979b59e8905ef7f244&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 18 Jun 2017 14:00:30 -0500</pubDate>
+				<link>http://localhost:4000/tradewatch/intro/</link>
+				<guid isPermaLink="true">http://localhost:4000/tradewatch/intro/</guid>
+			</item>
+		
+			<item>
 				<title>Shiny App for MBA Interviews</title>
 					<description>&lt;p&gt;A couple of weeks ago I attended some interviews as part of my process for admission into an MBA program. While most candidates would pore over the possible questions and then try to teach them to a third party to help them with a mock interview, I decided to expedite the process by building a shiny app in &lt;em&gt;R&lt;/em&gt;.&lt;/p&gt;
 

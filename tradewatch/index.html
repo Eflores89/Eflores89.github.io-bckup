@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>NAFTA Trade-Watch | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="Tradewatch is a visual dashboard designed to monitor trade in goods and commodities between countries in NAFTA" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/nafta.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 31 Dec 1969</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: </p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>NAFTA Trade-Watch</h1>
+    <p><strong>Tradewatch</strong> is a dashboard, written in <strong>R</strong> using the <a href="http://rmarkdown.rstudio.com/flexdashboard/">flexdashboard</a> framework. Visualizations are made possible thanks to  <a href="http://jkunst.com/highcharter/index.html">highcharter</a> and other packages.</p>
+
+<p>The main purpose of the dashboard is to monitor trade, mostly from the Mexican perspective, of goods and commodities with countries that are in NAFTA.</p>
+
+<p>In the age of fake news and policy-by-twitter, hopefully this tool will help guide more informed debate (and decisions) with respect to trade between these three countries.</p>
+
+<h2 id="notes-and-methodology">Notes and methodology</h2>
+
+<p>The dashboard consists of basically three sections:</p>
+
+<ul>
+  <li><strong>Bilateral Trade</strong>: These contain two, side-by-side comparisons, of exports and imports of products at a 2-level HS code depth. The color denotes year-over-year growth rate, while the size is related to the dollar value (in the newest month) of exports. The average growth rate for 2 digit codes is a weighted-mean of each 4-digit classification.</li>
+  <li><strong>US Share-shift:</strong> A visualization that describes the shift in share in the U.S. market of Mexican goods relative to Canadian goods. When the shift is lower than 0, Mexican imports lost share (vs. Canada last year) in the United States, and vice-versa. <em>Important caveat: the share is calculated only for goods from Mexico or Canada (Because they are not collectively exhaustive, it is perfectly posible that <strong>both</strong> lost share against a third competitor)</em></li>
+  <li><strong>Terms of Trade &amp; Fx:</strong> Prices are important. This section aims to gauge the impact of prices in the trade dynamic. To calculate the Mexican terms of trade (prices of exports divided by prices of imports) I use the <a href="http://enelmargen.org/inegiR/">inegiR package</a>. To obtain exchange rates and other FRED indicators, I use the <a href="https://cran.r-project.org/web/packages/tidyquant/index.html">tidyquant package</a>.</li>
+</ul>
+
+<p><em>The names of HS Codes have been abbreviated manually, they can be found <a href="">here</a>, however the code is still in between parenthesis. Should you want to look it up further, I recommend the UN Comtrade website</em></p>
+
+<h2 id="dashboards">Dashboards</h2>
+
+<ul>
+  <li><a href="build_nafta_dboard_v1.html">March 2017</a></li>
+  <li><a href="">April 2017</a></li>
+</ul>
+
+<h2 id="code">Code</h2>
+
+<p>The code used to build the dashboard consists of two files: a <strong>functions.R</strong> file that contains some functions for downloading and cleaning the data and a <strong>db.Rmd</strong> file that builds the dashboard using the <em>knitr/flexdashboard</em> process in RStudio.</p>
+
+<p>Both of these files can be found <a href="">here</a> and <a href="">here</a>.</p>
+
+<p>FYI, I borrowed heavily from <a href="https://comtrade.un.org/data/Doc/api/ex/r">here</a> and <a href="https://gist.github.com/guillgall/3b979b59e8905ef7f244">here</a>.</p>
+
+  </div>
+</article>
+
+</body>
+</html>

@@ -1,0 +1,206 @@
+```{r setup, include=FALSE}
+
+# Initial set-up, libraries
+library(flexdashboard)
+library(eem)
+library(ggplot2)
+library(highcharter)
+library(quantmod)
+library(dplyr)
+library(treemap)
+library(tidyquant)
+# css: eem-tradewatch-css.css
+#### ----------------------- Loading some functions, to download data! 
+source("functions.R")
+token_inegi <- "502ae69d-a835-8bd5-0e73-2173cc35c83d"
+### Dowloading data!
+options(timeout = 500)
+dld <- getComtradeData(months = c("201611", "201511"))
+ndata <- dld$data
+
+# level 2 category names
+l2 <- read.table(file = "https://raw.githubusercontent.com/Eflores89/proyectos/master/data/tradewatch/l2-code-names.txt", 
+                 sep = "|", header = T, 
+                 colClasses = c("character","character"))
+# level 4
+l4 <- read.table(file = "https://raw.githubusercontent.com/Eflores89/proyectos/master/data/tradewatch/l4-code-names.txt", 
+                 sep = "|", header = T, 
+                 colClasses = c("character","character"))
+cutoff <- 1000000
+
+# data %>% group_by(period, rtCode, ptCode, rgDesc) %>% summarise("n" = n()) %>% View(.)
+
+
+
+### Download inegi data
+exports <- inegiR::series_exportaciones_pais(token = token_inegi)
+
+mxn_exp_usa <- exports[, 1:2]
+names(mxn_exp_usa) <- c("Dates", "Exports")
+mxn_exp_usa <- as_xts(mxn_exp_usa, date_col = Dates)
+
+mxn_exp_can <- exports[, c(1,3)]
+names(mxn_exp_can) <- c("Dates", "Exports")
+mxn_exp_can <- as_xts(mxn_exp_can, date_col = Dates)
+
+can_imports <- inegiR::serie_inegi(serie = "http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/133428/00000/es/false/xml/", 
+                                   token = token_inegi)
+can_imports <- as_xts(can_imports, date_col = Fechas)
+
+usa_imports <- inegiR::serie_inegi(serie = "http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/133429/00000/es/false/xml/", 
+                                   token = token_inegi)
+usa_imports <- as_xts(usa_imports, date_col = Fechas)
+
+```
+
+
+Mexico - US Trade {data-orientation=columns, data-navmenu="Bilateral Trade"}
+=====================================
+
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### Mexico to USA export matrix
+
+```{r}
+summarise_df(data = ndata, name2 = l2, name4 = l4, from = "mx", to = "usa", type = "exports", threshold = cutoff)
+```
+
+> HS 4-Level Codes with a smaller trade value than 1 million usd dollars in latest month are grouped and labeled as "smaller". Source: UN Comtrade.
+
+
+### Total Mexican exports to USA
+
+```{r}
+hchart(mxn_exp_usa) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: INEGI.
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+
+### Mexico from USA import matrix
+
+```{r}
+summarise_df(data = ndata, name2 = l2, name4 = l4, from = "mx", to = "usa", type = "import", threshold = cutoff)
+```
+
+> HS 4-Level Codes with a smaller trade value than 1 million usd dollars in latest month are grouped and labeled as "smaller". Source: UN Comtrade.
+
+### Total Mexican imports from USA
+
+```{r}
+hchart(usa_imports) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: INEGI.
+
+
+Mexico - Canada Trade {data-orientation=columns, data-navmenu="Bilateral Trade"}
+=====================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### Mexico to Canada export matrix
+
+```{r}
+summarise_df(data = ndata, name2 = l2, name4 = l4, from = "mx", to = "can", type = "exports", threshold = cutoff)
+```
+
+> HS 4-Level Codes with a smaller trade value than 1 million usd dollars in latest month are grouped and labeled as "smaller". Source: UN Comtrade.
+
+### Total Mexican exports to Canada
+
+```{r}
+hchart(mxn_exp_can) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: INEGI.
+
+
+Column {data-width=600} 
+-----------------------------------------------------------------------
+
+
+### Mexico from Canada import matrix
+
+```{r}
+summarise_df(data = ndata, name2 = l2, name4 = l4, from = "mx", to = "can", type = "import", threshold = cutoff)
+```
+
+> HS 4-Level Codes with a smaller trade value than 1 million usd dollars in latest month are grouped and labeled as "smaller". Source: UN Comtrade.
+
+### Total Mexican imports from Canada
+
+```{r}
+hchart(can_imports) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: INEGI.
+
+
+US Share-Shift {data-orientation=columns}
+=====================================
+
+
+### Changes of share of Mexican products in U.S. Market
+
+```{r}
+summarise_mkt(data = ndata, name2 = l2, name4 = l4, mkt = "usa", pivot = "mx", threshold = cutoff)
+```
+
+
+> Imports are not collectively exhaustive (the U.S. market is represented by only the two other NAFTA countries). Source: UN Comtrade.
+
+
+
+Terms of Trade & Fx {data-orientation=columns}
+=====================================
+
+
+Column {data-width=600} 
+-----------------------------------------------------------------------
+
+### MXN-USD Exchange Rate
+
+```{r}
+usdmxn <- as_xts(tidyquant::tq_get("DEXMXUS", get = "economic.data"), date_col = date)
+hchart(usdmxn) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: Federal Reserve Bank of St. Louis.
+
+### USD Trade-weighted exchange rate
+
+```{r}
+twusd <- as_xts(tidyquant::tq_get("TWEXB", get = "economic.data"), date_col = date)
+hchart(twusd) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Broad measure. Source: Federal Reserve Bank of St. Louis.
+
+Column {data-width=400} 
+-----------------------------------------------------------------------
+
+### Mexican Import Price Index
+
+```{r}
+mxprice <- as_xts(tidyquant::tq_get("MEXTOT", get = "economic.data"), date_col = date)
+hchart(mxprice) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: Federal Reserve Bank of St. Louis.
+
+### Canada Import Price Index
+
+```{r}
+canprice <- as_xts(tidyquant::tq_get("CANTOT", get = "economic.data"), date_col = date)
+hchart(canprice) %>% hc_add_theme(hc_theme_eem) %>% hc_navigator(enabled = FALSE)
+```
+
+> Source: Federal Reserve Bank of St. Louis.
+
