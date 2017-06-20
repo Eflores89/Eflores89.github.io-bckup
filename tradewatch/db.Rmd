@@ -11,10 +11,10 @@ library(treemap)
 library(tidyquant)
 
 # dates
-d1 <- "201610"
-d2 <- "201511"
+d1 <- "201509"
+d2 <- "201609"
 
-d2_real <- "2016-11-01"
+d2_real <- "2016-10-01"
 
 #### ----------------------- Loading some functions, to download data! 
 source("functions.R")
