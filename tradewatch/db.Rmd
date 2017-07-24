@@ -11,10 +11,10 @@ library(treemap)
 library(tidyquant)
 
 # dates
-d1 <- "201509"
-d2 <- "201609"
+d1 <- "201702" # latest available month
+d2 <- "201602" # same month, a year earlier
 
-d2_real <- "2016-10-01"
+d2_real <- "2017-03-01" # one month after latest available month
 
 #### ----------------------- Loading some functions, to download data! 
 source("functions.R")
@@ -24,6 +24,9 @@ token_inegi <- "502ae69d-a835-8bd5-0e73-2173cc35c83d"
 options(timeout = 500)
 dld <- getComtradeData(months = c(d1, d2))
 ndata <- dld$data
+
+### To review data and see if all countries have data
+# ndata %>% group_by(yr, rtTitle, ptTitle, rgDesc) %>% summarise("n" = n()) %>% View(.)
 
 # level 2 category names
 l2 <- read.table(file = "https://raw.githubusercontent.com/Eflores89/proyectos/master/data/tradewatch/l2-code-names.txt", 
