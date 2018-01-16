@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>conapomx data package | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="R package to import population estimates " />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 16 Jan 2018</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: r-english, Data, Mexico</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/politica/nafta-amlo/">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>conapomx data package</h1>
+    <p>I have created a new data package for R to help users obtain national population statistics of Mexico.</p>
+
+<p>The <strong>conapomx</strong> package contains the <em>mxpopulation</em> data set, which is a tidy data.frame containing population estimates from the CONAPO (National Population Commission) official agency. The estimates are divided by age groups, gender, municipality and year.</p>
+
+<p>To install, just call CRAN (or github if you are reading this before it is accepted).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">install.packages(&quot;conapomx&quot;) 
+# or... 
+library(devtools)
+install_github(&quot;eflores89/conapomx&quot;)
+
+# explore the dataset
+head(mxpopulation)</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">y</th>
+      <th style="text-align: left">st</th>
+      <th style="text-align: right">id_st</th>
+      <th style="text-align: left">mun</th>
+      <th style="text-align: right">id_mun</th>
+      <th style="text-align: right">geoid</th>
+      <th style="text-align: left">gender</th>
+      <th style="text-align: left">age</th>
+      <th style="text-align: right">population</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">0-14</td>
+      <td style="text-align: right">124263.71</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">15-29</td>
+      <td style="text-align: right">106695.14</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">30-44</td>
+      <td style="text-align: right">81088.65</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">45-64</td>
+      <td style="text-align: right">60379.29</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">65+</td>
+      <td style="text-align: right">17679.26</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2010</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">1001</td>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">0-14</td>
+      <td style="text-align: right">119535.77</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Here is the data for 2018, just out of curiosity:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+
+mxpopulation %&gt;% 
+  filter(y == &quot;2018&quot;) %&gt;%
+  group_by(st) %&gt;% 
+  summarize(&quot;Population&quot; = sum(population))</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">st</th>
+      <th style="text-align: right">Population</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Aguascalientes</td>
+      <td style="text-align: right">1337792.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Baja California</td>
+      <td style="text-align: right">3633772.2</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Baja California Sur</td>
+      <td style="text-align: right">832827.2</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Campeche</td>
+      <td style="text-align: right">948459.3</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chiapas</td>
+      <td style="text-align: right">5445232.7</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Chihuahua</td>
+      <td style="text-align: right">3816865.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Coahuila</td>
+      <td style="text-align: right">3063662.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Colima</td>
+      <td style="text-align: right">759686.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Distrito Federal</td>
+      <td style="text-align: right">8788140.6</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Durango</td>
+      <td style="text-align: right">1815965.6</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Guanajuato</td>
+      <td style="text-align: right">5952086.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Guerrero</td>
+      <td style="text-align: right">3625040.0</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Hidalgo</td>
+      <td style="text-align: right">2980532.2</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Jalisco</td>
+      <td style="text-align: right">8197483.1</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Mexico</td>
+      <td style="text-align: right">17604619.1</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Michoacan</td>
+      <td style="text-align: right">4687210.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Morelos</td>
+      <td style="text-align: right">1987595.8</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Nayarit</td>
+      <td style="text-align: right">1290518.8</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Nuevo Leon</td>
+      <td style="text-align: right">5300618.6</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Oaxaca</td>
+      <td style="text-align: right">4084674.0</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Puebla</td>
+      <td style="text-align: right">6371380.8</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Queretaro</td>
+      <td style="text-align: right">2091823.2</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Quintana Roo</td>
+      <td style="text-align: right">1709478.7</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">San Luis Potosi</td>
+      <td style="text-align: right">2824976.0</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Sinaloa</td>
+      <td style="text-align: right">3059321.7</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Sonora</td>
+      <td style="text-align: right">3050472.7</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Tabasco</td>
+      <td style="text-align: right">2454294.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Tamaulipas</td>
+      <td style="text-align: right">3661161.7</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Tlaxcala</td>
+      <td style="text-align: right">1330142.6</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Veracruz</td>
+      <td style="text-align: right">8220321.9</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Yucatan</td>
+      <td style="text-align: right">2199617.6</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Zacatecas</td>
+      <td style="text-align: right">1612014.2</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Hopefully this helps to avoid the notoriously bad <em>datos.gob</em> webpage! Happy data wrangling!</p>
+
+  </div>
+</article>
+
+</body>
+</html>

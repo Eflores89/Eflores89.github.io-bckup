@@ -3,8 +3,263 @@
 	<channel>
 		<title>En El Margen - R-English</title>
 		<description>Posts categorized as 'R-English'</description>
-		<link>http://www.enelmargen.org</link>
-		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
+		<link>http://localhost:4000</link>
+		<atom:link href="http://localhost:4000/rss/r.english.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>conapomx data package</title>
+					<description>&lt;p&gt;I have created a new data package for R to help users obtain national population statistics of Mexico.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;conapomx&lt;/strong&gt; package contains the &lt;em&gt;mxpopulation&lt;/em&gt; data set, which is a tidy data.frame containing population estimates from the CONAPO (National Population Commission) official agency. The estimates are divided by age groups, gender, municipality and year.&lt;/p&gt;
+
+&lt;p&gt;To install, just call CRAN (or github if you are reading this before it is accepted).&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;install.packages(&amp;quot;conapomx&amp;quot;) 
+# or... 
+library(devtools)
+install_github(&amp;quot;eflores89/conapomx&amp;quot;)
+
+# explore the dataset
+head(mxpopulation)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;y&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;st&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;id_st&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;mun&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;id_mun&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;geoid&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;gender&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;age&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;population&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0-14&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;124263.71&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;15-29&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;106695.14&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;30-44&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;81088.65&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;45-64&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;60379.29&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;65+&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;17679.26&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2010&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1001&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0-14&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;119535.77&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Here is the data for 2018, just out of curiosity:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;library(dplyr)
+
+mxpopulation %&amp;gt;% 
+  filter(y == &amp;quot;2018&amp;quot;) %&amp;gt;%
+  group_by(st) %&amp;gt;% 
+  summarize(&amp;quot;Population&amp;quot; = sum(population))&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;st&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;Population&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Aguascalientes&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1337792.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Baja California&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3633772.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Baja California Sur&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;832827.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Campeche&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;948459.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Chiapas&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;5445232.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Chihuahua&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3816865.4&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Coahuila&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3063662.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Colima&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;759686.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Distrito Federal&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8788140.6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Durango&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1815965.6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Guanajuato&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;5952086.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Guerrero&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3625040.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Hidalgo&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2980532.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Jalisco&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8197483.1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Mexico&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;17604619.1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Michoacan&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;4687210.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Morelos&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1987595.8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nayarit&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1290518.8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nuevo Leon&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;5300618.6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Oaxaca&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;4084674.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Puebla&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;6371380.8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Queretaro&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2091823.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Quintana Roo&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1709478.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;San Luis Potosi&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2824976.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Sinaloa&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3059321.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Sonora&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3050472.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tabasco&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2454294.5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tamaulipas&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3661161.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tlaxcala&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1330142.6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Veracruz&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8220321.9&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Yucatan&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2199617.6&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Zacatecas&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1612014.2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Hopefully this helps to avoid the notoriously bad &lt;em&gt;datos.gob&lt;/em&gt; webpage! Happy data wrangling!&lt;/p&gt;
+</description>
+				<pubDate>Tue, 16 Jan 2018 06:00:30 +0100</pubDate>
+				<link>http://localhost:4000/datascience/conapo-package/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/conapo-package/</guid>
+			</item>
 		
 			<item>
 				<title>NAFTA trade dashboard</title>
@@ -48,9 +303,9 @@
 
 &lt;p&gt;FYI, I borrowed heavily from &lt;a href=&quot;https://comtrade.un.org/data/Doc/api/ex/r&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/guillgall/3b979b59e8905ef7f244&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 </description>
-				<pubDate>Sun, 18 Jun 2017 14:00:30 -0500</pubDate>
-				<link>http://www.enelmargen.org/tradewatch/intro/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/tradewatch/intro/</guid>
+				<pubDate>Sun, 18 Jun 2017 21:00:30 +0200</pubDate>
+				<link>http://localhost:4000/tradewatch/intro/</link>
+				<guid isPermaLink="true">http://localhost:4000/tradewatch/intro/</guid>
 			</item>
 		
 			<item>
@@ -234,9 +489,9 @@ d &amp;lt;- LoadManyTxt(&amp;quot;Interviews_&amp;quot;)&lt;/code&gt;&lt;/pre&gt
 &lt;p&gt;It might seem intense, but this definitely saved me a few hours. As for the outcome of the interviews, I was invited to join two of my school choices, so it all worked out! Although, having gone through the experience, I think the old mantra: “be yourself” is probably better advice than using this app, so use at your own risk!&lt;/p&gt;
 
 </description>
-				<pubDate>Tue, 20 Dec 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/mba-shiny/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mba-shiny/</guid>
+				<pubDate>Tue, 20 Dec 2016 00:00:00 +0100</pubDate>
+				<link>http://localhost:4000/datascience/mba-shiny/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/mba-shiny/</guid>
 			</item>
 		
 			<item>
@@ -414,9 +669,9 @@ ggplot(order_axis(bymentionchain %&amp;gt;%
 
 &lt;p&gt;However, It’s interesting to note how there is a small spike of the accounts afiliated with the PRI (party in power) on the day after his visit (Sept. 1st). Maybe they were trying to drive the conversation to another place?&lt;/p&gt;
 </description>
-				<pubDate>Mon, 26 Sep 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/datascience/trump-mextweets/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/trump-mextweets/</guid>
+				<pubDate>Mon, 26 Sep 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/datascience/trump-mextweets/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/trump-mextweets/</guid>
 			</item>
 		
 			<item>
@@ -527,9 +782,9 @@ ggplot(rsv$Data,
 
 &lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any suggestions / improvements or open &lt;a href=&quot;https://github.com/Eflores89/banxicoR&quot;&gt;an issue at Github&lt;/a&gt;&lt;/p&gt;
 </description>
-				<pubDate>Fri, 19 Aug 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/banxicoR/vignette-v09/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/banxicoR/vignette-v09/</guid>
+				<pubDate>Fri, 19 Aug 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/banxicoR/vignette-v09/</link>
+				<guid isPermaLink="true">http://localhost:4000/banxicoR/vignette-v09/</guid>
 			</item>
 		
 			<item>
@@ -660,9 +915,9 @@ hc_c2 %&amp;gt;% filter(hc_c2 == &amp;quot;6&amp;quot;)
 
 &lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any questions with the data!&lt;/p&gt;
 </description>
-				<pubDate>Wed, 27 Jul 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/datascience/un-voting-communities/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-communities/</guid>
+				<pubDate>Wed, 27 Jul 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/datascience/un-voting-communities/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/un-voting-communities/</guid>
 			</item>
 		
 			<item>
@@ -887,9 +1142,9 @@ agree_with_israel
 
 &lt;p&gt;I’m sure the kind readers at &lt;strong&gt;r-bloggers&lt;/strong&gt; will come up with another useful analysis from this package. Maybe a map? &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up!&lt;/p&gt;
 </description>
-				<pubDate>Tue, 12 Jul 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/datascience/un-voting-patterns/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-patterns/</guid>
+				<pubDate>Tue, 12 Jul 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/datascience/un-voting-patterns/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/un-voting-patterns/</guid>
 			</item>
 		
 			<item>
@@ -918,9 +1173,9 @@ agree_with_israel
 
 &lt;p&gt;&lt;strong&gt;Vote for Monterrey&lt;/strong&gt; here: &lt;a href=&quot;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&quot;&gt;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&lt;/a&gt;&lt;/p&gt;
 </description>
-				<pubDate>Sat, 14 May 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/datascience/mty-satrday/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mty-satrday/</guid>
+				<pubDate>Sat, 14 May 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/datascience/mty-satrday/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/mty-satrday/</guid>
 			</item>
 		
 			<item>
@@ -1096,9 +1351,9 @@ class(img)
 
 &lt;p&gt;This package is still in the early stages of development, and I plan on submitting to CRAN in a few weeks, so any suggestions/improvements are very welcome at my twitter: &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;@eflores89&lt;/a&gt; or via issues in the github package repo: &lt;a href=&quot;https://github.com/Eflores89/nasadata&quot;&gt;https://github.com/Eflores89/nasadata&lt;/a&gt;.&lt;/p&gt;
 </description>
-				<pubDate>Sun, 01 May 2016 00:00:00 -0500</pubDate>
-				<link>http://www.enelmargen.org/nasadata/vignette_v0/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/nasadata/vignette_v0/</guid>
+				<pubDate>Sun, 01 May 2016 00:00:00 +0200</pubDate>
+				<link>http://localhost:4000/nasadata/vignette_v0/</link>
+				<guid isPermaLink="true">http://localhost:4000/nasadata/vignette_v0/</guid>
 			</item>
 		
 			<item>
@@ -1364,9 +1619,9 @@ ggplot(nl, aes(x = Date, y = Productivity))+
 
 &lt;p&gt;If there are any suggestions or bugs, you can find me at &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;twitter&lt;/a&gt; or &lt;a href=&quot;https://github.com/Eflores89&quot;&gt;github&lt;/a&gt;.&lt;/p&gt;
 </description>
-				<pubDate>Sun, 21 Feb 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/inegir-v1-2/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/inegir-v1-2/</guid>
+				<pubDate>Sun, 21 Feb 2016 00:00:00 +0100</pubDate>
+				<link>http://localhost:4000/datascience/inegir-v1-2/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/inegir-v1-2/</guid>
 			</item>
 		
 			<item>
@@ -1627,9 +1882,9 @@ ggplot(info_all,
 
 &lt;p&gt;You can also contact me via twitter for any questions: @eflores89 or via an issue in github.&lt;/p&gt;
 </description>
-				<pubDate>Tue, 19 Jan 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-iii/</guid>
+				<pubDate>Tue, 19 Jan 2016 00:00:00 +0100</pubDate>
+				<link>http://localhost:4000/datascience/r-debate-analysis-part-iii/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/r-debate-analysis-part-iii/</guid>
 			</item>
 		
 			<item>
@@ -2017,9 +2272,9 @@ ggplot(info_all,
   &lt;li&gt;The &lt;code&gt;info_all&lt;/code&gt; data.frame is the aggregate stats of contenders by debate. It contains word counts, unique word counts, etc.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-				<pubDate>Thu, 07 Jan 2016 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-ii/</guid>
+				<pubDate>Thu, 07 Jan 2016 00:00:00 +0100</pubDate>
+				<link>http://localhost:4000/datascience/r-debate-analysis-part-ii/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/r-debate-analysis-part-ii/</guid>
 			</item>
 		
 			<item>
@@ -2366,9 +2621,9 @@ ggplot(info_all,
 &lt;p&gt;A trend seems to be emerging: Trump repeats the same thing every debate. But there should be much more proof after a few more debates…&lt;/p&gt;
 
 </description>
-				<pubDate>Thu, 26 Nov 2015 00:00:00 -0600</pubDate>
-				<link>http://www.enelmargen.org/datascience/republican-debates/</link>
-				<guid isPermaLink="true">http://www.enelmargen.org/datascience/republican-debates/</guid>
+				<pubDate>Thu, 26 Nov 2015 00:00:00 +0100</pubDate>
+				<link>http://localhost:4000/datascience/republican-debates/</link>
+				<guid isPermaLink="true">http://localhost:4000/datascience/republican-debates/</guid>
 			</item>
 		
 	</channel>
