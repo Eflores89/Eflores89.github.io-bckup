@@ -11,10 +11,10 @@ library(treemap)
 library(tidyquant)
 
 # dates
-d1 <- "201702" # latest available month
-d2 <- "201602" # same month, a year earlier
+d1 <- "201706" # latest available month
+d2 <- "201606" # same month, a year earlier
 
-d2_real <- "2017-03-01" # one month after latest available month
+d2_real <- "2017-07-01" # one month after latest available month
 
 #### ----------------------- Loading some functions, to download data! 
 source("functions.R")
