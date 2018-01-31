@@ -3,12 +3,12 @@
 	<channel>
 		<title>En El Margen - R-English</title>
 		<description>Posts categorized as 'R-English'</description>
-		<link>http://localhost:4000</link>
-		<atom:link href="http://localhost:4000/rss/r.english.xml" rel="self" type="application/rss+xml" />
+		<link>http://www.enelmargen.org</link>
+		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
 				<title>conapomx data package</title>
-					<description>&lt;p&gt;I have created a new data package for R to help users obtain national population statistics of Mexico.&lt;/p&gt;
+					<description>&lt;p&gt;I have created a new R data package to help users obtain national population statistics of Mexico.&lt;/p&gt;
 
 &lt;p&gt;The &lt;strong&gt;conapomx&lt;/strong&gt; package contains the &lt;em&gt;mxpopulation&lt;/em&gt; data set, which is a tidy data.frame containing population estimates from the CONAPO (National Population Commission) official agency. The estimates are divided by age groups, gender, municipality and year.&lt;/p&gt;
 
@@ -257,8 +257,8 @@ mxpopulation %&amp;gt;%
 &lt;p&gt;Hopefully this helps to avoid the notoriously bad &lt;em&gt;datos.gob&lt;/em&gt; webpage! Happy data wrangling!&lt;/p&gt;
 </description>
 				<pubDate>Tue, 16 Jan 2018 06:00:30 +0100</pubDate>
-				<link>http://localhost:4000/datascience/conapo-package/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/conapo-package/</guid>
+				<link>http://www.enelmargen.org/datascience/conapo-package/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/conapo-package/</guid>
 			</item>
 		
 			<item>
@@ -304,8 +304,8 @@ mxpopulation %&amp;gt;%
 &lt;p&gt;FYI, I borrowed heavily from &lt;a href=&quot;https://comtrade.un.org/data/Doc/api/ex/r&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/guillgall/3b979b59e8905ef7f244&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 </description>
 				<pubDate>Sun, 18 Jun 2017 21:00:30 +0200</pubDate>
-				<link>http://localhost:4000/tradewatch/intro/</link>
-				<guid isPermaLink="true">http://localhost:4000/tradewatch/intro/</guid>
+				<link>http://www.enelmargen.org/tradewatch/intro/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/tradewatch/intro/</guid>
 			</item>
 		
 			<item>
@@ -490,8 +490,8 @@ d &amp;lt;- LoadManyTxt(&amp;quot;Interviews_&amp;quot;)&lt;/code&gt;&lt;/pre&gt
 
 </description>
 				<pubDate>Tue, 20 Dec 2016 00:00:00 +0100</pubDate>
-				<link>http://localhost:4000/datascience/mba-shiny/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/mba-shiny/</guid>
+				<link>http://www.enelmargen.org/datascience/mba-shiny/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mba-shiny/</guid>
 			</item>
 		
 			<item>
@@ -670,8 +670,8 @@ ggplot(order_axis(bymentionchain %&amp;gt;%
 &lt;p&gt;However, It’s interesting to note how there is a small spike of the accounts afiliated with the PRI (party in power) on the day after his visit (Sept. 1st). Maybe they were trying to drive the conversation to another place?&lt;/p&gt;
 </description>
 				<pubDate>Mon, 26 Sep 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/datascience/trump-mextweets/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/trump-mextweets/</guid>
+				<link>http://www.enelmargen.org/datascience/trump-mextweets/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/trump-mextweets/</guid>
 			</item>
 		
 			<item>
@@ -783,8 +783,8 @@ ggplot(rsv$Data,
 &lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any suggestions / improvements or open &lt;a href=&quot;https://github.com/Eflores89/banxicoR&quot;&gt;an issue at Github&lt;/a&gt;&lt;/p&gt;
 </description>
 				<pubDate>Fri, 19 Aug 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/banxicoR/vignette-v09/</link>
-				<guid isPermaLink="true">http://localhost:4000/banxicoR/vignette-v09/</guid>
+				<link>http://www.enelmargen.org/banxicoR/vignette-v09/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/banxicoR/vignette-v09/</guid>
 			</item>
 		
 			<item>
@@ -916,8 +916,8 @@ hc_c2 %&amp;gt;% filter(hc_c2 == &amp;quot;6&amp;quot;)
 &lt;p&gt;&lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up if you have any questions with the data!&lt;/p&gt;
 </description>
 				<pubDate>Wed, 27 Jul 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/datascience/un-voting-communities/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/un-voting-communities/</guid>
+				<link>http://www.enelmargen.org/datascience/un-voting-communities/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-communities/</guid>
 			</item>
 		
 			<item>
@@ -1143,8 +1143,8 @@ agree_with_israel
 &lt;p&gt;I’m sure the kind readers at &lt;strong&gt;r-bloggers&lt;/strong&gt; will come up with another useful analysis from this package. Maybe a map? &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;Tweet&lt;/a&gt; me up!&lt;/p&gt;
 </description>
 				<pubDate>Tue, 12 Jul 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/datascience/un-voting-patterns/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/un-voting-patterns/</guid>
+				<link>http://www.enelmargen.org/datascience/un-voting-patterns/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/un-voting-patterns/</guid>
 			</item>
 		
 			<item>
@@ -1174,8 +1174,8 @@ agree_with_israel
 &lt;p&gt;&lt;strong&gt;Vote for Monterrey&lt;/strong&gt; here: &lt;a href=&quot;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&quot;&gt;http://app.doopoll.co/poll/ZznsEGPnmbFafim2c&lt;/a&gt;&lt;/p&gt;
 </description>
 				<pubDate>Sat, 14 May 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/datascience/mty-satrday/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/mty-satrday/</guid>
+				<link>http://www.enelmargen.org/datascience/mty-satrday/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/mty-satrday/</guid>
 			</item>
 		
 			<item>
@@ -1352,8 +1352,8 @@ class(img)
 &lt;p&gt;This package is still in the early stages of development, and I plan on submitting to CRAN in a few weeks, so any suggestions/improvements are very welcome at my twitter: &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;@eflores89&lt;/a&gt; or via issues in the github package repo: &lt;a href=&quot;https://github.com/Eflores89/nasadata&quot;&gt;https://github.com/Eflores89/nasadata&lt;/a&gt;.&lt;/p&gt;
 </description>
 				<pubDate>Sun, 01 May 2016 00:00:00 +0200</pubDate>
-				<link>http://localhost:4000/nasadata/vignette_v0/</link>
-				<guid isPermaLink="true">http://localhost:4000/nasadata/vignette_v0/</guid>
+				<link>http://www.enelmargen.org/nasadata/vignette_v0/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/nasadata/vignette_v0/</guid>
 			</item>
 		
 			<item>
@@ -1620,8 +1620,8 @@ ggplot(nl, aes(x = Date, y = Productivity))+
 &lt;p&gt;If there are any suggestions or bugs, you can find me at &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;twitter&lt;/a&gt; or &lt;a href=&quot;https://github.com/Eflores89&quot;&gt;github&lt;/a&gt;.&lt;/p&gt;
 </description>
 				<pubDate>Sun, 21 Feb 2016 00:00:00 +0100</pubDate>
-				<link>http://localhost:4000/datascience/inegir-v1-2/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/inegir-v1-2/</guid>
+				<link>http://www.enelmargen.org/datascience/inegir-v1-2/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/inegir-v1-2/</guid>
 			</item>
 		
 			<item>
@@ -1883,8 +1883,8 @@ ggplot(info_all,
 &lt;p&gt;You can also contact me via twitter for any questions: @eflores89 or via an issue in github.&lt;/p&gt;
 </description>
 				<pubDate>Tue, 19 Jan 2016 00:00:00 +0100</pubDate>
-				<link>http://localhost:4000/datascience/r-debate-analysis-part-iii/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/r-debate-analysis-part-iii/</guid>
+				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-iii/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-iii/</guid>
 			</item>
 		
 			<item>
@@ -2273,8 +2273,8 @@ ggplot(info_all,
 &lt;/ul&gt;
 </description>
 				<pubDate>Thu, 07 Jan 2016 00:00:00 +0100</pubDate>
-				<link>http://localhost:4000/datascience/r-debate-analysis-part-ii/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/r-debate-analysis-part-ii/</guid>
+				<link>http://www.enelmargen.org/datascience/r-debate-analysis-part-ii/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/r-debate-analysis-part-ii/</guid>
 			</item>
 		
 			<item>
@@ -2622,8 +2622,8 @@ ggplot(info_all,
 
 </description>
 				<pubDate>Thu, 26 Nov 2015 00:00:00 +0100</pubDate>
-				<link>http://localhost:4000/datascience/republican-debates/</link>
-				<guid isPermaLink="true">http://localhost:4000/datascience/republican-debates/</guid>
+				<link>http://www.enelmargen.org/datascience/republican-debates/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/republican-debates/</guid>
 			</item>
 		
 	</channel>
