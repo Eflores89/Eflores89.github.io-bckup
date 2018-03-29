@@ -7,6 +7,400 @@
 		<atom:link href="http://www.enelmargen.org/rss/r.english.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>inegiR v2</title>
+					<description>&lt;p&gt;After &lt;em&gt;a lot&lt;/em&gt; of slacking around, I finally got to finishing the upgraded version of the &lt;strong&gt;inegiR&lt;/strong&gt; package on CRAN. This version combines quite a few changes that I will explain further in this post.&lt;/p&gt;
+
+&lt;h2 id=&quot;new-language&quot;&gt;New language&lt;/h2&gt;
+&lt;p&gt;The biggest change upfront is the migration to english in both function names and documentation. The rationale behind this is to make it more accessible to developers around the world (I have recieved a few emails asking for translations). Also, the non-ASCII characters were not helpful. For the Mexican users, I assume that if you know R, you can probably find yourself around an english document.&lt;/p&gt;
+
+&lt;p&gt;To avoid crashing workflows, I left the legacy functions intact except for a warning to use the english version instead. An example of this is the commercial growth rate functions, which are:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;# english
+rate_commerce()
+# spanish (old version)
+tasa_comercio()&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;route-api&quot;&gt;Route API&lt;/h2&gt;
+
+&lt;p&gt;With some &lt;a href=&quot;https://github.com/Eflores89/inegiR/issues/13&quot;&gt;help&lt;/a&gt; from Arturo Cárdenas and a revamp of the &lt;a href=&quot;http://www.inegi.org.mx/desarrolladores/sakbe/apisakbe.aspx&quot;&gt;Sákbe API&lt;/a&gt; in INEGI, I was able to add functions to access route information.&lt;/p&gt;
+
+&lt;p&gt;The two main ones are:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;# to search for a destiny id
+inegi_destiny()
+# to get route information
+inegi_route()&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The first thing to understand is that INEGI has categorized sites in Mexico according to a “destiny id”. For example, the International Airport in Mexico city is destiny id #57. The inegi_destiny() function will help you find a destiny id based on a text criteria, sort of like googling the place and getting an address. Here is an example with a plaza in Monterrey:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;# download on CRAN or newest dev version (if not accepted yet)
+# install.packages(&amp;quot;inegiR&amp;quot;)
+# or... 
+# devtools::install_github(&amp;quot;eflores89/inegiR&amp;quot;)
+library(inegiR)
+library(knitr)
+# to search for Macroplaza destiny id
+token &amp;lt;- &amp;quot;mytoken&amp;quot;
+destiny1 &amp;lt;- inegi_destiny(&amp;quot;Macroplaza&amp;quot;, token = token)
+kable(destiny1)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;ID&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;ID_DEST&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;STATE&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;NAME&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;GEO_STRING&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;TYPE&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;LAT&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;LONG&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;destino&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;6940&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;N.L.&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Macroplaza, Monterrey&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;{“type”:”Point”,”coordinates”:[-100.309991587,25.668862054]}&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Point&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3100&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66886&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;destino&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;20237&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;B.C.&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Macroplaza del Valle, Mexicali&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;{“type”:”Point”,”coordinates”:[-115.50790804,32.62128025]}&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Point&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-115.5079&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;32.62128&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;destino&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;17891&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Coah.&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Macroplaza, Acuña&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;{“type”:”Point”,”coordinates”:[-100.978421457,29.3299882860001]}&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Point&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.9784&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;29.32999&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;When you know two destiny id’s, you can now use the API to learn about potential routes you can take between them. This function will return a list with two objects: a data.frame of route information (kilometers, toll cost, etc) and another data.frame with all the coordinates in the route. Intuitively, if you join all the dots, you can clearly see the route you would take.&lt;/p&gt;
+
+&lt;p&gt;To illustrate, i’m going to use the first result and see what the route would be from there to the U.S. Border (which is the other id) with a normal car and with a tolled highway. A further look at the documentation will explain the names and options in the parameters.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;route &amp;lt;- inegi_route(from = 6940, to = 7426, token = token, pref = 1, vehicle = 1)
+str(route)
+# List of 2
+#  $ ROUTE          :&amp;#39;data.frame&amp;#39;:	1 obs. of  6 variables:
+#   ..$ KMS       : num 222
+#   ..$ TIME_MINS : num 151
+#   ..$ TIME_HRS  : num 2.52
+#   ..$ HAS_TOLL  : logi TRUE
+#   ..$ TOLL_COST : num 364
+#   ..$ TOTAL_COST: logi NA
+#  $ COORDINATE_PATH:&amp;#39;data.frame&amp;#39;:	1176 obs. of  2 variables:
+#   ..$ V1: num [1:1176] -100 -100 -100 -100 -100 ...
+#   ..$ V2: num [1:1176] 25.7 25.7 25.7 25.7 25.7 ...&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;As you can see, the returning element is a list of two data.frame objects. The first will give us basic statistics about the route.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;kable(route$ROUTE)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;KMS&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TIME_MINS&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TIME_HRS&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;HAS_TOLL&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TOLL_COST&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;TOTAL_COST&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;222.36&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;151.11&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2.5185&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRUE&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;364&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;NA&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The total cost is NA because the default value for the &lt;em&gt;calc_cost&lt;/em&gt; parameter is FALSE. When this is set to TRUE, the function will additionally look for the price of gasoline in the Sakbé API and calculate a cost of the trip. Be warned, this is &lt;strong&gt;very&lt;/strong&gt; experimental and it is just a rule of thumb (you can see the documentation for a further explanation). Once the price of gasoline is calculated, any tolls are added and then a total cost is supplied. To do this, just change the parameter.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;route2 &amp;lt;- inegi_route(from = 6940, to = 7426, token = token, pref = 1, vehicle = 1, 
+                      calc_cost = TRUE)
+kable(route2$ROUTE)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;KMS&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TIME_MINS&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TIME_HRS&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;HAS_TOLL&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TOLL_COST&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;TOTAL_COST&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;222.36&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;151.11&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2.5185&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRUE&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;364&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;757.1729&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;All prices are reported in Mexican pesos.&lt;/p&gt;
+
+&lt;p&gt;The second element in the list is the data.frame containing all point references in the route. As I said before, just connect the dots. Here is a preview:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;kable(head(route$COORDINATE_PATH))&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;LONGITUD&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;LATITUD&lt;/th&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;INDEX&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3125&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66238&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3125&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66231&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3124&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66225&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3124&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66222&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;4&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3124&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66220&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;5&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;-100.3124&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;25.66215&lt;/td&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;6&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;For this particular route, I added the dots in Google maps to show this better:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/inegiR_2.jpg&quot; style=&quot;width:650px;height:450px;display: block; margin-left: auto; margin-right: auto&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;new-gdp-catalog&quot;&gt;New GDP catalog&lt;/h2&gt;
+
+&lt;p&gt;Another huge issue that users reported was trying to find relevant indicator id’s in the INEGI webpage. As experienced users know, every economic data series has a unique id on the API. However, there is no catalog that allows you to find the id’s you are looking for. I have petitioned INEGI multiple times but got nowhere.&lt;/p&gt;
+
+&lt;p&gt;My personal solution was to look up the series in the BIE application (a web browser version of the API) and download the data as a .iqy object. From there, I would hack my way into the file to find the unique id’s being called. Very time intensive and error-prone.&lt;/p&gt;
+
+&lt;p&gt;So, to help each other out in this endeavour, I created a catalog of id’s. This version has all the sub-levels of GDP (up until 4th level desagregation), but I plan to update this catalog on a rolling basis. Any help would also be appreciated.&lt;/p&gt;
+
+&lt;p&gt;You can see the catalog by calling the dataset like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;data(&amp;quot;inegi_catalog&amp;quot;)
+kable(head(inegi_catalog[,1:7]))
+# for more rows, see docs!&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;NAME&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;LEVEL_2&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;LEVEL_3&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;LEVEL_4&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;UNITS&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;BASE&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;FREQUENCY&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB - IMPUESTOS A PRODUCTOS NETOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;IMPUESTOS A PRODUCTOS NETOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB - VALOR AGREGADO BRUTO&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;VALOR AGREGADO BRUTO&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB - ACTIVIDADES PRIMARIAS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;ACTIVIDADES PRIMARIAS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB - ACTIVIDADES PRIMARIAS - AGRICULTURA&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;ACTIVIDADES PRIMARIAS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;AGRICULTURA&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PIB - ACTIVIDADES SECUNDARIAS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;ACTIVIDADES SECUNDARIAS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TOTAL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;MILLIONS OF 2008 PESOS&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TRIMESTRAL&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;compact-metadata-and-series-helper&quot;&gt;Compact metadata and series helper&lt;/h2&gt;
+
+&lt;p&gt;Two other common headaches came up with the past versions. First, the inegi_series() functions only accepted the full URL when most of the times, the only thing that changed between them was the number of the id. So I added a simple function to paste the entire URL string for the call to the API.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;GPD_ID &amp;lt;- 381016
+inegi_code(381016)
+# &amp;quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/381016/00000/es/false/xml/&amp;quot;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The second headache had to do with downloading multiple id’s. The list returned when using inegi_series() with the metadata parameter as TRUE is a bit clunky when using it in a loop or apply function. So I added a compact function that returns all the information in a tidy data.frame:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;token_inegi &amp;lt;- &amp;quot;mytoken&amp;quot;
+df &amp;lt;- compact_inegi_series(inegi_code(381016), token_inegi)
+kable(head(df))&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;Values&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Dates&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Name&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Update&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Region&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Units&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Indicator&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Frequency&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;7945204&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1993-01-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;7939362&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1993-04-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;7954943&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1993-07-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8268036&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1993-10-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8210538&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1994-01-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;8413362&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1994-04-01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Producto interno bruto, a precios de mercado&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2017/08/22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Nacional&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Millones de pesos a precios de 2008&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;381016&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Trimestral&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;I hope this update is useful to everyone doing data science with Mexican stats. Any new suggestions or questiosn are welcome via &lt;a href=&quot;https://twitter.com/eflores89&quot;&gt;twitter&lt;/a&gt; or a github &lt;a href=&quot;https://github.com/Eflores89/inegiR&quot;&gt;issue&lt;/a&gt; request.&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 29 Mar 2018 00:00:00 +0200</pubDate>
+				<link>http://www.enelmargen.org/datascience/inegiR-v2/</link>
+				<guid isPermaLink="true">http://www.enelmargen.org/datascience/inegiR-v2/</guid>
+			</item>
+		
+			<item>
 				<title>conapomx data package</title>
 					<description>&lt;p&gt;I have created a new R data package to help users obtain national population statistics of Mexico.&lt;/p&gt;
 

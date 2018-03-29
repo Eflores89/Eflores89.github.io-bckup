@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-81406080-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-81406080-1');
+</script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>inegiR v2 | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 29 Mar 2018</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: datascience, r-english</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/conapo-package/">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>inegiR v2</h1>
+    <p>After <em>a lot</em> of slacking around, I finally got to finishing the upgraded version of the <strong>inegiR</strong> package on CRAN. This version combines quite a few changes that I will explain further in this post.</p>
+
+<h2 id="new-language">New language</h2>
+<p>The biggest change upfront is the migration to english in both function names and documentation. The rationale behind this is to make it more accessible to developers around the world (I have recieved a few emails asking for translations). Also, the non-ASCII characters were not helpful. For the Mexican users, I assume that if you know R, you can probably find yourself around an english document.</p>
+
+<p>To avoid crashing workflows, I left the legacy functions intact except for a warning to use the english version instead. An example of this is the commercial growth rate functions, which are:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># english
+rate_commerce()
+# spanish (old version)
+tasa_comercio()</code></pre></figure>
+
+<h2 id="route-api">Route API</h2>
+
+<p>With some <a href="https://github.com/Eflores89/inegiR/issues/13">help</a> from Arturo Cárdenas and a revamp of the <a href="http://www.inegi.org.mx/desarrolladores/sakbe/apisakbe.aspx">Sákbe API</a> in INEGI, I was able to add functions to access route information.</p>
+
+<p>The two main ones are:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># to search for a destiny id
+inegi_destiny()
+# to get route information
+inegi_route()</code></pre></figure>
+
+<p>The first thing to understand is that INEGI has categorized sites in Mexico according to a “destiny id”. For example, the International Airport in Mexico city is destiny id #57. The inegi_destiny() function will help you find a destiny id based on a text criteria, sort of like googling the place and getting an address. Here is an example with a plaza in Monterrey:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"># download on CRAN or newest dev version (if not accepted yet)
+# install.packages(&quot;inegiR&quot;)
+# or... 
+# devtools::install_github(&quot;eflores89/inegiR&quot;)
+library(inegiR)
+library(knitr)
+# to search for Macroplaza destiny id
+token &lt;- &quot;mytoken&quot;
+destiny1 &lt;- inegi_destiny(&quot;Macroplaza&quot;, token = token)
+kable(destiny1)</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">ID</th>
+      <th style="text-align: left">ID_DEST</th>
+      <th style="text-align: left">STATE</th>
+      <th style="text-align: left">NAME</th>
+      <th style="text-align: left">GEO_STRING</th>
+      <th style="text-align: left">TYPE</th>
+      <th style="text-align: right">LAT</th>
+      <th style="text-align: right">LONG</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">destino</td>
+      <td style="text-align: left">6940</td>
+      <td style="text-align: left">N.L.</td>
+      <td style="text-align: left">Macroplaza, Monterrey</td>
+      <td style="text-align: left">{“type”:”Point”,”coordinates”:[-100.309991587,25.668862054]}</td>
+      <td style="text-align: left">Point</td>
+      <td style="text-align: right">-100.3100</td>
+      <td style="text-align: right">25.66886</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">destino</td>
+      <td style="text-align: left">20237</td>
+      <td style="text-align: left">B.C.</td>
+      <td style="text-align: left">Macroplaza del Valle, Mexicali</td>
+      <td style="text-align: left">{“type”:”Point”,”coordinates”:[-115.50790804,32.62128025]}</td>
+      <td style="text-align: left">Point</td>
+      <td style="text-align: right">-115.5079</td>
+      <td style="text-align: right">32.62128</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">destino</td>
+      <td style="text-align: left">17891</td>
+      <td style="text-align: left">Coah.</td>
+      <td style="text-align: left">Macroplaza, Acuña</td>
+      <td style="text-align: left">{“type”:”Point”,”coordinates”:[-100.978421457,29.3299882860001]}</td>
+      <td style="text-align: left">Point</td>
+      <td style="text-align: right">-100.9784</td>
+      <td style="text-align: right">29.32999</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When you know two destiny id’s, you can now use the API to learn about potential routes you can take between them. This function will return a list with two objects: a data.frame of route information (kilometers, toll cost, etc) and another data.frame with all the coordinates in the route. Intuitively, if you join all the dots, you can clearly see the route you would take.</p>
+
+<p>To illustrate, i’m going to use the first result and see what the route would be from there to the U.S. Border (which is the other id) with a normal car and with a tolled highway. A further look at the documentation will explain the names and options in the parameters.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">route &lt;- inegi_route(from = 6940, to = 7426, token = token, pref = 1, vehicle = 1)
+str(route)
+# List of 2
+#  $ ROUTE          :&#39;data.frame&#39;:	1 obs. of  6 variables:
+#   ..$ KMS       : num 222
+#   ..$ TIME_MINS : num 151
+#   ..$ TIME_HRS  : num 2.52
+#   ..$ HAS_TOLL  : logi TRUE
+#   ..$ TOLL_COST : num 364
+#   ..$ TOTAL_COST: logi NA
+#  $ COORDINATE_PATH:&#39;data.frame&#39;:	1176 obs. of  2 variables:
+#   ..$ V1: num [1:1176] -100 -100 -100 -100 -100 ...
+#   ..$ V2: num [1:1176] 25.7 25.7 25.7 25.7 25.7 ...</code></pre></figure>
+
+<p>As you can see, the returning element is a list of two data.frame objects. The first will give us basic statistics about the route.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">kable(route$ROUTE)</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">KMS</th>
+      <th style="text-align: right">TIME_MINS</th>
+      <th style="text-align: right">TIME_HRS</th>
+      <th style="text-align: left">HAS_TOLL</th>
+      <th style="text-align: right">TOLL_COST</th>
+      <th style="text-align: left">TOTAL_COST</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">222.36</td>
+      <td style="text-align: right">151.11</td>
+      <td style="text-align: right">2.5185</td>
+      <td style="text-align: left">TRUE</td>
+      <td style="text-align: right">364</td>
+      <td style="text-align: left">NA</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The total cost is NA because the default value for the <em>calc_cost</em> parameter is FALSE. When this is set to TRUE, the function will additionally look for the price of gasoline in the Sakbé API and calculate a cost of the trip. Be warned, this is <strong>very</strong> experimental and it is just a rule of thumb (you can see the documentation for a further explanation). Once the price of gasoline is calculated, any tolls are added and then a total cost is supplied. To do this, just change the parameter.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">route2 &lt;- inegi_route(from = 6940, to = 7426, token = token, pref = 1, vehicle = 1, 
+                      calc_cost = TRUE)
+kable(route2$ROUTE)</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">KMS</th>
+      <th style="text-align: right">TIME_MINS</th>
+      <th style="text-align: right">TIME_HRS</th>
+      <th style="text-align: left">HAS_TOLL</th>
+      <th style="text-align: right">TOLL_COST</th>
+      <th style="text-align: right">TOTAL_COST</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">222.36</td>
+      <td style="text-align: right">151.11</td>
+      <td style="text-align: right">2.5185</td>
+      <td style="text-align: left">TRUE</td>
+      <td style="text-align: right">364</td>
+      <td style="text-align: right">757.1729</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>All prices are reported in Mexican pesos.</p>
+
+<p>The second element in the list is the data.frame containing all point references in the route. As I said before, just connect the dots. Here is a preview:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">kable(head(route$COORDINATE_PATH))</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">LONGITUD</th>
+      <th style="text-align: right">LATITUD</th>
+      <th style="text-align: right">INDEX</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">-100.3125</td>
+      <td style="text-align: right">25.66238</td>
+      <td style="text-align: right">1</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">-100.3125</td>
+      <td style="text-align: right">25.66231</td>
+      <td style="text-align: right">2</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">-100.3124</td>
+      <td style="text-align: right">25.66225</td>
+      <td style="text-align: right">3</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">-100.3124</td>
+      <td style="text-align: right">25.66222</td>
+      <td style="text-align: right">4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">-100.3124</td>
+      <td style="text-align: right">25.66220</td>
+      <td style="text-align: right">5</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">-100.3124</td>
+      <td style="text-align: right">25.66215</td>
+      <td style="text-align: right">6</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For this particular route, I added the dots in Google maps to show this better:</p>
+
+<p><img src="/images/posts/inegiR_2.jpg" style="width:650px;height:450px;display: block; margin-left: auto; margin-right: auto" /></p>
+
+<h2 id="new-gdp-catalog">New GDP catalog</h2>
+
+<p>Another huge issue that users reported was trying to find relevant indicator id’s in the INEGI webpage. As experienced users know, every economic data series has a unique id on the API. However, there is no catalog that allows you to find the id’s you are looking for. I have petitioned INEGI multiple times but got nowhere.</p>
+
+<p>My personal solution was to look up the series in the BIE application (a web browser version of the API) and download the data as a .iqy object. From there, I would hack my way into the file to find the unique id’s being called. Very time intensive and error-prone.</p>
+
+<p>So, to help each other out in this endeavour, I created a catalog of id’s. This version has all the sub-levels of GDP (up until 4th level desagregation), but I plan to update this catalog on a rolling basis. Any help would also be appreciated.</p>
+
+<p>You can see the catalog by calling the dataset like this:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">data(&quot;inegi_catalog&quot;)
+kable(head(inegi_catalog[,1:7]))
+# for more rows, see docs!</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">NAME</th>
+      <th style="text-align: left">LEVEL_2</th>
+      <th style="text-align: left">LEVEL_3</th>
+      <th style="text-align: left">LEVEL_4</th>
+      <th style="text-align: left">UNITS</th>
+      <th style="text-align: left">BASE</th>
+      <th style="text-align: left">FREQUENCY</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">PIB</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">PIB - IMPUESTOS A PRODUCTOS NETOS</td>
+      <td style="text-align: left">IMPUESTOS A PRODUCTOS NETOS</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">PIB - VALOR AGREGADO BRUTO</td>
+      <td style="text-align: left">VALOR AGREGADO BRUTO</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">PIB - ACTIVIDADES PRIMARIAS</td>
+      <td style="text-align: left">ACTIVIDADES PRIMARIAS</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">PIB - ACTIVIDADES PRIMARIAS - AGRICULTURA</td>
+      <td style="text-align: left">ACTIVIDADES PRIMARIAS</td>
+      <td style="text-align: left">AGRICULTURA</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">PIB - ACTIVIDADES SECUNDARIAS</td>
+      <td style="text-align: left">ACTIVIDADES SECUNDARIAS</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">TOTAL</td>
+      <td style="text-align: left">MILLIONS OF 2008 PESOS</td>
+      <td style="text-align: left">2008</td>
+      <td style="text-align: left">TRIMESTRAL</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="compact-metadata-and-series-helper">Compact metadata and series helper</h2>
+
+<p>Two other common headaches came up with the past versions. First, the inegi_series() functions only accepted the full URL when most of the times, the only thing that changed between them was the number of the id. So I added a simple function to paste the entire URL string for the call to the API.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">GPD_ID &lt;- 381016
+inegi_code(381016)
+# &quot;http://www3.inegi.org.mx/sistemas/api/indicadores/v1//Indicador/381016/00000/es/false/xml/&quot;</code></pre></figure>
+
+<p>The second headache had to do with downloading multiple id’s. The list returned when using inegi_series() with the metadata parameter as TRUE is a bit clunky when using it in a loop or apply function. So I added a compact function that returns all the information in a tidy data.frame:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">token_inegi &lt;- &quot;mytoken&quot;
+df &lt;- compact_inegi_series(inegi_code(381016), token_inegi)
+kable(head(df))</code></pre></figure>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">Values</th>
+      <th style="text-align: left">Dates</th>
+      <th style="text-align: left">Name</th>
+      <th style="text-align: left">Update</th>
+      <th style="text-align: left">Region</th>
+      <th style="text-align: left">Units</th>
+      <th style="text-align: left">Indicator</th>
+      <th style="text-align: left">Frequency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">7945204</td>
+      <td style="text-align: left">1993-01-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">7939362</td>
+      <td style="text-align: left">1993-04-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">7954943</td>
+      <td style="text-align: left">1993-07-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">8268036</td>
+      <td style="text-align: left">1993-10-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">8210538</td>
+      <td style="text-align: left">1994-01-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">8413362</td>
+      <td style="text-align: left">1994-04-01</td>
+      <td style="text-align: left">Producto interno bruto, a precios de mercado</td>
+      <td style="text-align: left">2017/08/22</td>
+      <td style="text-align: left">Nacional</td>
+      <td style="text-align: left">Millones de pesos a precios de 2008</td>
+      <td style="text-align: left">381016</td>
+      <td style="text-align: left">Trimestral</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>I hope this update is useful to everyone doing data science with Mexican stats. Any new suggestions or questiosn are welcome via <a href="https://twitter.com/eflores89">twitter</a> or a github <a href="https://github.com/Eflores89/inegiR">issue</a> request.</p>
+
+
+  </div>
+</article>
+
+</body>
+</html>
