@@ -1,0 +1,137 @@
+```{r setup, include=FALSE}
+# Initial set-up, libraries
+library(flexdashboard)
+library(eem)
+library(ggplot2)
+library(highcharter)
+library(quantmod)
+library(dplyr)
+library(treemap)
+library(tidyquant)
+library(inegiR)
+
+data("inegi_catalog")
+token <- "61c36253-47f6-c616-034e-7bf43b1aaba4"
+
+series <- inegi_catalog[inegi_catalog$GROUP=="GDP", "INEGI_CODE" ] %>% pull()
+series_names <- inegi_catalog[inegi_catalog$GROUP=="GDP", "NAME" ] %>% pull()
+
+# theme 
+hc_theme_eem <- hc_theme(
+  colors = c('#A84A44','#E47D04','#D8A19E','#ae8b38','#4d7c28','#38b6a6','#2080c7','#94127a','#155685', 
+             '#157d85','#731585','#848515','#d06347','#d0ca47','#d04785','#a19c9b','#b5bcbf','#62686b',
+             '#021118', '#daf3ff'),
+  chart = list(
+    backgroundColor = "#ffffff"
+  ),
+  title = list(
+    style = list(
+      color = '#333333',
+      fontFamily = "Lato"
+    )
+  ),
+  subtitle = list(
+    style = list(
+      color = '#666666',
+      fontFamily = "Shadows Into Light"
+    )
+  ),
+  legend = list(
+    itemStyle = list(
+      fontFamily = 'Tangerine',
+      color = 'black'
+    ),
+    itemHoverStyle = list(
+      color = 'gray'
+    )   
+  )
+)
+
+  
+import_all_gdp <- function(series, token){
+  v <- NULL
+  for(i in 1:length(series)){
+    tmp <- inegiR::compact_inegi_series(inegi_code(id = series[i]), token = token)
+  print(paste0(i, " / ", length(series)))  
+    v <- rbind.data.frame(tmp, v)
+  }
+v  
+}
+
+d <- import_all_gdp(series, token)
+names(d)[7] <- "INEGI_CODE"
+
+CatalogHierarchy <- structure(list(LEVEL4_NAME = c("AGRICULTURA", "EXTRACCION PETROLEO Y GAS", 
+"MATERIALES METALICOS", "SERVICIOS RELACIONADOS", "ENERGIA", 
+"AGUA", "EDIFICACION", "ING. CIVIL", "ESPECIALIZADA", "MAN. ALIMENTARIA", 
+"MAN. BEBIDAS Y TABACO", "MAN. INSUMOS TEXTILES", "MAN. TEXTILES", 
+"MAN. PRENDAS DE VESTIR", "MAN. CUERO Y PIEL", "MAN. INDUSTRIA MADERA", 
+"MAN. INDUSTRIA DEL PAPEL", "MAN. IMPRESION E INDUSTRIAS CONEXAS", 
+"MAN. PRODUCTOS DE PETROLEO Y CARBON", "MAN. INDUSTRIA QUIMICA", 
+"MAN. INDUSTRIA PLASTICO Y HULE", "MAN. FABRICACION NO METALICOS", 
+"MAN. INDUSTRIAS METALICAS BASICAS", "MAN. PRODUCTOS METALICOS", 
+"MAN. MAQUINARIA Y EQUIPO", "MAN. ACCESORIOS Y EQUIPOS ELECTRONICOS", 
+"MAN. APARATOS ELECTRICOS Y GENERACION", "MAN. EQUIPO DE TRANSPORTE", 
+"MAN. MUEBLES Y COLCHONES", "MAN. OTRAS INDUSTRIAS", "COMERCIO AL POR MENOR Y POR MAYOR", 
+"TRANSPORTES Y CORREOS", "MEDIOS MASIVOS", "SERVICIOS FINANCIEROS", 
+"SERVICIOS INMOBILIARIOS", "SERVICIOS PROFESIONALES Y CIENTIFICOS", 
+"CORPORATIVOS", "SERVICIOS A NEGOCIOS", "EDUCACION", "SERVICIOS DE SALUD", 
+"SERVICIOS DE ESPARCIMIENTO", "SERVICIOS DE ALOJAMIENTO Y PREPARACION DE ALIMENTOS", 
+"OTROS SERVICIOS", "ACTIVIDADES DE GOBIERNO"), INEGI_CODE = c("381020", 
+"381028", "381029", "381030", "381032", "381033", "381035", "381036", 
+"381037", "381039", "381049", "381052", "381056", "381059", "381063", 
+"381067", "381071", "381074", "381076", "381078", "381086", "381089", 
+"381095", "381101", "381111", "381119", "381126", "381131", "381139", 
+"381143", "381147", "381148", "381157", "381164", "381167", "381170", 
+"381172", "381174", "381176", "381178", "381182", "381185", "381188", 
+"381192")), .Names = c("LEVEL4_NAME", "INEGI_CODE"), row.names = c(NA, 
+-44L), class = c("tbl_df", "tbl", "data.frame"))
+
+
+y1 <- as.Date("2016-04-01")
+dy1 <- d %>% dplyr::filter(Dates %in% y1) %>% 
+  dplyr::select("INEGI_CODE", "Values")
+names(dy1)[2] <- "Val_y1"
+ 
+
+y2 <- as.Date("2017-04-01")
+dy2 <- d %>% dplyr::filter(Dates %in% y2) %>% 
+  dplyr::select("INEGI_CODE", "Values")
+names(dy2)[2] <- "Val_y2"
+
+
+dyc <- dy1 %>% inner_join(., dy2) %>% 
+  inner_join(., CatalogHierarchy) %>% as.tibble() %>%
+  mutate("Growth" = (Val_y2/Val_y1-1)*100) %>%
+  dplyr::select(-c(INEGI_CODE, Val_y1))
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+hchart(dyc, 
+       type = "treemap", 
+       mapping = hcaes(x = LEVEL4_NAME, value = Val_y2, color = Growth)) %>% 
+  hc_add_theme(hc_theme_eem) %>% 
+  hc_navigator(enabled = FALSE)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+

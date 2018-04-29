@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-81406080-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-81406080-1');
+</script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Banking on electronic transfers in Mexico | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="Banxico's SPEI system, hacked last week, has been decreasing financial costs, reducing waste and changing attitudes since 2004" />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 29 Apr 2018</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: asdasdsad s</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/datascience/inegiR-v2/">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>Banking on electronic transfers in Mexico</h1>
+    <p>Hacks or not, Banxico’s SPEI system is improving the financial system in Mexico, reducing waste, making some businesses leaner and changing attitudes.</p>
+
+<p>Back when I was in College, I remember hearing about the Central Bank’s SPEI initiative (although it was established in 2004, I heard until 2007). At the time, it seemed like my curiosity was the only reason I learned about it, as I scoured some news and reports in Banxico’s website. I assumed SPEI was a backend only intended for large banks to use. Indeed, in the beginning the average transaction was 99 million pesos (about 7 million usd).</p>
+
+<p>However, as I began to enter the labor force and banks improved their digital services, SPEI increasingly became a part of my life.</p>
+
+<p>Before I left for my MBA, I would use SPEI transfers to pay for many services, including small transactions such as dog grooming.</p>
+
+<p>I can say the same for friends and family alike. SPEI became a cheaper alternative (when considering the opportunity cost of time) for transferring funds than going to the bank.</p>
+
+<p>I am pretty sure this has also led to tangible benefits for businesses. Coming back to the dog grooming example, because I paid upfront for the service, the groomers were able to schedule a pick up time for their convenience and improve their use of capacity, as opposed to waiting for customers to come in at the same time.</p>
+
+<p>Skipping the bank has also freed resources for the branches and customers to pursue more value-adding opportunities.</p>
+
+<p>Not to mention the effect it is having in attitudes. Uber and other ride-hailing companies, as well as Amazon, have been having success on the basis of a population that understands the dynamics of electronic payments more and more.</p>
+
+<p>There are clearly some issues, it is still relatively expensive to send money between accounts if we compare with other countries where there is no fee. It is also slow and tedious to use dynamic tokens.</p>
+
+<p>However, I am sure the benefits clearly outweigh the costs. Otherwise, it would have never been as successful as this…</p>
+
+<p><img src="/images/posts/spei2.PNG" alt="SPEI Transactions" /></p>
+
+<p><img src="/images/posts/spei1.PNG" alt="SPEI Average peso per transaction" /></p>
+
+<p>Last week, <a href="https://www.bloomberg.com/news/articles/2018-04-28/mexican-banks-are-said-to-have-been-targeted-in-cyber-attack">Bloomberg reported</a> a cyberattack to three banks via this system which apparently did not result in any large scale theft. It might seem like this is the kind of episodes that would create panic amongst the public but it modern Mexico this is only a blip in the radar.</p>
+
+<p>The trend towards electronic is unstoppable, how will companies and investors take advantage of this?</p>
+
+<h3 id="code">Code</h3>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(dplyr)
+library(ggplot2)
+library(eem)
+install_github(&quot;eflores89/banxicoR&quot;) #new version
+
+# data series and token
+token &lt;- &quot;******&quot;
+importes &lt;- &quot;SF46189&quot;
+ops &lt;- &quot;SF46188&quot;
+
+# download
+d &lt;- banxico_series2(series = ops, token = token) %&gt;% 
+    left_join(., banxico_series2(series = importes, token = token)
+    ) %&gt;%
+    mutate(&quot;avg_trans&quot; = SF46189/SF46188)
+
+# make graphs
+ggplot(d, aes(x = Date, y = avg_trans)) + 
+  geom_line(colour = eem_colors[1]) + 
+  theme_eem() + 
+  labs(title = &quot;SPEI Average Pesos per Transaction&quot;, 
+        subtitle = &quot;99.5 million to 500k&quot;, 
+        y = &quot;Pesos per transaction (millions)&quot;)
+
+ggplot(d, aes(x = Date, y = SF46188/1000)) + 
+    geom_line(colour = eem_colors[1]) + 
+    theme_eem() + 
+    labs(title = &quot;SPEI Transactions&quot;, 
+         subtitle = &quot;3k to 46 million&quot;, 
+         y = &quot;Transactions (000s)&quot;)</code></pre></figure>
+
+  </div>
+</article>
+
+</body>
+</html>
