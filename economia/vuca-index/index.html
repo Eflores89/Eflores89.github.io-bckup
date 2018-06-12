@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-81406080-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-81406080-1');
+</script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>VUCA index for Mexico | En El Margen</title>
+  <meta name="viewport" content="width=device-width">
+
+  <meta name="description" content="A proposed VUCA index for Mexico shows the country has made a sorts of peace with the changing economic conditions, including the upcoming elections." />
+
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/css/syntax.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic|Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+  
+  
+  <link rel="stylesheet" href="/css/post.css">
+  
+
+</head>
+
+<body>
+  <header style="background-image: url(/images/cover.jpg);">
+  <div class="container post-container">
+    <a href="/" class="home_button"></a>
+    <div class="inner-container">
+      <ul class="meta">
+        <li>
+        <p style="color:white">Publicado: 12 Jun 2018</p>
+        </li>
+        <li>
+            <p style="color:white">Archivado en: vuca, economy, mexico, elections</p>
+        </li>
+      </ul>      
+    </div>
+    <ul class="pagination">
+      
+        <li class="previous">
+          <a href="/politica/amlo-experiment/">
+            Previous
+          </a>
+        </li>
+      
+      
+    </ul>
+  </div>
+</header>
+<article>
+    <div id="topbar">
+      
+    </div>
+  <div class="container">
+    <h1>VUCA index for Mexico</h1>
+    <p>There is an acronym coined by the U.S. Army War College to refer to post-cold-war conditions: VUCA (Volatile, Uncertain, Complex and Ambiguous). It has stuck to the business world because that’s how the world is increasingly seen, especially since the election of Trump.</p>
+
+<p>As VUCA becomes the norm, so do ways to adapt to such a world. Increasingly, business books are being updated with “anti-VUCA” strategies involving a military-style framework:</p>
+
+<ul>
+  <li>Anticipate the Issues that Shape</li>
+  <li>Understand the Consequences of Issues and Actions</li>
+  <li>Appreciate the Interdependence of Variables</li>
+  <li>Prepare for Alternative Realities and Challenges</li>
+  <li>Interpret and Address Relevant Opportunities</li>
+</ul>
+
+<p>But even though it <strong>seems</strong> pretty straightforward, I have found that there is no real quantitative method to measure VUCA conditions.</p>
+
+<p>This is a first attempt to pin down some sort of numeric value for VUCA conditions. I do the index for Mexico, as I understand the available information much better than anywhere else.</p>
+
+<h2 id="the-index">The index</h2>
+
+<p>Predictably, I divided the index into four subindices, each for a dimension we want to value. The code follows this structure.</p>
+
+<p>First let’s install some packages (the entire script can be found in <a href="">Github</a>):</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">library(banxicoR)
+library(inegiR)
+token_inegi &lt;- &quot;xxxx&quot; # your own API token
+library(ggplot2)
+library(eem)</code></pre></figure>
+
+<h3 id="volatility">Volatility</h3>
+
+<p>I define volatility as the range, as a percentage of the minimum close, of the Mexican stock market. This means that when the range is large, there is more perceived volatility. A better measure would be daily standard deviation but I have not been able to find a programmable, R-friendly way to obtain this data. Here, I obtain the data from INEGI.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">vuca_v &lt;- function(token_inegi){
+  
+  lows &lt;- inegi_series(series = inegi_code(&quot;15321&quot;), 
+                       token = token_inegi)
+  highs &lt;- inegi_series(series = inegi_code(&quot;15322&quot;), 
+                        token = token_inegi)
+  
+  d &lt;- data.frame(&quot;v&quot; = (lows$Values - highs$Values)/lows$Values*100, 
+                  &quot;dates&quot; = highs$Dates)
+  d
+}</code></pre></figure>
+
+<h3 id="uncertainty">Uncertainty</h3>
+<p>For uncertainty, I posit that when financial analysts have a hard time pinning down a prediction for next year, uncertainty must be high. Thus, I take the monthly survey the Bank of Mexico does to financial experts asking for predictions and look to the standard deviation of their exchange rate estimates. In over words, when financial experts have a large standard deviation in their exchange rate (peso versus dollar) predictions, than uncertainty is high. Standard deviation is measured as percentage of the closing rate that month.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">vuca_u &lt;- function(){
+  std_dev &lt;- banxico_series(series = &quot;SR14880&quot;)
+  fx &lt;- banxico_series(series = &quot;SF17909&quot;)
+  
+  names(fx) &lt;- c(&quot;dates&quot;, &quot;fx&quot;)
+  names(std_dev) &lt;- c(&quot;dates&quot;, &quot;std&quot;)
+  
+  std_dev &lt;- std_dev %&gt;% 
+    left_join(., fx) %&gt;%
+    mutate(&quot;u&quot; = std/fx*100) %&gt;%
+    select(c(&quot;dates&quot;, &quot;u&quot;))
+  
+  std_dev
+}</code></pre></figure>
+
+<h3 id="complexity">Complexity</h3>
+<p>Complexity is, well, complex to measure. I looked to the <a href="">Observatory of Economic Complexity</a>, which does a great job measuring macro-economic complexity, but data reporting of merchandise trade is too slow for my needs. For example, Mexico is more than a year behind in reporting merchandise trade at a desaggregate level.</p>
+
+<p>So I thought about the basic needs of a firm.</p>
+
+<p>Intuitively, a firm faces a complex world when their inputs are not easily predictable and they have to constantly adapt. This can be measured in many ways, but it seems reasonable to say that prices are one of the most important components. So, I took data from the National Production Price Index by INEGI to measure complexity. I define complexity as the standard deviation in monthly inflation of all the components of producer prices, as a percent of the average monthly inflation. In simpler terms, if all the components of producer prices move in the same amount then complexity is low, compared to large swings across components.</p>
+
+<p>There are 15 components, so sorry for the code overload:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">vuca_c &lt;- function(token_inegi) {
+  
+  i1 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364705&quot;), token = token_inegi)
+  names(i1) &lt;- c(&quot;s1&quot;, &quot;dates&quot;)
+  i2 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364710&quot;), token = token_inegi)
+  names(i2) &lt;- c(&quot;s2&quot;, &quot;dates&quot;)
+  i3 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364711&quot;), token = token_inegi)
+  names(i3) &lt;- c(&quot;s3&quot;, &quot;dates&quot;)
+  i4 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364714&quot;), token = token_inegi)
+  names(i4) &lt;- c(&quot;s4&quot;, &quot;dates&quot;)
+  i5 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364717&quot;), token = token_inegi)
+  names(i5) &lt;- c(&quot;s5&quot;, &quot;dates&quot;)
+  i6 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364739&quot;), token = token_inegi)
+  names(i6) &lt;- c(&quot;s6&quot;, &quot;dates&quot;)
+  i7 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364749&quot;), token = token_inegi)
+  names(i7) &lt;- c(&quot;s7&quot;, &quot;dates&quot;)
+  i8 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364755&quot;), token = token_inegi)
+  names(i8) &lt;- c(&quot;s8&quot;, &quot;dates&quot;)
+  i9 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364758&quot;), token = token_inegi)
+  names(i9) &lt;- c(&quot;s9&quot;, &quot;dates&quot;)
+  i10 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364760&quot;), token = token_inegi)
+  names(i10) &lt;- c(&quot;s10&quot;, &quot;dates&quot;)
+  i11 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364763&quot;), token = token_inegi)
+  names(i11) &lt;- c(&quot;s11&quot;, &quot;dates&quot;)
+  i12 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364765&quot;), token = token_inegi)
+  names(i12) &lt;- c(&quot;s12&quot;, &quot;dates&quot;)
+  i13 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364769&quot;), token = token_inegi)
+  names(i13) &lt;- c(&quot;s13&quot;, &quot;dates&quot;)
+  i14 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364772&quot;), token = token_inegi)
+  names(i14) &lt;- c(&quot;s14&quot;, &quot;dates&quot;)
+  i15 &lt;- inegiR::inegi_series(series = inegi_code(&quot;364775&quot;), token = token_inegi)
+  names(i15) &lt;- c(&quot;s15&quot;, &quot;dates&quot;)
+  
+  d &lt;- i1 %&gt;% 
+    left_join(., i2) %&gt;% 
+    left_join(., i3) %&gt;%
+    left_join(., i4) %&gt;%
+    left_join(., i5) %&gt;%
+    left_join(., i6) %&gt;%
+    left_join(., i7) %&gt;%
+    left_join(., i8) %&gt;%
+    left_join(., i9) %&gt;%
+    left_join(., i10) %&gt;%
+    left_join(., i11) %&gt;%
+    left_join(., i12) %&gt;%
+    left_join(., i13) %&gt;%
+    left_join(., i14) %&gt;%
+    left_join(., i15) %&gt;% 
+    rowwise() %&gt;%
+    mutate(&quot;c&quot; = sd(c(s1, s2, s3, s4, s5, s6, s7, s8,
+                      s9, s10, s11, s12, s13, s14, s15))) %&gt;%
+    select(c(&quot;dates&quot;, &quot;c&quot;))
+  
+  d
+}</code></pre></figure>
+
+<h3 id="ambiguity">Ambiguity</h3>
+
+<p>I define this component as simply not being sure of taking a decision. <strong>Not knowing</strong> whether to invest is different from being sure <strong>not</strong> to invest. So, I look to the same survey of financial experts conducted by the Bank of Mexico and observe the rate of response to investing in the future, extracting only the percentage of “not sure” responses.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">vuca_a &lt;- function(){
+  not_sure &lt;- banxico_series(&quot;SR15035&quot;)
+  names(not_sure) &lt;- c(&quot;dates&quot;, &quot;a&quot;)
+  not_sure
+}</code></pre></figure>
+
+<h2 id="putting-it-all-together">Putting it all together</h2>
+
+<p>Each part of the index is standardized to 100 in the beginning data point and given the same weight. I am aware that this is controversial, but I could not justify another way of doing it (i.e. why give more weight to uncertainty than complexity?).</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">vuca &lt;- function(token_inegi, scales = c(0.25, 0.25, 0.25, 0.25)){
+  df &lt;- vuca_v(token_inegi = token_inegi) %&gt;% 
+    left_join(., vuca_u()) %&gt;%
+    left_join(., vuca_c(token_inegi = token_inegi)) %&gt;%
+    left_join(., vuca_a()) 
+
+  df &lt;- df[complete.cases(df), ]
+  df &lt;- as.tibble(df) %&gt;% 
+    mutate(&quot;v_ind&quot; = v/first(v)*100, 
+           &quot;u_ind&quot; = u/first(u)*100, 
+           &quot;c_ind&quot; = c/first(c)*100, 
+           &quot;a_ind&quot; = a/first(a)*100) %&gt;%
+    mutate(&quot;vuca&quot; = v_ind*scales[1] + u_ind*scales[2] + c_ind*scales[3] + a_ind*scales[4] ) %&gt;%
+    tq_mutate(select = v, 
+              mutate_fun = runMean, 
+              n = 12, col_rename = &quot;vuca_12m&quot;) # running 12m average
+  
+  df
+}
+
+# Downloading the vuca index
+d &lt;- vuca(token_inegi = token_inegi)
+
+# graph
+ggplot(d, aes(x = dates, y = vuca)) + 
+  geom_line(color = eem_colors[1]) + 
+  geom_smooth(color = eem_colors[3]) +
+  eem::theme_eem() + 
+  labs(title = &quot;VUCA Index for Mexico&quot;, 
+       x = &quot;Dates&quot; , y = &quot;Index (100 = 2010/07)&quot;)</code></pre></figure>
+
+<p><img src="/images/posts/vuca.png" alt="VUCA Index for Mexico" /></p>
+
+<p>Interestingly enough, once we graph this index, we find that there has been two large spikes (january 2015 and november 2011) and a recent sustained decrease.</p>
+
+<p>What can be said about these events? In January the big driver was Complexity, which means there might have been a large correction in producer prices, with a standard deviation almost four times larger than the initial reading. As for November 2011, the large shift occurred in the stock market, as volatility flared probably due to the death of Interior Minister Francisco Blake Mora.</p>
+
+<p>As for the recent decrease, it might be counterintuive considering the daily flurry of news from Trump and the NAFTA negotiations, but it also makes sense.</p>
+
+<p>A low VUCA does not mean a thriving economy. The economy can be in the midst of a recession but pretty much if every one understands the situation, VUCA is low. In fact, what is driving down the index these months is a low ambiguity component, which means analysts <strong>know</strong> whether they should invest or not.</p>
+
+<p>Thus, the relatively low VUCA we are witnessing <strong>might seem</strong> to suggest that the market has come to a consensus around who will be the next President and what will happen to NAFTA.</p>
+
+
+  </div>
+</article>
+
+</body>
+</html>

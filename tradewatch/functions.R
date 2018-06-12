@@ -77,7 +77,7 @@ summarise_df <- function(data, name2, name4, from, to, type = "exports", thresho
     dplyr::mutate("TradeValue" = as.numeric(as.character(TradeValue))) %>%
     dplyr::mutate("rgCode" = as.character(rgCode))
   
-  # print(nrow(filtered_df))
+   #print(nrow(filtered_df))
   
   # i'm going to see which codes have fewer than "threshold" in movements
   other_cats <- filtered_df %>%
@@ -86,7 +86,7 @@ summarise_df <- function(data, name2, name4, from, to, type = "exports", thresho
     group_by(cmdCode) %>% 
     summarise("v" = sum(as.numeric(TradeValue))) %>%
     ungroup() %>%
-    mutate("NEWcmdCode" = ifelse(v>threshold, cmdCode, "SMALL"))
+    mutate("NEWcmdCode" = ifelse(v> threshold, cmdCode, "SMALL"))
   
  # print(nrow(other_cats))
   
@@ -95,7 +95,7 @@ summarise_df <- function(data, name2, name4, from, to, type = "exports", thresho
     left_join(., other_cats, by = "cmdCode") %>%
     mutate("uppergrp" = substr(NEWcmdCode, 1,2))
   
-  # print(nrow(filtered_df))
+ #  print(nrow(filtered_df))
   
   df <- filtered_df %>% 
     ungroup() %>%
@@ -104,7 +104,7 @@ summarise_df <- function(data, name2, name4, from, to, type = "exports", thresho
     dplyr::group_by(uppergrp, NEWcmdCode) %>% 
     dplyr::summarise("old" = sum(as.numeric(TradeValue))) %>%
     ungroup() %>%
-    left_join(., filtered_df %>%
+    dplyr::left_join(., filtered_df %>%
                 dplyr::mutate("period" = as.character(period)) %>%
                 dplyr::filter(period == as.character(newdate)) %>% 
                 group_by(uppergrp, NEWcmdCode) %>% 
@@ -121,8 +121,8 @@ summarise_df <- function(data, name2, name4, from, to, type = "exports", thresho
   # print(nrow(df))
   
   df <- df %>% 
-    left_join(., name2, by = c("uppergrp" = "l2")) %>% 
-    left_join(., name4, by = c("NEWcmdCode" = "l4")) %>% 
+    dplyr::left_join(., name2, by = c("uppergrp" = "l2")) %>% 
+    dplyr::left_join(., name4, by = c("NEWcmdCode" = "l4")) %>% 
     mutate("l4_name" = ifelse(is.na(l4_name), 
                               paste0("NA (", NEWcmdCode, ")"), 
                               l4_name))
