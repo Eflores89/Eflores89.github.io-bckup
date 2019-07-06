@@ -12,10 +12,10 @@ library(tidyquant)
 library(timetk)
 
 # dates
-d1 <- "201705" # latest available month
-d2 <- "201605" # same month, a year earlier
+d1 <- "201707" # latest available month
+d2 <- "201607" # same month, a year earlier
 
-d2_real <- "2017-06-01" # one month after latest available month
+d2_real <- "2017-08-01" # one month after latest available month
 
 #### ----------------------- Loading some functions, to download data! 
 source("functions.R")
